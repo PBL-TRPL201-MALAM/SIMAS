@@ -72,14 +72,11 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <a href="{{ route('login') }}" class="hidden lg:inline-flex text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors duration-200 px-3 py-1.5">
-            Masuk
-          </a>
           <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:shadow-blue-300 hover:from-blue-700 hover:to-blue-600 active:scale-95 transition-all duration-200">
-            Mulai
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            Masuk
+            <!-- <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+            </svg> -->
           </a>
           <button id="menu-toggle" type="button" class="lg:hidden -m-1 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

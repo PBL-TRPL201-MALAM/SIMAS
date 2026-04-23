@@ -85,7 +85,7 @@
           @endif
 
           {{-- Form Login --}}
-          <form id="login-form" action="{{ route('dashboard.pemohon') }}" method="GET" class="space-y-5" novalidate>
+          <form id="login-form" action="{{ route('pemohon.dashboard') }}" method="GET" class="space-y-5" novalidate>
 
             {{-- Username --}}
             <div class="space-y-1.5">
