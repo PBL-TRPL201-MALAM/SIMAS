@@ -218,16 +218,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
-      e.preventDefault();
       const page = link.dataset.page;
+      if (!page) return;
+      e.preventDefault();
       if (page) switchPage(page);
     });
   });
 
   quickNavs.forEach(link => {
     link.addEventListener('click', (e) => {
-      e.preventDefault();
       const page = link.dataset.page;
+      if (!page) return;
+      e.preventDefault();
       if (page) switchPage(page);
     });
   });
