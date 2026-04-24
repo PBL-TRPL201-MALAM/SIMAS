@@ -1,8 +1,8 @@
-﻿@include('template.header', ['pageTitle' => 'Buat Surat Baru', 'modalVariant' => 'pemohon'])
+@include('template.header', ['pageTitle' => 'Buat Surat Baru', 'modalVariant' => 'pemohon'])
 @include('template.pemohon-sidebar', ['activePage' => 'buat-surat'])
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
-        <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
+        <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -41,7 +41,7 @@
             {{-- Step 1 --}}
             <div id="surat-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-                <h2 class="text-sm font-bold text-slate-900">Langkah 1 â€” Upload Draft Surat</h2>
+                <h2 class="text-sm font-bold text-slate-900">Langkah 1 — Upload Draft Surat</h2>
                 <p class="text-xs text-slate-400 font-light mt-0.5">Siapkan draft surat dalam format DOCX lalu unggah ke sistem.</p>
               </div>
               <div class="px-6 py-6 space-y-5">
@@ -61,7 +61,7 @@
                     </div>
                     <div class="text-center">
                       <p class="text-xs font-semibold text-slate-700">Klik atau seret file ke sini</p>
-                      <p class="text-[11px] text-slate-400 font-light mt-0.5">Format: DOCX Â· Maks. 10 MB</p>
+                      <p class="text-[11px] text-slate-400 font-light mt-0.5">Format: DOCX · Maks. 10 MB</p>
                     </div>
                     <input id="surat-file-input" type="file" accept=".docx" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                   </div>
@@ -86,7 +86,7 @@
             {{-- Step 2 --}}
             <div id="surat-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-                <h2 class="text-sm font-bold text-slate-900">Langkah 2 â€” Data Surat</h2>
+                <h2 class="text-sm font-bold text-slate-900">Langkah 2 — Data Surat</h2>
                 <p class="text-xs text-slate-400 font-light mt-0.5">Lengkapi informasi awal surat yang akan diajukan.</p>
               </div>
               <form action="#" method="POST" enctype="multipart/form-data" class="px-6 py-6 space-y-5">
@@ -128,8 +128,9 @@
 
 
         {{-- ============================================================
-             PAGE: BUAT PENGAJUAN SK â€” 3 STEP WIZARD
+             PAGE: BUAT PENGAJUAN SK — 3 STEP WIZARD
         ============================================================ --}}
       </main>
     </div>
 @include('template.footer')
+

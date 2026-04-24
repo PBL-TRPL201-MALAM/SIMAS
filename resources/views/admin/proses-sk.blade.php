@@ -5,7 +5,7 @@
 
       {{-- Topbar --}}
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
-        <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
+        <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -25,14 +25,23 @@
       <main class="flex-1 overflow-y-auto p-6">
         <div class="max-w-2xl mx-auto">
 
+          @php
+            $judulSk = $sk->judul ?? request('judul') ?? '-';
+            $pemohonSk = $sk->pemohon ?? request('pemohon') ?? '-';
+            $tentangSk = $sk->tentang ?? request('ringkasan') ?? '-';
+            $menimbangSk = $sk->menimbang ?? request('ringkasan') ?? '-';
+            $mengingatSk = $sk->mengingat ?? '';
+            $memutuskanSk = $sk->memutuskan ?? request('ringkasan') ?? '-';
+          @endphp
+
           {{-- Info bar SK yang diproses --}}
           <div class="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3 mb-5">
             <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <div class="min-w-0">
               <p class="text-[11px] font-semibold text-blue-700">Sedang mereview SK:</p>
-              <p id="sk-proses-judul-info" class="text-[11px] text-blue-600 font-light truncate">{{ $sk->judul ?? '—' }}</p>
+              <p id="sk-proses-judul-info" class="text-[11px] text-blue-600 font-light truncate">{{ $judulSk }}</p>
             </div>
-            <a href="{{ route('admin.pengajuan-sk') }}" class="ml-auto text-[10px] font-medium text-blue-500 hover:text-blue-700 shrink-0 transition-colors duration-200">← Kembali ke daftar</a>
+            <a href="{{ route('admin.pengajuan-sk') }}" class="ml-auto text-[10px] font-medium text-blue-500 hover:text-blue-700 shrink-0 transition-colors duration-200">Kembali ke daftar</a>
           </div>
 
           {{-- Step Indicator --}}
@@ -59,56 +68,53 @@
             </div>
           </div>
 
-
-          {{-- ============================================================
-               STEP 1: Review Isi SK + Catatan
-          ============================================================ --}}
           <div id="sk-proses-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-              <h2 class="text-sm font-bold text-slate-900">Langkah 1 — Review Isi SK</h2>
+              <h2 class="text-sm font-bold text-slate-900">Langkah 1 - Review Isi SK</h2>
               <p class="text-xs text-slate-400 font-light mt-0.5">Periksa kelengkapan dan kesesuaian isi SK dari pemohon.</p>
             </div>
             <div class="px-6 py-6 space-y-4">
 
-              {{-- Isi SK dari pemohon (readonly) --}}
               <div class="space-y-3">
-
                 <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
                   <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Judul SK</p>
-                  <p id="sk-review-judul" class="text-sm font-semibold text-slate-800">{{ $sk->judul ?? '—' }}</p>
+                  <p id="sk-review-judul" class="text-sm font-semibold text-slate-800">{{ $judulSk }}</p>
+                </div>
+
+                <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
+                  <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Pemohon</p>
+                  <p class="text-sm font-medium text-slate-700">{{ $pemohonSk }}</p>
                 </div>
 
                 <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
                   <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Tentang</p>
-                  <p id="sk-review-tentang" class="text-sm font-medium text-slate-700">{{ $sk->tentang ?? '—' }}</p>
+                  <p id="sk-review-tentang" class="text-sm font-medium text-slate-700">{{ $tentangSk }}</p>
                 </div>
 
                 <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
                   <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Menimbang</p>
-                  <p id="sk-review-menimbang" class="text-xs text-slate-600 font-light leading-relaxed whitespace-pre-line">{{ $sk->menimbang ?? '—' }}</p>
+                  <p id="sk-review-menimbang" class="text-xs text-slate-600 font-light leading-relaxed whitespace-pre-line">{{ $menimbangSk }}</p>
                 </div>
 
                 <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
                   <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Mengingat</p>
                   <ul id="sk-review-mengingat" class="space-y-1.5">
-                    @if(!empty($sk->mengingat))
-                      @foreach(explode("\n", $sk->mengingat) as $mengingat)
+                    @if(!empty($mengingatSk))
+                      @foreach(explode("\n", $mengingatSk) as $mengingat)
                         <li class="text-xs text-slate-600 font-light">{{ $mengingat }}</li>
                       @endforeach
                     @else
-                      <li class="text-xs text-slate-400 font-light">—</li>
+                      <li class="text-xs text-slate-400 font-light">-</li>
                     @endif
                   </ul>
                 </div>
 
                 <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
                   <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Memutuskan</p>
-                  <p id="sk-review-memutuskan" class="text-xs text-slate-600 font-light leading-relaxed whitespace-pre-line">{{ $sk->memutuskan ?? '—' }}</p>
+                  <p id="sk-review-memutuskan" class="text-xs text-slate-600 font-light leading-relaxed whitespace-pre-line">{{ $memutuskanSk }}</p>
                 </div>
-
               </div>
 
-              {{-- Divider --}}
               <div class="border-t border-slate-100 pt-4">
                 <p class="text-xs font-semibold text-slate-700 mb-3">Catatan / Komentar Admin</p>
 
@@ -116,14 +122,14 @@
                   <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
                     <input type="radio" name="status_review_sk" value="lanjut" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" checked />
                     <div>
-                      <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">✅ Lanjutkan ke verifikasi</p>
+                      <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">Lanjutkan ke verifikasi</p>
                       <p class="text-[11px] text-slate-400 font-light mt-0.5">Isi SK sudah sesuai, siap dikirim ke verifikator</p>
                     </div>
                   </label>
                   <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
                     <input type="radio" name="status_review_sk" value="revisi" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" />
                     <div>
-                      <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">🔄 Kembalikan untuk revisi</p>
+                      <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">Kembalikan untuk revisi</p>
                       <p class="text-[11px] text-slate-400 font-light mt-0.5">Ada bagian yang perlu diperbaiki oleh pemohon</p>
                     </div>
                   </label>
@@ -148,7 +154,7 @@
                 </button>
                 <button id="sk-proses-next-1" type="button"
                   class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-                  Lanjut — Tentukan Verifikasi
+                  Lanjut - Tentukan Verifikasi
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </button>
               </div>
@@ -156,13 +162,9 @@
             </div>
           </div>
 
-
-          {{-- ============================================================
-               STEP 2: Tentukan Tingkat Verifikasi
-          ============================================================ --}}
           <div id="sk-proses-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-              <h2 class="text-sm font-bold text-slate-900">Langkah 2 — Tingkat Verifikasi</h2>
+              <h2 class="text-sm font-bold text-slate-900">Langkah 2 - Tingkat Verifikasi</h2>
               <p class="text-xs text-slate-400 font-light mt-0.5">Tentukan jalur verifikasi SK sebelum dikirim ke verifikator.</p>
             </div>
             <div class="px-6 py-6 space-y-5">
@@ -181,7 +183,7 @@
                 <label class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
                   <input type="radio" name="jalur_verifikasi_sk" value="2" class="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" />
                   <div>
-                    <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">Level 1 → Level 2</p>
+                    <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">Level 1 -> Level 2</p>
                     <p class="text-[11px] text-slate-400 font-light mt-0.5">SK harus disetujui Level 1 terlebih dahulu, lalu diteruskan ke Level 2</p>
                   </div>
                 </label>
@@ -189,7 +191,7 @@
                 <label class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
                   <input type="radio" name="jalur_verifikasi_sk" value="3" class="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" />
                   <div>
-                    <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">Level 1 → Level 2 → Level 3</p>
+                    <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">Level 1 -> Level 2 -> Level 3</p>
                     <p class="text-[11px] text-slate-400 font-light mt-0.5">SK harus melewati tiga tingkat persetujuan secara berurutan</p>
                   </div>
                 </label>
@@ -212,7 +214,7 @@
                 <div class="space-y-1.5">
                   <label class="block text-[11px] font-medium text-slate-500">Verifikator Level 2</label>
                   <select name="sk_verifikator_2" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all duration-200">
-                    <option value="">— Tidak ada (jika hanya 1 level) —</option>
+                    <option value="">- Tidak ada (jika hanya 1 level) -</option>
                     <option>Wakil Direktur I</option>
                     <option>Wakil Direktur II</option>
                     <option>Wakil Direktur III</option>
@@ -222,7 +224,7 @@
                 <div class="space-y-1.5">
                   <label class="block text-[11px] font-medium text-slate-500">Verifikator Level 3</label>
                   <select name="sk_verifikator_3" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all duration-200">
-                    <option value="">— Tidak ada (jika hanya 1-2 level) —</option>
+                    <option value="">- Tidak ada (jika hanya 1-2 level) -</option>
                     <option>Direktur Polibatam</option>
                   </select>
                 </div>
@@ -236,39 +238,34 @@
                 </button>
                 <button id="sk-proses-next-2" type="button"
                   class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-                  Lanjut — Konfirmasi
+                  Lanjut - Konfirmasi
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </button>
               </div>
             </div>
           </div>
 
-
-          {{-- ============================================================
-               STEP 3: Konfirmasi & Kirim
-          ============================================================ --}}
           <div id="sk-proses-step-3" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-              <h2 class="text-sm font-bold text-slate-900">Langkah 3 — Konfirmasi & Kirim</h2>
+              <h2 class="text-sm font-bold text-slate-900">Langkah 3 - Konfirmasi & Kirim</h2>
               <p class="text-xs text-slate-400 font-light mt-0.5">Periksa ringkasan sebelum SK dikirim ke verifikator pertama.</p>
             </div>
             <div class="px-6 py-6 space-y-4">
 
               <div class="space-y-3">
-
                 <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
                   <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">SK yang Diproses</p>
-                  <p id="sk-konfirmasi-judul" class="text-sm font-semibold text-slate-800">{{ $sk->judul ?? '—' }}</p>
+                  <p id="sk-konfirmasi-judul" class="text-sm font-semibold text-slate-800">{{ $judulSk }}</p>
                 </div>
 
                 <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
                   <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Pemohon</p>
-                  <p id="sk-konfirmasi-pemohon" class="text-sm font-medium text-slate-700">{{ $sk->pemohon ?? '—' }}</p>
+                  <p id="sk-konfirmasi-pemohon" class="text-sm font-medium text-slate-700">{{ $pemohonSk }}</p>
                 </div>
 
                 <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
                   <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Jalur Verifikasi</p>
-                  <p id="sk-konfirmasi-jalur" class="text-sm font-medium text-slate-700">—</p>
+                  <p id="sk-konfirmasi-jalur" class="text-sm font-medium text-slate-700">-</p>
                 </div>
 
                 <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
@@ -278,9 +275,8 @@
 
                 <div id="sk-konfirmasi-catatan-wrap" class="hidden rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
                   <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Catatan Admin</p>
-                  <p id="sk-konfirmasi-catatan" class="text-xs text-slate-600 font-light leading-relaxed">—</p>
+                  <p id="sk-konfirmasi-catatan" class="text-xs text-slate-600 font-light leading-relaxed">-</p>
                 </div>
-
               </div>
 
               <div class="rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3 flex items-start gap-3">

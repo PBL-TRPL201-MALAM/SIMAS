@@ -1,9 +1,12 @@
-<aside id="sidebar" class="relative flex flex-col w-64 shrink-0 bg-white border-r border-slate-100 h-screen overflow-y-auto z-30 transition-all duration-300">
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col overflow-y-auto border-r border-slate-100 bg-white shadow-xl transition-all duration-300 xl:relative xl:z-30 xl:h-screen xl:translate-x-0 xl:shadow-none">
   <div class="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-50/80 blur-2xl pointer-events-none"></div>
 
   <div class="relative flex items-center gap-2.5 px-5 h-16 border-b border-slate-100/80 shrink-0">
     <img src="{{ asset('images/logo.png') }}" alt="Logo SIMAS" class="h-7 w-auto object-contain" />
-    <span class="text-sm font-bold tracking-tight text-slate-900">SIMAS</span>
+    <div>
+      <span class="text-sm font-bold tracking-tight text-slate-900 block">SIMAS</span>
+      <span class="text-[10px] font-medium text-blue-500">Pemohon</span>
+    </div>
   </div>
 
   <nav class="flex-1 px-3 py-4 space-y-0.5">
@@ -62,3 +65,4 @@
     </a>
   </div>
 </aside>
+

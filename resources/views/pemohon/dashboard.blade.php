@@ -1,8 +1,8 @@
-﻿@include('template.header', ['pageTitle' => 'Dashboard', 'modalVariant' => 'pemohon'])
+@include('template.header', ['pageTitle' => 'Dashboard', 'modalVariant' => 'pemohon'])
 @include('template.pemohon-sidebar', ['activePage' => 'dashboard'])
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
-        <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
+        <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -37,7 +37,7 @@
             </div>
           </div>
 
-          {{-- Stats Cards â€” semua biru --}}
+          {{-- Stats Cards — semua biru --}}
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
             <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
@@ -167,8 +167,9 @@
 
 
         {{-- ============================================================
-             PAGE: BUAT SURAT BARU â€” 2 STEP WIZARD
+             PAGE: BUAT SURAT BARU — 2 STEP WIZARD
         ============================================================ --}}
       </main>
     </div>
 @include('template.footer')
+

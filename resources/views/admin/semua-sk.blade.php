@@ -5,7 +5,7 @@
 
       {{-- Topbar --}}
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
-        <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
+        <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -36,6 +36,7 @@
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Judul SK</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Nomor SK</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Status</th>
+                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Aksi</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
@@ -44,22 +45,36 @@
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150">
                     <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">{{ $item->pemohon }}</p></td>
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[180px]">{{ $item->judul }}</p></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ $item->nomor_sk ?? '—' }}</p></td>
+                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ $item->nomor_sk ?? '-' }}</p></td>
                     <td class="px-5 py-3.5">
                       <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
                         <span class="w-1 h-1 rounded-full bg-slate-400"></span>{{ $item->status }}
                       </span>
                     </td>
+                    <td class="px-5 py-3.5">
+                      @if(strtolower($item->status) === 'diajukan')
+                        <a href="{{ route('admin.proses-sk', ['judul' => $item->judul, 'pemohon' => $item->pemohon, 'ringkasan' => $item->ringkasan ?? '']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
+                      @else
+                        <button type="button" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Lihat</button>
+                      @endif
+                    </td>
                   </tr>
                   @endforeach
 
-                  {{-- Fallback data statis --}}
                   @if(empty($skList) || count($skList) === 0)
+                  <tr class="hover:bg-slate-50/40 transition-colors duration-150">
+                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">Budi Santoso</p></td>
+                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[180px]">SK Kegiatan KKN 2025</p></td>
+                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">-</p></td>
+                    <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span></td>
+                    <td class="px-5 py-3.5"><a href="{{ route('admin.proses-sk', ['judul' => 'SK Kegiatan KKN 2025', 'pemohon' => 'Budi Santoso', 'ringkasan' => 'Pengajuan SK untuk kegiatan KKN mahasiswa semester genap 2025.']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a></td>
+                  </tr>
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150">
                     <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">Rizki Pratama</p></td>
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[180px]">SK Pembentukan Panitia Seminar</p></td>
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">SK/002/SIMAS/2025</p></td>
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-slate-400"></span>Published</span></td>
+                    <td class="px-5 py-3.5"><button type="button" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Lihat</button></td>
                   </tr>
                   @endif
 

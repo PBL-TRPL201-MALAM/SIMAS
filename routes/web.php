@@ -119,3 +119,57 @@ Route::prefix('verifikator')->name('verifikator.')->group(function () {
         return view('verifikator.profil');
     })->name('profil');
 });
+
+// super admin
+Route::prefix('super-admin')->name('super-admin.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('super-admin.dashboard');
+    })->name('dashboard');
+
+    Route::get('/semua-user', function () {
+        return view('super-admin.semua-user');
+    })->name('semua-user');
+
+    Route::get('/tambah-user', function () {
+        return view('super-admin.tambah-user');
+    })->name('tambah-user');
+
+    Route::get('/role-akses', function () {
+        return view('super-admin.role-akses');
+    })->name('role-akses');
+
+    Route::get('/dasar-hukum', function () {
+        return view('super-admin.dasar-hukum');
+    })->name('dasar-hukum');
+
+    Route::get('/unit-kerja', function () {
+        return view('super-admin.unit-kerja');
+    })->name('unit-kerja');
+
+    Route::get('/semua-dokumen', function () {
+        return view('super-admin.semua-dokumen');
+    })->name('semua-dokumen');
+
+    Route::get('/log-aktivitas', function () {
+        return view('super-admin.log-aktivitas');
+    })->name('log-aktivitas');
+
+    Route::get('/profil', function () {
+        return view('super-admin.profil');
+    })->name('profil');
+});
+
+// Dashboard pemohon (sementara, tanpa auth)
+Route::get('/dashboard/pemohon', function () {
+    return view('dashboard-pemohon');
+})->name('dashboard.pemohon');
+
+// dashboard admin (sementara, tanpa auth)
+Route::get('/dashboard/admin', function () {
+    return view('dashboard-admin');
+})->name('dashboard.admin');
+
+// dashboard verifikator (sementara, tanpa auth)
+Route::get('/dashboard/verifikator', function () {
+    return view('dashboard-verifikator');
+})->name('dashboard.verifikator');

@@ -124,11 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // MOBILE SIDEBAR
   // ================================================================
   if (sidebarToggle && sidebar) {
-    sidebar.classList.add('lg:translate-x-0');
+    sidebar.classList.add('xl:translate-x-0');
     sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
     document.addEventListener('click', (e) => {
       const isOutside = !sidebar.contains(e.target) && !sidebarToggle.contains(e.target);
-      if (isOutside && window.innerWidth < 1024) sidebar.classList.add('-translate-x-full');
+      if (isOutside && window.innerWidth < 1280) sidebar.classList.add('-translate-x-full');
     });
   }
 
@@ -275,3 +275,4 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 });
+

@@ -5,7 +5,7 @@
 
       {{-- Topbar --}}
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
-        <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
+        <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -70,7 +70,7 @@
                     <td class="px-5 py-3.5 flex items-center gap-2">
                       <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
                       @if(strtolower($item->status) === 'diajukan')
-                      <button type="button" class="btn-proses text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</button>
+                      <a href="{{ route('admin.proses-surat', ['perihal' => $item->perihal, 'pemohon' => $item->pemohon]) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
                       @endif
                     </td>
                   </tr>
@@ -85,7 +85,7 @@
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span></td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
                       <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <button type="button" class="btn-proses text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</button>
+                      <a href="{{ route('admin.proses-surat', ['perihal' => 'Permohonan Izin Penelitian', 'pemohon' => 'Ahmad Fauzi']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
                     </td>
                   </tr>
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-filter-status="diajukan" data-jenis="Surat Biasa" data-perihal="Permohonan Izin Magang" data-pemohon="Siti Rahma" data-tanggal="09 Apr 2025" data-status="Diajukan" data-ringkasan="Pemohon mengajukan surat izin magang di perusahaan teknologi selama 3 bulan.">
@@ -95,7 +95,7 @@
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span></td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
                       <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <button type="button" class="btn-proses text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</button>
+                      <a href="{{ route('admin.proses-surat', ['perihal' => 'Permohonan Izin Magang', 'pemohon' => 'Siti Rahma']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
                     </td>
                   </tr>
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-filter-status="diproses" data-jenis="Surat Biasa" data-perihal="Surat Keterangan Aktif Kuliah" data-pemohon="Rina Dewi" data-tanggal="07 Apr 2025" data-status="Diproses" data-ringkasan="Surat keterangan mahasiswa aktif untuk keperluan beasiswa.">
@@ -119,3 +119,4 @@
     </div>
 
 @include('template.footer')
+

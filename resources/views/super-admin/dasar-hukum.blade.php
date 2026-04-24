@@ -1,9 +1,7 @@
 @include('template.header', ['pageTitle' => 'Master Dasar Hukum'])
-@include('template.admin-sidebar')
+@include('template.super-admin-sidebar')
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
-
-      {{-- Topbar --}}
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -29,12 +27,13 @@
             <h2 class="text-sm font-bold text-slate-900">Master Dasar Hukum</h2>
             <button id="btn-tambah-dasar" type="button"
               class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition-all duration-200">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
               Tambah Dasar Hukum
             </button>
           </div>
 
-          {{-- Form tambah (toggle via JS) --}}
           <div id="form-tambah-dasar" class="hidden rounded-2xl bg-white border border-blue-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
               <h3 class="text-sm font-bold text-slate-900">Tambah Dasar Hukum Baru</h3>
@@ -63,7 +62,6 @@
             </div>
           </div>
 
-          {{-- Tabel dasar hukum --}}
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full">
@@ -84,31 +82,30 @@
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-500 font-light">{{ $item->tentang }}</p></td>
                     <td class="px-5 py-3.5">
                       <button type="button"
-                        class="text-[11px] font-medium text-slate-400 hover:text-red-500 transition-colors duration-200"
+                        class="btn-hapus-dasar text-[11px] font-medium text-slate-400 hover:text-red-500 transition-colors duration-200"
                         data-id="{{ $item->id }}">Hapus</button>
                     </td>
                   </tr>
                   @endforeach
 
-                  {{-- Fallback data statis --}}
                   @if(empty($dasarHukumList) || count($dasarHukumList) === 0)
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150">
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-400 font-light">1</p></td>
                     <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">UU No. 20 Tahun 2003</p></td>
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-500 font-light">tentang Sistem Pendidikan Nasional</p></td>
-                    <td class="px-5 py-3.5"><button type="button" class="text-[11px] font-medium text-slate-400 hover:text-red-500 transition-colors duration-200">Hapus</button></td>
+                    <td class="px-5 py-3.5"><button type="button" class="btn-hapus-dasar text-[11px] font-medium text-slate-400 hover:text-red-500 transition-colors duration-200">Hapus</button></td>
                   </tr>
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150">
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-400 font-light">2</p></td>
                     <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">PP No. 4 Tahun 2014</p></td>
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-500 font-light">tentang Penyelenggaraan Pendidikan Tinggi</p></td>
-                    <td class="px-5 py-3.5"><button type="button" class="text-[11px] font-medium text-slate-400 hover:text-red-500 transition-colors duration-200">Hapus</button></td>
+                    <td class="px-5 py-3.5"><button type="button" class="btn-hapus-dasar text-[11px] font-medium text-slate-400 hover:text-red-500 transition-colors duration-200">Hapus</button></td>
                   </tr>
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150">
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-400 font-light">3</p></td>
                     <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">Peraturan Direktur Polibatam No. 01 Tahun 2023</p></td>
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-500 font-light">tentang Tata Kelola Administrasi Polibatam</p></td>
-                    <td class="px-5 py-3.5"><button type="button" class="text-[11px] font-medium text-slate-400 hover:text-red-500 transition-colors duration-200">Hapus</button></td>
+                    <td class="px-5 py-3.5"><button type="button" class="btn-hapus-dasar text-[11px] font-medium text-slate-400 hover:text-red-500 transition-colors duration-200">Hapus</button></td>
                   </tr>
                   @endif
 
@@ -116,7 +113,6 @@
               </table>
             </div>
           </div>
-
         </div>
       </main>
     </div>

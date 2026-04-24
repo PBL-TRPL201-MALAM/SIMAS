@@ -5,7 +5,7 @@
 
       {{-- Topbar --}}
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
-        <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
+        <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -55,7 +55,7 @@
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>{{ $item->status }}</span></td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
                       <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <button type="button" class="btn-proses-sk text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Review & Proses</button>
+                      <a href="{{ route('admin.proses-sk', ['judul' => $item->judul, 'pemohon' => $item->pemohon, 'ringkasan' => $item->ringkasan]) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Review & Proses</a>
                     </td>
                   </tr>
                   @endforeach
@@ -69,7 +69,7 @@
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span></td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
                       <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <button type="button" class="btn-proses-sk text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Review & Proses</button>
+                      <a href="{{ route('admin.proses-sk', ['judul' => 'SK Kegiatan KKN 2025', 'pemohon' => 'Budi Santoso', 'ringkasan' => 'Pengajuan SK untuk kegiatan KKN mahasiswa semester genap 2025.']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Review & Proses</a>
                     </td>
                   </tr>
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-jenis="SK" data-perihal="SK Seminar Nasional 2025" data-pemohon="Dewi Lestari" data-tanggal="06 Apr 2025" data-status="Diajukan" data-ringkasan="SK pembentukan panitia seminar nasional bidang teknologi informasi.">
@@ -79,7 +79,7 @@
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span></td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
                       <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <button type="button" class="btn-proses-sk text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Review & Proses</button>
+                      <a href="{{ route('admin.proses-sk', ['judul' => 'SK Seminar Nasional 2025', 'pemohon' => 'Dewi Lestari', 'ringkasan' => 'SK pembentukan panitia seminar nasional bidang teknologi informasi.']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Review & Proses</a>
                     </td>
                   </tr>
                   @endif
@@ -94,3 +94,4 @@
     </div>
 
 @include('template.footer')
+

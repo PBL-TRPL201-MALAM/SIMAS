@@ -1,4 +1,4 @@
-<aside id="sidebar" class="relative flex flex-col w-64 shrink-0 bg-white border-r border-slate-100 h-screen overflow-y-auto z-30 transition-all duration-300">
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col overflow-y-auto border-r border-slate-100 bg-white shadow-xl transition-all duration-300 xl:relative xl:z-30 xl:h-screen xl:translate-x-0 xl:shadow-none">
 
   <div class="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-50/80 blur-2xl pointer-events-none"></div>
 
@@ -100,3 +100,4 @@
     </a>
   </div>
 </aside>
+

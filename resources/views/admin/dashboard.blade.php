@@ -8,7 +8,7 @@
 
       {{-- Topbar --}}
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
-        <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
+        <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -104,7 +104,7 @@
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ $item->tanggal }}</p></td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
                       <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <button type="button" class="btn-proses inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</button>
+                      <a href="{{ route('admin.proses-surat', ['perihal' => $item->perihal, 'pemohon' => $item->pemohon]) }}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
                     </td>
                   </tr>
                   @endforeach
@@ -118,7 +118,7 @@
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">10 Apr 2025</p></td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
                       <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <button type="button" class="btn-proses inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</button>
+                      <a href="{{ route('admin.proses-surat', ['perihal' => 'Permohonan Izin Penelitian', 'pemohon' => 'Ahmad Fauzi']) }}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
                     </td>
                   </tr>
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-jenis="Surat Biasa" data-perihal="Permohonan Izin Magang" data-pemohon="Siti Rahma" data-tanggal="09 Apr 2025" data-status="Diajukan" data-ringkasan="Pemohon mengajukan surat izin magang di perusahaan teknologi selama 3 bulan.">
@@ -128,7 +128,7 @@
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">09 Apr 2025</p></td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
                       <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <button type="button" class="btn-proses inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</button>
+                      <a href="{{ route('admin.proses-surat', ['perihal' => 'Permohonan Izin Magang', 'pemohon' => 'Siti Rahma']) }}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
                     </td>
                   </tr>
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-jenis="SK" data-perihal="SK Kegiatan KKN 2025" data-pemohon="Budi Santoso" data-tanggal="08 Apr 2025" data-status="Diajukan" data-ringkasan="Pengajuan SK untuk kegiatan KKN mahasiswa semester genap 2025.">
@@ -138,7 +138,7 @@
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">08 Apr 2025</p></td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
                       <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <button type="button" class="btn-proses inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</button>
+                      <a href="{{ route('admin.proses-surat', ['perihal' => 'SK Kegiatan KKN 2025', 'pemohon' => 'Budi Santoso']) }}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
                     </td>
                   </tr>
                   @endif
@@ -152,3 +152,4 @@
     </div>
 
 @include('template.footer')
+

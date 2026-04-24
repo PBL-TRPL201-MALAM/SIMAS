@@ -1,8 +1,8 @@
-﻿@include('template.header', ['pageTitle' => 'SK Saya', 'modalVariant' => 'pemohon'])
+@include('template.header', ['pageTitle' => 'SK Saya', 'modalVariant' => 'pemohon'])
 @include('template.pemohon-sidebar', ['activePage' => 'sk-saya'])
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
-        <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
+        <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -62,7 +62,7 @@
                     </td>
                   </tr>
 
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-status="diproses" data-jenis="SK" data-perihal="SK Kegiatan KKN 2025" data-tanggal="10 Apr 2025" data-nomor="â€”" data-keterangan="SK sedang dalam proses review oleh Admin/TU.">
+                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-status="diproses" data-jenis="SK" data-perihal="SK Kegiatan KKN 2025" data-tanggal="10 Apr 2025" data-nomor="—" data-keterangan="SK sedang dalam proses review oleh Admin/TU.">
                     <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[200px]">SK Kegiatan KKN 2025</p></td>
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">10 Apr 2025</p></td>
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diproses</span></td>
@@ -86,8 +86,9 @@
 
 
         {{-- ============================================================
-             PAGE: PROFIL â€” Placeholder
+             PAGE: PROFIL — Placeholder
         ============================================================ --}}
       </main>
     </div>
 @include('template.footer')
+

@@ -1,8 +1,8 @@
-﻿@include('template.header', ['pageTitle' => 'Semua SK', 'modalVariant' => 'verifikator'])
+@include('template.header', ['pageTitle' => 'Semua SK', 'modalVariant' => 'verifikator'])
 @include('template.verifikator-sidebar', ['activePage' => 'sk-semua'])
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
-        <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
+        <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -51,7 +51,7 @@
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-600">Rizki Pratama</p></td>
                     <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level 1</span></td>
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-slate-400"></span>Published</span></td>
-                    <td class="px-5 py-3.5"><span class="text-[11px] text-slate-400 font-light">â€”</span></td>
+                    <td class="px-5 py-3.5"><span class="text-[11px] text-slate-400 font-light">—</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -61,8 +61,9 @@
 
 
         {{-- ============================================================
-             PAGE: PROFIL â€” Placeholder
+             PAGE: PROFIL — Placeholder
         ============================================================ --}}
       </main>
     </div>
 @include('template.footer')
+

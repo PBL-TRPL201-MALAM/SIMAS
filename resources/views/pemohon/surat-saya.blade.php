@@ -1,8 +1,8 @@
-﻿@include('template.header', ['pageTitle' => 'Surat Saya', 'modalVariant' => 'pemohon'])
+@include('template.header', ['pageTitle' => 'Surat Saya', 'modalVariant' => 'pemohon'])
 @include('template.pemohon-sidebar', ['activePage' => 'surat-saya'])
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
-        <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
+        <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -53,7 +53,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-50" id="tbody-surat">
 
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-status="diproses" data-jenis="Surat Biasa" data-perihal="Permohonan Izin Penelitian" data-tanggal="10 Apr 2025" data-nomor="â€”" data-keterangan="Dokumen sedang diperiksa oleh Admin/TU. Menunggu upload PDF dan pengaturan data surat.">
+                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-status="diproses" data-jenis="Surat Biasa" data-perihal="Permohonan Izin Penelitian" data-tanggal="10 Apr 2025" data-nomor="—" data-keterangan="Dokumen sedang diperiksa oleh Admin/TU. Menunggu upload PDF dan pengaturan data surat.">
                     <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[200px]">Permohonan Izin Penelitian</p></td>
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">10 Apr 2025</p></td>
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diproses</span></td>
@@ -62,7 +62,7 @@
                     </td>
                   </tr>
 
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-status="diproses" data-jenis="Surat Biasa" data-perihal="Permohonan Izin Magang" data-tanggal="02 Apr 2025" data-nomor="â€”" data-keterangan="Dokumen sedang dalam proses verifikasi Level 1.">
+                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-status="diproses" data-jenis="Surat Biasa" data-perihal="Permohonan Izin Magang" data-tanggal="02 Apr 2025" data-nomor="—" data-keterangan="Dokumen sedang dalam proses verifikasi Level 1.">
                     <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[200px]">Permohonan Izin Magang</p></td>
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">02 Apr 2025</p></td>
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diproses</span></td>
@@ -84,7 +84,7 @@
                     </td>
                   </tr>
 
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-status="ditolak" data-jenis="Surat Biasa" data-perihal="Permohonan Surat Keterangan" data-tanggal="05 Apr 2025" data-nomor="â€”" data-keterangan="Dokumen ditolak oleh Admin/TU. Alasan: Format surat tidak sesuai standar Polibatam. Harap perbaiki dan ajukan kembali.">
+                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-status="ditolak" data-jenis="Surat Biasa" data-perihal="Permohonan Surat Keterangan" data-tanggal="05 Apr 2025" data-nomor="—" data-keterangan="Dokumen ditolak oleh Admin/TU. Alasan: Format surat tidak sesuai standar Polibatam. Harap perbaiki dan ajukan kembali.">
                     <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[200px]">Permohonan Surat Keterangan</p></td>
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">05 Apr 2025</p></td>
                     <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-slate-400"></span>Ditolak</span></td>
@@ -109,8 +109,9 @@
 
 
         {{-- ============================================================
-             PAGE: SK SAYA â€” Tabel + Filter + Aksi
+             PAGE: SK SAYA — Tabel + Filter + Aksi
         ============================================================ --}}
       </main>
     </div>
 @include('template.footer')
+
