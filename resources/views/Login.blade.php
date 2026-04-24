@@ -193,7 +193,7 @@
                            alt="Dashboard SIMAS"
                            class="w-full h-full object-cover object-center" />
                     --}}
-                    <img src="{{ asset('images/carousel/r1.png') }}"
+                    <img src="{{ asset('images/carousel/c1.png') }}"
                          alt="Dashboard SIMAS"
                          class="w-full h-full object-cover object-center" />
                     <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
@@ -203,7 +203,7 @@
                 {{-- SLIDE 2 --}}
                 <div class="login-carousel-slide">
                   <div class="relative w-full aspect-video overflow-hidden">
-                    <img src="{{ asset('images/carousel/r2.png') }}"
+                    <img src="{{ asset('images/carousel/c2.png') }}"
                          alt="Form Pengajuan SIMAS"
                          class="w-full h-full object-cover object-center" />
                     <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
@@ -213,7 +213,7 @@
                 {{-- SLIDE 3 --}}
                 <div class="login-carousel-slide">
                   <div class="relative w-full aspect-video overflow-hidden">
-                    <img src="{{ asset('images/carousel/r3.png') }}"
+                    <img src="{{ asset('images/carousel/c3.png') }}"
                          alt="Alur Verifikasi SIMAS"
                          class="w-full h-full object-cover object-center" />
                     <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
