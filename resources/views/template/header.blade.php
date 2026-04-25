@@ -179,6 +179,35 @@
             <p id="modal-sk-memutuskan" class="text-xs text-slate-600 font-light whitespace-pre-line"></p>
           </div>
         </div>
+
+        <div class="border-t border-slate-100 pt-3">
+          <p class="text-xs font-semibold text-slate-700 mb-3">Keputusan Verifikasi</p>
+
+          <div class="space-y-2 mb-3">
+            <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
+              <input type="radio" name="keputusan_verifikasi" value="setuju" id="radio-setuju" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" checked />
+              <div>
+                <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">✅ Setujui Dokumen</p>
+                <p class="text-[11px] text-slate-400 font-light mt-0.5">Dokumen disetujui dan diteruskan ke level berikutnya (jika ada)</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
+              <input type="radio" name="keputusan_verifikasi" value="tolak" id="radio-tolak" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" />
+              <div>
+                <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">❌ Tolak Dokumen</p>
+                <p class="text-[11px] text-slate-400 font-light mt-0.5">Proses berhenti, dokumen dikembalikan untuk diperbaiki</p>
+              </div>
+            </label>
+          </div>
+
+          <div id="alasan-wrap" class="hidden space-y-1.5">
+            <label class="block text-xs font-semibold text-slate-700 tracking-wide">
+              Alasan Penolakan <span class="text-blue-400">*</span>
+            </label>
+            <textarea id="alasan-penolakan" rows="3" placeholder="Tuliskan alasan penolakan secara jelas agar pemohon dapat memperbaikinya..." class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none"></textarea>
+            <p class="text-[10px] text-slate-400 font-light">Alasan ini akan dicatat dan dikirimkan kepada pemohon.</p>
+          </div>
+        </div>
       </div>
       <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
         <button id="modal-close-btn" type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700 transition-all duration-200">
