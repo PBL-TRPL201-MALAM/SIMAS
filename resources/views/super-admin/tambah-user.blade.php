@@ -10,7 +10,7 @@
           <h1 class="text-sm font-bold text-slate-900">Tambah User</h1>
           <p class="text-[11px] text-slate-400 font-light">Form untuk membuat atau memperbarui akun</p>
         </div>
-        <a href="{{ route('super-admin.semua-user') }}" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-all duration-200">Kembali</a>
+        <a href="{{ route('super-admin.users.index') }}" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-all duration-200">Kembali</a>
       </header>
 
       <main class="flex-1 overflow-y-auto p-6">
@@ -21,44 +21,50 @@
               <p class="text-[11px] text-slate-400 font-light mt-1">Tampilan ini sudah menyiapkan field inti untuk tambah user, edit user, dan ubah status.</p>
             </div>
 
-            <form class="space-y-5">
+            @if ($errors->any())
+              <div class="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
+                {{ $errors->first() }}
+              </div>
+            @endif
+
+            <form action="{{ route('super-admin.users.store') }}" method="POST" class="space-y-5">
+              @csrf
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Nama Lengkap</label>
-                  <input type="text" value="Nur Aisyah" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                  <input type="text" name="nama" value="{{ old('nama') }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Username</label>
-                  <input type="text" value="nur.aisyah" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                  <input type="text" name="username" value="{{ old('username') }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
                 </div>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Email</label>
-                  <input type="email" value="nur.aisyah@kampus.ac.id" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                  <input type="email" name="email" value="{{ old('email') }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-slate-600 mb-2">Nomor HP</label>
-                  <input type="text" value="0812-3456-7890" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                  <label class="block text-xs font-semibold text-slate-600 mb-2">Password</label>
+                  <input type="password" name="password" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
                 </div>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Role</label>
-                  <select class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
-                    <option>ADMIN_TU</option>
-                    <option>PEMOHON</option>
-                    <option selected>VERIFIKATOR</option>
-                    <option>SUPER_ADMIN</option>
+                  <select name="role" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
+                    @foreach ($roles as $role)
+                      <option value="{{ $role }}" {{ old('role') === $role ? 'selected' : '' }}>{{ $role }}</option>
+                    @endforeach
                   </select>
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Status Akun</label>
-                  <select class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
-                    <option selected>Aktif</option>
-                    <option>Nonaktif</option>
+                  <select name="is_active" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
+                    <option value="1" {{ old('is_active', '1') === '1' ? 'selected' : '' }}>Aktif</option>
+                    <option value="0" {{ old('is_active') === '0' ? 'selected' : '' }}>Nonaktif</option>
                   </select>
                 </div>
               </div>
@@ -66,32 +72,22 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Unit Kerja</label>
-                  <select class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
-                    <option selected>Direktorat</option>
-                    <option>Akademik</option>
-                    <option>Keuangan</option>
-                    <option>Mahasiswa</option>
-                  </select>
+                  <input type="text" name="unit_kerja" value="{{ old('unit_kerja') }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Jabatan</label>
-                  <select class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
-                    <option selected>Koordinator Verifikator</option>
-                    <option>Staf Administrasi</option>
-                    <option>Operator</option>
-                    <option>Admin Sistem</option>
-                  </select>
+                  <input type="text" name="jabatan" value="{{ old('jabatan') }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
                 </div>
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-2">Catatan</label>
-                <textarea rows="4" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">Akun disiapkan untuk verifikasi dokumen tingkat 1 dan tingkat 2.</textarea>
+                <label class="block text-xs font-semibold text-slate-600 mb-2">NIP / NIK</label>
+                <input type="text" name="nip_nik" value="{{ old('nip_nik') }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
               </div>
 
               <div class="flex flex-wrap gap-3">
-                <button type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700 transition-all duration-200">Simpan User</button>
-                <button type="button" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-all duration-200">Reset Password</button>
+                <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700 transition-all duration-200">Simpan User</button>
+                <a href="{{ route('super-admin.users.index') }}" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-all duration-200">Batal</a>
               </div>
             </form>
           </div>
@@ -112,19 +108,19 @@
               <div class="mt-4 space-y-3 text-xs">
                 <div class="flex items-center justify-between">
                   <span class="text-slate-400">Nama</span>
-                  <span class="font-medium text-slate-700">Nur Aisyah</span>
+                  <span class="font-medium text-slate-700">{{ old('nama') ?: '-' }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-slate-400">Role</span>
-                  <span class="font-medium text-slate-700">VERIFIKATOR</span>
+                  <span class="font-medium text-slate-700">{{ old('role') ?: '-' }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-slate-400">Status</span>
-                  <span class="font-medium text-blue-600">Aktif</span>
+                  <span class="font-medium text-blue-600">{{ old('is_active', '1') === '1' ? 'Aktif' : 'Nonaktif' }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-slate-400">Unit Kerja</span>
-                  <span class="font-medium text-slate-700">Direktorat</span>
+                  <span class="font-medium text-slate-700">{{ old('unit_kerja') ?: '-' }}</span>
                 </div>
               </div>
             </div>

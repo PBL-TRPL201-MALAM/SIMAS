@@ -1,4 +1,4 @@
-@include('template.header', ['pageTitle' => 'Surat Menunggu Verifikasi', 'modalVariant' => 'verifikator'])
+@include('template.header', ['pageTitle' => 'Surat Menunggu Verifikasi', 'modalVariant' => 'none'])
 @include('template.verifikator-sidebar', ['activePage' => 'surat-menunggu'])
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
@@ -19,9 +19,26 @@
       </header>
       <main class="flex-1 overflow-y-auto p-6">
         <div id="page-surat-menunggu" class="page-content space-y-4">
+          @if (session('status'))
+            <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+              <p class="text-[11px] font-semibold text-emerald-700">{{ session('status') }}</p>
+            </div>
+          @endif
+
+          @if ($errors->any())
+            <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3">
+              <p class="text-[11px] font-semibold text-red-700 mb-1">Keputusan verifikasi belum bisa diproses:</p>
+              <ul class="space-y-1 text-[11px] text-red-600 font-light">
+                @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+                @endforeach
+              </ul>
+            </div>
+          @endif
+
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-slate-900">Surat Menunggu Verifikasi</h2>
-            <span class="text-[11px] font-medium text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">3 dokumen</span>
+            <span class="text-[11px] font-medium text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">{{ $suratMenunggu->count() }} dokumen</span>
           </div>
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
@@ -36,53 +53,34 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row"
-                    data-jenis="Surat Biasa" data-perihal="Permohonan Izin Penelitian" data-pemohon="Ahmad Fauzi"
-                    data-tanggal="10 Apr 2025" data-level="Level 1" data-status="menunggu"
-                    data-ringkasan="Permohonan izin penelitian untuk keperluan tugas akhir di wilayah Batam selama 2 bulan.">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[180px]">Permohonan Izin Penelitian</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600">Ahmad Fauzi</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level 1</span></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">10 Apr 2025</p></td>
-                    <td class="px-5 py-3.5">
-                      <button type="button" class="btn-verifikasi text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Verifikasi</button>
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row"
-                    data-jenis="Surat Biasa" data-perihal="Permohonan Izin Magang" data-pemohon="Siti Rahma"
-                    data-tanggal="09 Apr 2025" data-level="Level 1" data-status="menunggu"
-                    data-ringkasan="Permohonan izin magang di perusahaan teknologi selama 3 bulan.">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[180px]">Permohonan Izin Magang</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600">Siti Rahma</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level 1</span></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">09 Apr 2025</p></td>
-                    <td class="px-5 py-3.5">
-                      <button type="button" class="btn-verifikasi text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Verifikasi</button>
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row"
-                    data-jenis="Surat Biasa" data-perihal="Surat Keterangan Aktif Kuliah" data-pemohon="Rina Dewi"
-                    data-tanggal="07 Apr 2025" data-level="Level 2" data-status="menunggu"
-                    data-ringkasan="Surat keterangan mahasiswa aktif untuk keperluan beasiswa.">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[180px]">Surat Keterangan Aktif Kuliah</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600">Rina Dewi</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level 2</span></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">07 Apr 2025</p></td>
-                    <td class="px-5 py-3.5">
-                      <button type="button" class="btn-verifikasi text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Verifikasi</button>
-                    </td>
-                  </tr>
+                  @forelse ($suratMenunggu as $item)
+                    @php($pdfFile = $item->dokumen->dokumenFiles->first())
+                    <tr class="hover:bg-slate-50/40 transition-colors duration-150">
+                      <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[220px]">{{ $item->dokumen->suratBiasa?->hal ?? '-' }}</p></td>
+                      <td class="px-5 py-3.5"><p class="text-xs text-slate-600">{{ $item->dokumen->pemohon?->nama ?? '-' }}</p></td>
+                      <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level {{ $item->level }}</span></td>
+                      <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->dokumen->created_at)->format('d M Y') }}</p></td>
+                      <td class="px-5 py-3.5">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <a href="{{ route('verifikator.surat.detail', $item->dokumen) }}" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</a>
+                          @if ($pdfFile)
+                            <a href="{{ route('verifikator.surat.unduh-pdf', $item->dokumen) }}" class="text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-colors duration-200">Unduh PDF</a>
+                          @endif
+                          <a href="{{ route('verifikator.surat.detail', ['dokumen' => $item->dokumen, 'aksi' => 'setuju']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Setujui</a>
+                          <a href="{{ route('verifikator.surat.detail', ['dokumen' => $item->dokumen, 'aksi' => 'tolak']) }}" class="inline-flex items-center text-[11px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg transition-all duration-200">Tolak</a>
+                        </div>
+                      </td>
+                    </tr>
+                  @empty
+                    <tr>
+                      <td colspan="5" class="px-5 py-8 text-center text-xs text-slate-400">Belum ada surat yang menunggu verifikasi Anda.</td>
+                    </tr>
+                  @endforelse
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-
-
-        {{-- ============================================================
-             PAGE: SURAT DISETUJUI
-        ============================================================ --}}
       </main>
     </div>
 @include('template.footer')
-

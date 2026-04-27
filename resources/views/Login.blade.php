@@ -75,6 +75,15 @@
           </div>
 
           {{-- Alert Error --}}
+          @if (session('status'))
+            <div class="flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 mb-6">
+              <svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <p class="text-xs text-emerald-600 font-medium">{{ session('status') }}</p>
+            </div>
+          @endif
+
           @if ($errors->any())
             <div class="flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3 mb-6">
               <svg class="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -85,22 +94,23 @@
           @endif
 
           {{-- Form Login --}}
-          <form id="login-form" action="{{ route('pemohon.dashboard') }}" method="GET" class="space-y-5" novalidate>
+          <form action="{{ route('login.attempt') }}" method="POST" class="space-y-5">
+            @csrf
 
-            {{-- Username --}}
+            {{-- Email / Username --}}
             <div class="space-y-1.5">
-              <label for="username" class="block text-xs font-semibold text-slate-700 tracking-wide">Nama Pengguna</label>
+              <label for="login" class="block text-xs font-semibold text-slate-700 tracking-wide">Email atau Username</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
                   <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
-                <input id="username" name="username" type="text" autocomplete="username"
-                  value="{{ old('username') }}" placeholder="Masukkan nama pengguna"
+                <input id="login" name="login" type="text" autocomplete="username"
+                  value="{{ old('login') }}" placeholder="Masukkan email atau username"
                   class="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 hover:border-slate-300" />
               </div>
-              <p id="username-error" class="hidden text-[11px] text-red-500 font-medium mt-1"></p>
+              <p id="login-error" class="hidden text-[11px] text-red-500 font-medium mt-1"></p>
             </div>
 
             {{-- Password --}}
@@ -131,6 +141,14 @@
                 </button>
               </div>
               <p id="password-error" class="hidden text-[11px] text-red-500 font-medium mt-1"></p>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <label for="remember" class="inline-flex items-center gap-2 text-xs text-slate-500 font-medium">
+                <input id="remember" name="remember" type="checkbox" value="1" {{ old('remember') ? 'checked' : '' }}
+                  class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                <span>Ingat saya</span>
+              </label>
             </div>
 
             {{-- Submit --}}

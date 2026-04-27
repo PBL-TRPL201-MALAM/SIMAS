@@ -3,7 +3,6 @@
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
-      {{-- Topbar --}}
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -23,15 +22,34 @@
       </header>
 
       <main class="flex-1 overflow-y-auto p-6">
-        <div class="max-w-2xl mx-auto">
+        <div class="max-w-6xl mx-auto">
 
           @php
-            $perihalSurat = $surat->perihal ?? request('perihal') ?? '-';
-            $pemohonSurat = $surat->pemohon ?? request('pemohon');
-            $ringkasanSurat = $surat->ringkasan ?? request('ringkasan') ?? '';
+            $perihalSurat = $dokumen->suratBiasa?->hal ?? request('perihal') ?? '-';
+            $pemohonSurat = $dokumen->pemohon?->nama ?? request('pemohon');
+            $ringkasanSurat = $dokumen->suratBiasa?->ringkasan_isi ?? request('ringkasan') ?? '';
+            $unitKerjaAdmin = auth()->user()?->unit_kerja ?: '-';
+            $initialStep = $initialStep ?? 1;
+            $selectedVerifikators = $selectedVerifikators ?? collect();
           @endphp
 
-          {{-- Info surat yang diproses --}}
+          @if ($errors->any())
+            <div class="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3">
+              <p class="text-[11px] font-semibold text-red-700 mb-1">Data proses surat belum bisa disimpan:</p>
+              <ul class="space-y-1 text-[11px] text-red-600 font-light">
+                @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+                @endforeach
+              </ul>
+            </div>
+          @endif
+
+          @if (session('status'))
+            <div class="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+              <p class="text-[11px] font-semibold text-emerald-700">{{ session('status') }}</p>
+            </div>
+          @endif
+
           <div id="proses-info-bar" class="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3 mb-5">
             <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <div class="min-w-0">
@@ -41,7 +59,6 @@
             <a href="{{ route('admin.pengajuan-masuk') }}" class="ml-auto text-[10px] font-medium text-blue-500 hover:text-blue-700 shrink-0 transition-colors duration-200">Kembali ke daftar</a>
           </div>
 
-          {{-- Step Indicator --}}
           <div class="flex items-center mb-6">
             <div class="flex items-center gap-2">
               <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="proses-circle-1"><span class="text-[11px] font-bold text-white">1</span></div>
@@ -59,17 +76,16 @@
             </div>
           </div>
 
-          {{-- ============================================================
-               STEP 1: Upload PDF + Metadata
-          ============================================================ --}}
+          <form id="proses-metadata-form" action="{{ route('admin.proses-surat.store', $dokumen) }}" method="POST" enctype="multipart/form-data" class="contents">
+            @csrf
+            <input type="hidden" id="proses-start-step" value="{{ $initialStep }}">
           <div id="proses-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
               <h2 class="text-sm font-bold text-slate-900">Langkah 1 - Upload PDF & Data Surat</h2>
-              <p class="text-xs text-slate-400 font-light mt-0.5">Unggah PDF hasil pemeriksaan lalu lengkapi metadata surat.</p>
+              <p class="text-xs text-slate-400 font-light mt-0.5">Unggah PDF hasil pemeriksaan lalu lengkapi metadata inti surat.</p>
             </div>
             <div class="px-6 py-6 space-y-5">
 
-              {{-- Upload PDF --}}
               <div class="space-y-1.5">
                 <label class="block text-xs font-semibold text-slate-700 tracking-wide">Unggah Draf PDF <span class="text-blue-400">*</span></label>
                 <div id="pdf-drop-zone" class="relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-6 py-8 hover:border-blue-300 hover:bg-blue-50/30 transition-all duration-200 cursor-pointer">
@@ -78,13 +94,14 @@
                   </div>
                   <div class="text-center">
                     <p class="text-xs font-semibold text-slate-700">Klik atau seret file PDF ke sini</p>
-                    <p class="text-[11px] text-slate-400 font-light mt-0.5">Format: PDF · Maks. 10 MB</p>
+                    <p class="text-[11px] text-slate-400 font-light mt-0.5">Format: PDF - Maks. 10 MB</p>
                   </div>
-                  <input id="pdf-file-input" type="file" accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <input id="pdf-file-input" name="hasil_pemeriksaan_pdf" type="file" accept=".pdf,application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 </div>
                 <div id="pdf-file-preview" class="hidden flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-2.5">
                   <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   <p id="pdf-file-name" class="text-[11px] font-medium text-blue-700 truncate"></p>
+                  <p id="pdf-file-source" class="text-[10px] text-blue-500 font-light shrink-0"></p>
                   <button id="pdf-file-remove" type="button" class="ml-auto text-slate-400 hover:text-slate-600 shrink-0 transition-colors duration-200">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
@@ -93,232 +110,262 @@
 
               <div class="border-t border-slate-100 pt-5">
                 <p class="text-xs font-semibold text-slate-700 mb-4">Metadata Surat</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Unit Kerja / Unit Pengolah <span class="text-blue-400">*</span></label>
-                    <input type="text" name="unit_kerja" placeholder="Contoh: Tata Usaha Jurusan TRPL"
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
+                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Unit Kerja / Unit Pengolah</label>
+                    <input type="text" name="unit_kerja" value="{{ $unitKerjaAdmin }}" readonly
+                      class="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm text-slate-700 font-light outline-none cursor-not-allowed" />
                   </div>
 
                   <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Penanda Tangan <span class="text-blue-400">*</span></label>
+                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Penandatangan <span class="text-blue-400">*</span></label>
                     <select name="penanda_tangan" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
-                      <option value="" disabled selected>Pilih penanda tangan</option>
-                      <option>Direktur Polibatam</option>
-                      <option>Wakil Direktur I</option>
-                      <option>Wakil Direktur II</option>
-                      <option>Wakil Direktur III</option>
-                      <option>Kepala Jurusan</option>
+                      <option value="" disabled {{ old('penanda_tangan', $dokumen->suratBiasa?->penandatangan) ? '' : 'selected' }}>Pilih penanda tangan</option>
+                      @foreach (['Direktur Polibatam', 'Wakil Direktur I', 'Wakil Direktur II', 'Wakil Direktur III', 'Kepala Jurusan'] as $penandatangan)
+                        <option value="{{ $penandatangan }}" @selected(old('penanda_tangan', $dokumen->suratBiasa?->penandatangan) === $penandatangan)>{{ $penandatangan }}</option>
+                      @endforeach
                     </select>
                   </div>
 
                   <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Templat Surat</label>
-                    <select name="templat" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
-                      <option value="" disabled selected>Pilih templat</option>
-                      <option>Templat Surat Resmi Polibatam</option>
-                      <option>Templat Surat Keterangan</option>
-                      <option>Templat Surat Permohonan</option>
+                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Jenis Surat <span class="text-blue-400">*</span></label>
+                    <select name="jenis_surat" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                      <option value="" disabled {{ old('jenis_surat', $dokumen->suratBiasa?->jenis_surat) ? '' : 'selected' }}>Pilih jenis surat</option>
+                      @foreach (['Surat Keterangan', 'Surat Permohonan', 'Surat Izin', 'Surat Pengantar', 'Surat Tugas'] as $jenisSurat)
+                        <option value="{{ $jenisSurat }}" @selected(old('jenis_surat', $dokumen->suratBiasa?->jenis_surat) === $jenisSurat)>{{ $jenisSurat }}</option>
+                      @endforeach
                     </select>
                   </div>
 
                   <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Versi Kop Surat</label>
-                    <select name="versi_kop" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
-                      <option value="" disabled selected>Pilih versi kop</option>
-                      <option>Kop Polibatam Standar</option>
-                      <option>Kop Jurusan TRPL</option>
-                      <option>Kop Tanpa Logo</option>
+                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Sifat Surat <span class="text-blue-400">*</span></label>
+                    <select name="sifat_surat" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                      <option value="" disabled {{ old('sifat_surat', $dokumen->suratBiasa?->sifat_surat) ? '' : 'selected' }}>Pilih sifat surat</option>
+                      @foreach (['Biasa', 'Penting', 'Segera', 'Sangat Segera', 'Rahasia'] as $sifatSurat)
+                        <option value="{{ $sifatSurat }}" @selected(old('sifat_surat', $dokumen->suratBiasa?->sifat_surat) === $sifatSurat)>{{ $sifatSurat }}</option>
+                      @endforeach
                     </select>
                   </div>
 
                   <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Jenis <span class="text-blue-400">*</span></label>
-                    <select name="jenis" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
-                      <option value="" disabled selected>Pilih jenis surat</option>
-                      <option>Surat Keterangan</option>
-                      <option>Surat Permohonan</option>
-                      <option>Surat Izin</option>
-                      <option>Surat Pengantar</option>
-                      <option>Surat Tugas</option>
-                    </select>
-                  </div>
-
-                  <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Sifat <span class="text-blue-400">*</span></label>
-                    <select name="sifat" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
-                      <option value="" disabled selected>Pilih sifat</option>
-                      <option>Biasa</option>
-                      <option>Penting</option>
-                      <option>Segera</option>
-                      <option>Sangat Segera</option>
-                      <option>Rahasia</option>
-                    </select>
-                  </div>
-
-                  <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Kode Hal</label>
-                    <input type="text" name="kode_hal" placeholder="Contoh: ADM/001"
+                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Nomor Surat <span class="text-blue-400">*</span></label>
+                    <input type="text" name="nomor_surat" placeholder="Contoh: B/123/TU/2026" value="{{ old('nomor_surat', $dokumen->suratBiasa?->nomor_surat) }}"
                       class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                   </div>
 
                   <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Hal <span class="text-blue-400">*</span></label>
-                    <input type="text" name="hal" placeholder="Contoh: Permohonan Izin Penelitian"
-                      value="{{ $perihalSurat }}"
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
+                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Tanggal Surat <span class="text-blue-400">*</span></label>
+                    <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat', optional($dokumen->suratBiasa?->tanggal_surat)->format('Y-m-d')) }}"
+                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                   </div>
-
                 </div>
 
                 <div class="space-y-4 mt-4">
-
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Kepada / Tujuan <span class="text-blue-400">*</span></label>
-                    <input type="text" name="tujuan" placeholder="Contoh: Yth. Kepala Dinas Pendidikan Kota Batam"
+                    <input type="text" name="tujuan" placeholder="Contoh: Yth. Kepala Dinas Pendidikan Kota Batam" value="{{ old('tujuan', $dokumen->suratBiasa?->kepada_tujuan) }}"
                       class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                   </div>
 
                   <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Isi / Ringkasan <span class="text-blue-400">*</span></label>
-                    <textarea name="isi_ringkasan" rows="3" placeholder="Tuliskan ringkasan isi surat secara singkat..."
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ $ringkasanSurat }}</textarea>
+                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Isi / Ringkasan</label>
+                    <textarea name="isi_ringkasan" rows="4" readonly
+                      class="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm text-slate-700 font-light outline-none resize-none cursor-not-allowed">{{ $ringkasanSurat }}</textarea>
                   </div>
 
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Tembusan</label>
-                    <textarea name="tembusan" rows="2" placeholder="Contoh:&#10;1. Direktur Polibatam&#10;2. Wakil Direktur II"
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none"></textarea>
+                    <textarea name="tembusan" rows="3" placeholder="Contoh:&#10;1. Direktur Polibatam&#10;2. Wakil Direktur II"
+                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('tembusan', $dokumen->suratBiasa?->tembusan) }}</textarea>
                   </div>
 
                   <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Keterangan Tambahan</label>
-                    <textarea name="keterangan_tambahan" rows="2" placeholder="Catatan atau informasi tambahan jika diperlukan..."
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none"></textarea>
+                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Catatan Tambahan</label>
+                    <textarea name="catatan_tambahan" rows="3" placeholder="Catatan atau informasi tambahan jika diperlukan..."
+                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('catatan_tambahan', $dokumen->suratBiasa?->catatan ?? $dokumen->suratBiasa?->keterangan_tambahan) }}</textarea>
                   </div>
-
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-1.5">
-                      <label class="block text-xs font-semibold text-slate-700 tracking-wide">Pengonsep Surat</label>
-                      <input type="text" name="pengonsep" placeholder="Nama pengonsep surat"
-                        class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
-                    </div>
-                    <div class="space-y-1.5">
-                      <label class="block text-xs font-semibold text-slate-700 tracking-wide">Pemberkasan (Nama Arsip)</label>
-                      <input type="text" name="pemberkasan" placeholder="Nama arsip / judul berkas"
-                        class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
-                    </div>
-                  </div>
-
-                  <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3">
-                    <div>
-                      <p class="text-xs font-semibold text-slate-700">Dilihat Publik</p>
-                      <p class="text-[10px] text-slate-400 font-light mt-0.5">Aktifkan jika surat ini dapat diakses oleh umum</p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" name="dilihat_publik" class="sr-only peer" />
-                      <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:bg-blue-600 transition-colors duration-200"></div>
-                      <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 peer-checked:translate-x-4"></div>
-                    </label>
-                  </div>
-
-                  <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Lampiran</label>
-                    <input type="file" name="lampiran" multiple
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-500 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100" />
-                    <p class="text-[10px] text-slate-400 font-light">Bisa memilih lebih dari satu file lampiran.</p>
-                  </div>
-
                 </div>
               </div>
 
               <div class="flex justify-end pt-2">
-                <button id="proses-next-1" type="button"
+                <button id="proses-save-step-1" type="submit"
                   class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-                  Lanjut - Atur Posisi Elemen
+                  Simpan PDF & Metadata
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </button>
               </div>
             </div>
           </div>
+          </form>
 
-          {{-- ============================================================
-               STEP 2: Atur Posisi Elemen
-          ============================================================ --}}
           <div id="proses-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
               <h2 class="text-sm font-bold text-slate-900">Langkah 2 - Atur Posisi Elemen</h2>
               <p class="text-xs text-slate-400 font-light mt-0.5">Tentukan posisi penempatan nomor surat, tanggal, dan TTE pada dokumen PDF.</p>
             </div>
-            <div class="px-6 py-6 space-y-5">
-
+            <div
+              id="posisi-elemen-config"
+              class="px-6 py-6 space-y-5"
+              data-dokumen-id="{{ $dokumen->dokumen_id }}"
+              data-start-step="{{ $initialStep }}"
+              data-save-url="{{ route('admin.proses-surat.posisi-elemen', $dokumen) }}"
+              data-preview-url="{{ $previewPdfUrl }}"
+              data-preview-name="{{ $previewPdfName ?? '' }}"
+              data-existing-positions='@json($existingPositions)'
+            >
               <div class="rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3">
                 <p class="text-[11px] font-semibold text-blue-700 mb-1">Catatan penting:</p>
-                <p class="text-[11px] text-blue-600 font-light">Posisi yang diatur di sini hanya disimpan sebagai data koordinat. Elemen belum digenerate ke dokumen final - generate dilakukan setelah semua verifikator menyetujui.</p>
+                <p class="text-[11px] text-blue-600 font-light">Pilih salah satu elemen, lalu klik area preview PDF untuk menyimpan koordinat. Posisi disimpan dalam pixel relatif terhadap preview dasar dan akan otomatis menyesuaikan saat zoom berubah.</p>
               </div>
 
-              <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
-                <p class="text-xs font-semibold text-slate-700">Nomor Surat</p>
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="space-y-1.5">
-                    <label class="block text-[11px] font-medium text-slate-500">Posisi X (dari kiri, px)</label>
-                    <input type="number" name="nomor_x" placeholder="Contoh: 120" min="0"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200" />
+              <div class="grid grid-cols-1 xl:grid-cols-[280px,1fr] gap-5">
+                <div class="space-y-4">
+                  <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
+                    <div>
+                      <p class="text-xs font-semibold text-slate-700">Pilih Elemen</p>
+                      <p class="text-[11px] text-slate-400 font-light mt-0.5">Setelah tombol dipilih, klik area preview di kanan.</p>
+                    </div>
+
+                    <button type="button" class="btn-set-elemen w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/40" data-elemen="nomor_surat">
+                      <p class="text-xs font-semibold text-slate-700">Set Lokasi Nomor Surat</p>
+                      <p id="status-elemen-nomor_surat" class="text-[10px] text-slate-400 font-light mt-1">Belum ditentukan</p>
+                    </button>
+
+                    <button type="button" class="btn-set-elemen w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/40" data-elemen="tanggal_surat">
+                      <p class="text-xs font-semibold text-slate-700">Set Lokasi Tanggal Surat</p>
+                      <p id="status-elemen-tanggal_surat" class="text-[10px] text-slate-400 font-light mt-1">Belum ditentukan</p>
+                    </button>
+
+                    <button type="button" class="btn-set-elemen w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/40" data-elemen="tte">
+                      <p class="text-xs font-semibold text-slate-700">Set Lokasi QRCode / TTE</p>
+                      <p id="status-elemen-tte" class="text-[10px] text-slate-400 font-light mt-1">Belum ditentukan</p>
+                    </button>
                   </div>
-                  <div class="space-y-1.5">
-                    <label class="block text-[11px] font-medium text-slate-500">Posisi Y (dari atas, px)</label>
-                    <input type="number" name="nomor_y" placeholder="Contoh: 85" min="0"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200" />
+
+                  <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
+                    <div>
+                      <p class="text-xs font-semibold text-slate-700">Halaman Preview</p>
+                      <p class="text-[11px] text-slate-400 font-light mt-0.5">Jika elemen ada di halaman lain, ubah halaman lalu klik Tampilkan.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <input id="pdf-page-input" type="number" min="1" value="1"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100" />
+                      <button id="pdf-page-apply" type="button" class="shrink-0 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-medium text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all duration-200">
+                        Tampilkan
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                      <p class="text-xs font-semibold text-slate-700">Zoom Preview</p>
+                      <span id="pdf-zoom-label" class="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">100%</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                      <button id="pdf-zoom-out" type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all duration-200">Zoom Out</button>
+                      <button id="pdf-zoom-reset" type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all duration-200">Reset</button>
+                      <button id="pdf-zoom-in" type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all duration-200">Zoom In</button>
+                    </div>
+                  </div>
+
+                  <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4">
+                    <p class="text-xs font-semibold text-slate-700">Elemen Aktif</p>
+                    <p id="aktif-elemen-label" class="text-[11px] text-slate-400 font-light mt-1">Belum ada elemen yang dipilih.</p>
+                  </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <p class="text-xs font-semibold text-slate-700">Preview PDF</p>
+                      <p id="pdf-preview-caption" class="text-[11px] text-slate-400 font-light mt-0.5">Unggah PDF di langkah 1 untuk mulai mengatur posisi elemen.</p>
+                    </div>
+                    <span id="pdf-preview-page-badge" class="inline-flex items-center justify-center rounded-full bg-blue-50 px-3 py-1 text-[10px] font-semibold text-blue-600">Halaman 1</span>
+                  </div>
+
+                  <div id="pdf-preview-empty" class="rounded-xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
+                    <p class="text-xs font-semibold text-slate-600">Preview PDF belum tersedia</p>
+                    <p class="text-[11px] text-slate-400 font-light mt-1">Pilih file PDF pada langkah pertama, lalu lanjutkan ke langkah ini.</p>
+                  </div>
+
+                  <div id="pdf-preview-stage" class="hidden rounded-xl border border-slate-200 bg-white overflow-hidden">
+                    <div id="pdf-scroll-container" class="overflow-auto bg-slate-100/60" style="height: max(900px, calc(100vh - 250px));">
+                      <div id="pdf-preview-canvas" class="relative mx-auto my-4 rounded-lg shadow-sm overflow-hidden bg-white">
+                        <iframe id="pdf-preview-frame" title="Preview PDF proses surat" class="absolute inset-0 border-0 bg-white"></iframe>
+                        <button
+                          id="pdf-click-overlay"
+                          type="button"
+                          class="absolute inset-0 z-10 cursor-crosshair bg-transparent"
+                          aria-label="Klik untuk menentukan posisi elemen pada preview PDF"
+                        ></button>
+                        <div id="pdf-marker-layer" class="pointer-events-none absolute inset-0 z-20"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
-                <p class="text-xs font-semibold text-slate-700">Tanggal Surat</p>
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="space-y-1.5">
-                    <label class="block text-[11px] font-medium text-slate-500">Posisi X (dari kiri, px)</label>
-                    <input type="number" name="tanggal_x" placeholder="Contoh: 120" min="0"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200" />
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
+                  <p class="text-xs font-semibold text-slate-700">Nomor Surat</p>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                      <label class="block text-[11px] font-medium text-slate-500">Posisi X</label>
+                      <input id="input-nomor-surat-x" type="number" name="nomor_x" min="0" readonly
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 font-light outline-none" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="block text-[11px] font-medium text-slate-500">Posisi Y</label>
+                      <input id="input-nomor-surat-y" type="number" name="nomor_y" min="0" readonly
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 font-light outline-none" />
+                    </div>
                   </div>
-                  <div class="space-y-1.5">
-                    <label class="block text-[11px] font-medium text-slate-500">Posisi Y (dari atas, px)</label>
-                    <input type="number" name="tanggal_y" placeholder="Contoh: 110" min="0"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200" />
+                </div>
+
+                <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
+                  <p class="text-xs font-semibold text-slate-700">Tanggal Surat</p>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                      <label class="block text-[11px] font-medium text-slate-500">Posisi X</label>
+                      <input id="input-tanggal-surat-x" type="number" name="tanggal_x" min="0" readonly
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 font-light outline-none" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="block text-[11px] font-medium text-slate-500">Posisi Y</label>
+                      <input id="input-tanggal-surat-y" type="number" name="tanggal_y" min="0" readonly
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 font-light outline-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
+                  <p class="text-xs font-semibold text-slate-700">QRCode / TTE</p>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                      <label class="block text-[11px] font-medium text-slate-500">Posisi X</label>
+                      <input id="input-tte-x" type="number" name="tte_x" min="0" readonly
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 font-light outline-none" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="block text-[11px] font-medium text-slate-500">Posisi Y</label>
+                      <input id="input-tte-y" type="number" name="tte_y" min="0" readonly
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 font-light outline-none" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="block text-[11px] font-medium text-slate-500">Lebar</label>
+                      <input id="input-tte-w" type="number" name="tte_w" min="0" readonly
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 font-light outline-none" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="block text-[11px] font-medium text-slate-500">Tinggi</label>
+                      <input id="input-tte-h" type="number" name="tte_h" min="0" readonly
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 font-light outline-none" />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
-                <p class="text-xs font-semibold text-slate-700">TTE (Tanda Tangan Elektronik)</p>
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="space-y-1.5">
-                    <label class="block text-[11px] font-medium text-slate-500">Posisi X (dari kiri, px)</label>
-                    <input type="number" name="tte_x" placeholder="Contoh: 380" min="0"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200" />
-                  </div>
-                  <div class="space-y-1.5">
-                    <label class="block text-[11px] font-medium text-slate-500">Posisi Y (dari atas, px)</label>
-                    <input type="number" name="tte_y" placeholder="Contoh: 680" min="0"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200" />
-                  </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="space-y-1.5">
-                    <label class="block text-[11px] font-medium text-slate-500">Lebar TTE (px)</label>
-                    <input type="number" name="tte_w" placeholder="Contoh: 120" min="0"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200" />
-                  </div>
-                  <div class="space-y-1.5">
-                    <label class="block text-[11px] font-medium text-slate-500">Tinggi TTE (px)</label>
-                    <input type="number" name="tte_h" placeholder="Contoh: 60" min="0"
-                      class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200" />
-                  </div>
-                </div>
-              </div>
-
-              <p class="text-[10px] text-slate-400 font-light">* Koordinat dalam satuan pixel dari pojok kiri atas halaman dokumen PDF.</p>
+              <p class="text-[10px] text-slate-400 font-light">Koordinat disimpan terhadap preview dasar. Saat zoom diubah, marker dan klik posisi akan tetap mengikuti skala preview yang sedang ditampilkan.</p>
 
               <div class="flex items-center justify-between pt-2">
                 <button id="proses-back-1" type="button"
@@ -335,9 +382,8 @@
             </div>
           </div>
 
-          {{-- ============================================================
-               STEP 3: Tentukan Tingkat Verifikasi
-          ============================================================ --}}
+          <form id="proses-verifikasi-form" action="{{ route('admin.proses-surat.kirim-verifikasi', $dokumen) }}" method="POST" class="contents">
+            @csrf
           <div id="proses-step-3" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
               <h2 class="text-sm font-bold text-slate-900">Langkah 3 - Tingkat Verifikasi</h2>
@@ -345,32 +391,9 @@
             </div>
             <div class="px-6 py-6 space-y-5">
 
-              <div class="space-y-2">
-                <label class="block text-xs font-semibold text-slate-700 tracking-wide">Jalur Verifikasi <span class="text-blue-400">*</span></label>
-
-                <label class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
-                  <input type="radio" name="jalur_verifikasi" value="1" class="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" />
-                  <div>
-                    <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">Level 1 saja</p>
-                    <p class="text-[11px] text-slate-400 font-light mt-0.5">Dokumen hanya perlu disetujui oleh Verifikator Level 1</p>
-                  </div>
-                </label>
-
-                <label class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
-                  <input type="radio" name="jalur_verifikasi" value="2" class="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" />
-                  <div>
-                    <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">Level 1 -> Level 2</p>
-                    <p class="text-[11px] text-slate-400 font-light mt-0.5">Dokumen harus disetujui oleh Level 1 terlebih dahulu, lalu diteruskan ke Level 2</p>
-                  </div>
-                </label>
-
-                <label class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
-                  <input type="radio" name="jalur_verifikasi" value="3" class="mt-0.5 w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" />
-                  <div>
-                    <p class="text-xs font-semibold text-slate-700 group-hover:text-blue-700 transition-colors duration-200">Level 1 -> Level 2 -> Level 3</p>
-                    <p class="text-[11px] text-slate-400 font-light mt-0.5">Dokumen harus melewati tiga tingkat persetujuan secara berurutan</p>
-                  </div>
-                </label>
+              <div class="rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3 flex items-start gap-3">
+                <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <p class="text-[11px] text-blue-600 font-light leading-relaxed">Pilih verifikator aktif untuk setiap level yang dibutuhkan. Level 1 wajib dipilih. Level 2 dan Level 3 bersifat opsional, dan proses verifikasi akan berjalan berurutan dari level paling rendah.</p>
               </div>
 
               <div class="space-y-3">
@@ -379,36 +402,43 @@
                 <div class="space-y-1.5">
                   <label class="block text-[11px] font-medium text-slate-500">Verifikator Level 1 <span class="text-blue-400">*</span></label>
                   <select name="verifikator_1" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all duration-200">
-                    <option value="" disabled selected>Pilih verifikator level 1</option>
-                    <option>Kepala Jurusan TRPL</option>
-                    <option>Kepala Jurusan TI</option>
-                    <option>Wakil Direktur I</option>
-                    <option>Wakil Direktur II</option>
+                    <option value="" disabled {{ old('verifikator_1', $selectedVerifikators->get(1)) ? '' : 'selected' }}>Pilih verifikator level 1</option>
+                    @foreach ($verifikators as $verifikator)
+                      <option value="{{ $verifikator->user_id }}" @selected((string) old('verifikator_1', $selectedVerifikators->get(1)) === (string) $verifikator->user_id)>
+                        {{ $verifikator->nama }}{{ $verifikator->jabatan ? ' - ' . $verifikator->jabatan : '' }}
+                      </option>
+                    @endforeach
                   </select>
                 </div>
 
                 <div class="space-y-1.5">
                   <label class="block text-[11px] font-medium text-slate-500">Verifikator Level 2</label>
                   <select name="verifikator_2" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all duration-200">
-                    <option value="">- Tidak ada (jika hanya 1 level) -</option>
-                    <option>Wakil Direktur I</option>
-                    <option>Wakil Direktur II</option>
-                    <option>Wakil Direktur III</option>
+                    <option value="">- Tidak ada (opsional) -</option>
+                    @foreach ($verifikators as $verifikator)
+                      <option value="{{ $verifikator->user_id }}" @selected((string) old('verifikator_2', $selectedVerifikators->get(2)) === (string) $verifikator->user_id)>
+                        {{ $verifikator->nama }}{{ $verifikator->jabatan ? ' - ' . $verifikator->jabatan : '' }}
+                      </option>
+                    @endforeach
                   </select>
                 </div>
 
                 <div class="space-y-1.5">
                   <label class="block text-[11px] font-medium text-slate-500">Verifikator Level 3</label>
                   <select name="verifikator_3" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all duration-200">
-                    <option value="">- Tidak ada (jika hanya 1-2 level) -</option>
-                    <option>Direktur Polibatam</option>
+                    <option value="">- Tidak ada (opsional) -</option>
+                    @foreach ($verifikators as $verifikator)
+                      <option value="{{ $verifikator->user_id }}" @selected((string) old('verifikator_3', $selectedVerifikators->get(3)) === (string) $verifikator->user_id)>
+                        {{ $verifikator->nama }}{{ $verifikator->jabatan ? ' - ' . $verifikator->jabatan : '' }}
+                      </option>
+                    @endforeach
                   </select>
                 </div>
               </div>
 
               <div class="rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3 flex items-start gap-3">
                 <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <p class="text-[11px] text-blue-600 font-light leading-relaxed">Setelah dikirim, sistem akan meneruskan dokumen ke verifikator pertama. Jika ditolak oleh salah satu verifikator, proses berhenti dan dokumen dikembalikan untuk diperbaiki.</p>
+                <p class="text-[11px] text-blue-600 font-light leading-relaxed">Saat dokumen dikirim, Level 1 akan mulai dengan status menunggu. Level berikutnya baru diproses setelah level sebelumnya selesai menyetujui dokumen.</p>
               </div>
 
               <div class="flex items-center justify-between pt-2">
@@ -417,7 +447,7 @@
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" /></svg>
                   Kembali
                 </button>
-                <button id="proses-submit" type="button"
+                <button id="proses-submit" type="submit"
                   class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
                   Kirim ke Verifikator
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
@@ -426,6 +456,7 @@
 
             </div>
           </div>
+          </form>
 
         </div>
       </main>

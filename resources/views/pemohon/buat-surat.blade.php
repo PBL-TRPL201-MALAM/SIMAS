@@ -21,7 +21,6 @@
         <div id="page-buat-surat" class="page-content">
           <div class="max-w-2xl mx-auto">
 
-            {{-- Step indicator --}}
             <div class="flex items-center mb-6">
               <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="surat-step2-circle-wrap">
@@ -38,13 +37,18 @@
               </div>
             </div>
 
-            {{-- Step 1 --}}
             <div id="surat-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-                <h2 class="text-sm font-bold text-slate-900">Langkah 1 — Upload Draft Surat</h2>
+                <h2 class="text-sm font-bold text-slate-900">Langkah 1 - Upload Draft Surat</h2>
                 <p class="text-xs text-slate-400 font-light mt-0.5">Siapkan draft surat dalam format DOCX lalu unggah ke sistem.</p>
               </div>
               <div class="px-6 py-6 space-y-5">
+                @if ($errors->any())
+                  <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
+                    {{ $errors->first() }}
+                  </div>
+                @endif
+
                 <div class="rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3">
                   <p class="text-[11px] font-semibold text-blue-700 mb-1.5">Yang perlu disiapkan:</p>
                   <ul class="space-y-1">
@@ -63,7 +67,7 @@
                       <p class="text-xs font-semibold text-slate-700">Klik atau seret file ke sini</p>
                       <p class="text-[11px] text-slate-400 font-light mt-0.5">Format: DOCX · Maks. 10 MB</p>
                     </div>
-                    <input id="surat-file-input" type="file" accept=".docx" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <input id="surat-file-input" name="draft_surat" form="surat-biasa-form" type="file" accept=".docx" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                   </div>
                   <div id="surat-file-preview" class="hidden flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-2.5 mt-2">
                     <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -83,13 +87,12 @@
               </div>
             </div>
 
-            {{-- Step 2 --}}
             <div id="surat-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-                <h2 class="text-sm font-bold text-slate-900">Langkah 2 — Data Surat</h2>
+                <h2 class="text-sm font-bold text-slate-900">Langkah 2 - Data Surat</h2>
                 <p class="text-xs text-slate-400 font-light mt-0.5">Lengkapi informasi awal surat yang akan diajukan.</p>
               </div>
-              <form action="#" method="POST" enctype="multipart/form-data" class="px-6 py-6 space-y-5">
+              <form id="surat-biasa-form" action="{{ route('pemohon.surat.store') }}" method="POST" enctype="multipart/form-data" class="px-6 py-6 space-y-5">
                 @csrf
                 <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-2.5">
                   <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -98,14 +101,14 @@
                 </div>
                 <div class="space-y-1.5">
                   <label class="block text-xs font-semibold text-slate-700 tracking-wide">Perihal <span class="text-blue-400">*</span></label>
-                  <input type="text" name="perihal" placeholder="Contoh: Permohonan Izin Penelitian Lapangan"
+                  <input type="text" name="perihal" value="{{ old('perihal') }}" placeholder="Contoh: Permohonan Izin Penelitian Lapangan"
                     class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                   <p class="text-[10px] text-slate-400 font-light">Tuliskan pokok/inti dari surat yang diajukan.</p>
                 </div>
                 <div class="space-y-1.5">
                   <label class="block text-xs font-semibold text-slate-700 tracking-wide">Ringkasan Isi Surat <span class="text-blue-400">*</span></label>
                   <textarea name="ringkasan" rows="5" placeholder="Tuliskan ringkasan isi surat secara singkat dan jelas..."
-                    class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none"></textarea>
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('ringkasan') }}</textarea>
                   <p class="text-[10px] text-slate-400 font-light">Ringkasan ini membantu Admin/TU memahami isi surat sebelum memeriksa file DOCX.</p>
                 </div>
                 <div class="flex items-center justify-between pt-2">
@@ -114,7 +117,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" /></svg>
                     Kembali
                   </button>
-                  <button id="surat-submit-btn" type="button"
+                  <button id="surat-submit-btn" type="submit"
                     class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
                     Ajukan Surat
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
@@ -125,12 +128,6 @@
 
           </div>
         </div>
-
-
-        {{-- ============================================================
-             PAGE: BUAT PENGAJUAN SK — 3 STEP WIZARD
-        ============================================================ --}}
       </main>
     </div>
 @include('template.footer')
-

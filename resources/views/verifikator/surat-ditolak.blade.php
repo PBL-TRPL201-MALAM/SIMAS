@@ -19,7 +19,10 @@
       </header>
       <main class="flex-1 overflow-y-auto p-6">
         <div id="page-surat-ditolak" class="page-content space-y-4">
-          <h2 class="text-sm font-bold text-slate-900">Surat yang Ditolak</h2>
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-900">Surat yang Ditolak</h2>
+            <span class="text-[11px] font-medium text-red-600 bg-red-50 border border-red-100 px-3 py-1 rounded-full">{{ $suratDitolak->count() }} dokumen</span>
+          </div>
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full">
@@ -32,23 +35,23 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[160px]">Permohonan Surat Keterangan</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600">Hendra</p></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">03 Apr 2025</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-500 font-light max-w-[200px]">Format surat tidak sesuai standar Polibatam.</p></td>
-                  </tr>
+                  @forelse ($suratDitolak as $item)
+                    <tr class="hover:bg-slate-50/40 transition-colors duration-150">
+                      <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[200px]">{{ $item->dokumen->suratBiasa?->hal ?? '-' }}</p></td>
+                      <td class="px-5 py-3.5"><p class="text-xs text-slate-600">{{ $item->dokumen->pemohon?->nama ?? '-' }}</p></td>
+                      <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->verified_at)->format('d M Y H:i') ?? '-' }}</p></td>
+                      <td class="px-5 py-3.5"><p class="text-xs text-slate-500 font-light max-w-[260px]">{{ $item->catatan ?? '-' }}</p></td>
+                    </tr>
+                  @empty
+                    <tr>
+                      <td colspan="4" class="px-5 py-8 text-center text-xs text-slate-400">Belum ada surat yang Anda tolak.</td>
+                    </tr>
+                  @endforelse
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-
-
-        {{-- ============================================================
-             PAGE: SEMUA SURAT
-        ============================================================ --}}
       </main>
     </div>
 @include('template.footer')
-

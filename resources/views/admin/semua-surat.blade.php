@@ -3,7 +3,6 @@
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
-      {{-- Topbar --}}
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -45,54 +44,106 @@
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Perihal</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Nomor Surat</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Status</th>
+                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Tanggal Pengajuan</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Aksi</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-50">
+                <tbody id="tbody-pengajuan" class="divide-y divide-slate-50">
+                  @forelse ($suratList as $dokumen)
+                    @php
+                      $status = $dokumen->status_dokumen;
+                      $statusLabel = ucwords(strtolower(str_replace('_', ' ', $status)));
+                      $filterStatus = match ($status) {
+                          'DIAJUKAN' => 'diajukan',
+                          'DIPROSES', 'DITOLAK', 'PERLU_REVISI' => 'diproses',
+                          'MENUNGGU_VERIFIKASI' => 'verifikasi',
+                          'SIAP_PUBLISH', 'PUBLISHED' => 'published',
+                          default => 'semua',
+                      };
+                      $hasPreviewablePdf = $dokumen->dokumenFiles->contains(
+                          fn ($file) => in_array($file->file_type, ['FINAL_PDF', 'PREVIEW_VERIFIKASI_PDF', 'HASIL_PEMERIKSAAN_PDF'], true)
+                      );
+                      $latestRejectedVerification = $dokumen->verifikasi
+                          ->first(fn ($verifikasi) => $verifikasi->status_verifikasi === 'DITOLAK' && filled($verifikasi->catatan));
+                      $badgeClasses = match ($status) {
+                          'DIAJUKAN' => 'text-blue-600 bg-blue-50',
+                          'DIPROSES' => 'text-amber-600 bg-amber-50',
+                          'MENUNGGU_VERIFIKASI' => 'text-violet-600 bg-violet-50',
+                          'SIAP_PUBLISH' => 'text-emerald-600 bg-emerald-50',
+                          'PUBLISHED' => 'text-slate-600 bg-slate-100',
+                          'PERLU_REVISI', 'DITOLAK' => 'text-red-600 bg-red-50',
+                          default => 'text-slate-600 bg-slate-100',
+                      };
+                    @endphp
+                    <tr class="doc-row hover:bg-slate-50/40 transition-colors duration-150" data-filter-status="{{ $filterStatus }}">
+                      <td class="px-5 py-3.5">
+                        <p class="text-xs font-medium text-slate-800">{{ $dokumen->pemohon?->nama ?? '-' }}</p>
+                      </td>
+                      <td class="px-5 py-3.5">
+                        <p class="text-xs text-slate-600 max-w-[220px]">{{ $dokumen->suratBiasa?->hal ?? '-' }}</p>
+                      </td>
+                      <td class="px-5 py-3.5">
+                        <p class="text-[11px] text-slate-500 font-light">{{ $dokumen->suratBiasa?->nomor_surat ?? '-' }}</p>
+                      </td>
+                      <td class="px-5 py-3.5">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full {{ $badgeClasses }}">
+                          <span class="w-1 h-1 rounded-full bg-current opacity-70"></span>{{ $statusLabel }}
+                        </span>
+                      </td>
+                      <td class="px-5 py-3.5">
+                        <p class="text-[11px] text-slate-500 font-light">{{ optional($dokumen->created_at)->format('d M Y H:i') ?? '-' }}</p>
+                      </td>
+                      <td class="px-5 py-3.5">
+                        <div class="flex flex-wrap items-center gap-2">
+                          @if ($status === 'DIAJUKAN')
+                            <a href="{{ route('admin.proses-surat', ['dokumen' => $dokumen->dokumen_id, 'step' => 1]) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
+                          @elseif ($status === 'MENUNGGU_VERIFIKASI')
+                            <a href="{{ route('admin.proses-surat', ['dokumen' => $dokumen->dokumen_id, 'step' => 3]) }}" class="inline-flex items-center text-[11px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-all duration-200">Lihat</a>
+                          @elseif ($status === 'SIAP_PUBLISH')
+                            <form action="{{ route('admin.surat.publish', $dokumen) }}" method="POST" class="inline-flex">
+                              @csrf
+                              <button type="submit" class="inline-flex items-center text-[11px] font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-all duration-200">Publish</button>
+                            </form>
+                          @elseif ($status === 'PUBLISHED')
+                            @if ($hasPreviewablePdf)
+                              <a href="{{ route('admin.semua-surat.preview-final', $dokumen) }}" target="_blank" class="inline-flex items-center text-[11px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-all duration-200">Lihat</a>
+                              <a href="{{ route('admin.semua-surat.download-final', $dokumen) }}" class="inline-flex items-center text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-all duration-200">Unduh Final</a>
+                            @else
+                              <span class="inline-flex items-center text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">File final belum ada</span>
+                            @endif
+                          @else
+                            <a href="{{ route('admin.proses-surat', ['dokumen' => $dokumen->dokumen_id, 'step' => $status === 'DIPROSES' ? 2 : 1]) }}" class="inline-flex items-center text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-all duration-200">Lihat</a>
+                          @endif
+                        </div>
 
-                  @foreach($suratList ?? [] as $item)
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150"
-                    data-filter-status="{{ strtolower($item->status) }}">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">{{ $item->pemohon }}</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[160px]">{{ $item->perihal }}</p></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ $item->nomor_surat ?? '—' }}</p></td>
-                    <td class="px-5 py-3.5">
-                      @if(strtolower($item->status) === 'diajukan')
-                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span>
-                      @elseif(strtolower($item->status) === 'published')
-                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-slate-400"></span>Published</span>
-                      @else
-                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-slate-400"></span>{{ $item->status }}</span>
-                      @endif
-                    </td>
-                    <td class="px-5 py-3.5">
-                      @if(strtolower($item->status) === 'diajukan')
-                        <a href="{{ route('admin.proses-surat', ['perihal' => $item->perihal, 'pemohon' => $item->pemohon]) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
-                      @else
-                        <button type="button" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Lihat</button>
-                      @endif
-                    </td>
-                  </tr>
-                  @endforeach
-
-                  {{-- Fallback data statis --}}
-                  @if(empty($suratList) || count($suratList) === 0)
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">Ahmad Fauzi</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[160px]">Permohonan Izin Penelitian</p></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">—</p></td>
-                    <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span></td>
-                    <td class="px-5 py-3.5"><a href="{{ route('admin.proses-surat', ['perihal' => 'Permohonan Izin Penelitian', 'pemohon' => 'Ahmad Fauzi']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a></td>
-                  </tr>
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">Rina Dewi</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[160px]">Surat Keterangan Aktif Kuliah</p></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">001/SIMAS/TU/2025</p></td>
-                    <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-slate-400"></span>Published</span></td>
-                    <td class="px-5 py-3.5"><button type="button" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Lihat</button></td>
-                  </tr>
-                  @endif
-
+                        @if (in_array($status, ['PERLU_REVISI', 'DITOLAK'], true) && $latestRejectedVerification)
+                          <details class="mt-2 group">
+                            <summary class="list-none inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium text-red-600 hover:text-red-700">
+                              <span>Lihat Catatan</span>
+                              <svg class="h-3.5 w-3.5 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </summary>
+                            <div class="mt-2 rounded-xl border border-red-100 bg-red-50/70 px-3 py-2.5">
+                              <p class="text-[10px] font-semibold uppercase tracking-wider text-red-500">
+                                Level {{ $latestRejectedVerification->level }} | {{ $latestRejectedVerification->verifikator?->nama ?? 'Verifikator' }}
+                              </p>
+                              <p class="mt-1 text-[11px] font-light leading-relaxed text-red-700">
+                                {{ $latestRejectedVerification->catatan }}
+                              </p>
+                            </div>
+                          </details>
+                        @endif
+                      </td>
+                    </tr>
+                  @empty
+                    <tr>
+                      <td colspan="6" class="px-5 py-12 text-center">
+                        <p class="text-sm font-semibold text-slate-600">Belum ada data surat biasa.</p>
+                        <p class="mt-1 text-[11px] font-light text-slate-400">Data pengajuan akan muncul di sini setelah pemohon mengirim surat.</p>
+                      </td>
+                    </tr>
+                  @endforelse
                 </tbody>
               </table>
             </div>
@@ -103,4 +154,3 @@
     </div>
 
 @include('template.footer')
-

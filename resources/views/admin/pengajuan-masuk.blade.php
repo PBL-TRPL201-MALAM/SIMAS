@@ -41,73 +41,59 @@
                   <tr class="bg-slate-50/60 border-b border-slate-100">
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Pemohon</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Perihal</th>
+                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Ringkasan</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Tanggal</th>
+                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Draft DOCX</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Status</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Aksi</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50" id="tbody-pengajuan">
-
-                  @foreach($pengajuan ?? [] as $item)
+                  @forelse($pengajuan ?? [] as $item)
+                  @php($draftFile = $item->dokumenFiles->first())
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row"
-                    data-filter-status="{{ strtolower($item->status) }}"
-                    data-jenis="{{ $item->jenis }}"
-                    data-perihal="{{ $item->perihal }}"
-                    data-pemohon="{{ $item->pemohon }}"
-                    data-tanggal="{{ $item->tanggal }}"
-                    data-status="{{ $item->status }}"
-                    data-ringkasan="{{ $item->ringkasan }}">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">{{ $item->pemohon }}</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[180px]">{{ $item->perihal }}</p></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ $item->tanggal }}</p></td>
+                    data-dokumen-id="{{ $item->dokumen_id }}"
+                    data-filter-status="{{ strtolower($item->status_dokumen) }}"
+                    data-jenis="Surat Biasa"
+                    data-perihal="{{ $item->suratBiasa?->hal ?? '-' }}"
+                    data-pemohon="{{ $item->pemohon?->nama ?? '-' }}"
+                    data-tanggal="{{ optional($item->created_at)->format('d M Y') }}"
+                    data-status="{{ $item->status_dokumen }}"
+                    data-ringkasan="{{ $item->suratBiasa?->ringkasan_isi ?? '-' }}">
+                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">{{ $item->pemohon?->nama ?? '-' }}</p></td>
+                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[180px]">{{ $item->suratBiasa?->hal ?? '-' }}</p></td>
+                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-500 max-w-[220px]">{{ \Illuminate\Support\Str::limit($item->suratBiasa?->ringkasan_isi ?? '-', 80) }}</p></td>
+                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->created_at)->format('d M Y') }}</p></td>
                     <td class="px-5 py-3.5">
-                      @if(strtolower($item->status) === 'diajukan')
+                      @if($draftFile)
+                        <p class="text-[11px] text-slate-600 max-w-[160px] truncate">{{ $draftFile->file_name }}</p>
+                      @else
+                        <p class="text-[11px] text-slate-400">Tidak ada file</p>
+                      @endif
+                    </td>
+                    <td class="px-5 py-3.5">
+                      @if(strtolower($item->status_dokumen) === 'diajukan')
                         <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span>
                       @else
-                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-slate-400"></span>{{ $item->status }}</span>
+                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-slate-400"></span>{{ $item->status_dokumen }}</span>
                       @endif
                     </td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
-                      <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      @if(strtolower($item->status) === 'diajukan')
-                      <a href="{{ route('admin.proses-surat', ['perihal' => $item->perihal, 'pemohon' => $item->pemohon]) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
+                      <button type="button"
+                        class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                        data-download-url="{{ $draftFile ? route('admin.pengajuan-masuk.download-docx', $item->dokumen_id) : '' }}">
+                        Detail
+                      </button>
+                      @if(strtolower($item->status_dokumen) === 'diajukan')
+                      <a href="{{ route('admin.proses-surat', ['dokumen' => $item->dokumen_id]) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses Surat</a>
                       @endif
                     </td>
                   </tr>
-                  @endforeach
-
-                  {{-- Fallback data statis --}}
-                  @if(empty($pengajuan) || count($pengajuan) === 0)
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-filter-status="diajukan" data-jenis="Surat Biasa" data-perihal="Permohonan Izin Penelitian" data-pemohon="Ahmad Fauzi" data-tanggal="10 Apr 2025" data-status="Diajukan" data-ringkasan="Pemohon mengajukan izin penelitian untuk keperluan tugas akhir di wilayah Batam.">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">Ahmad Fauzi</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[180px]">Permohonan Izin Penelitian</p></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">10 Apr 2025</p></td>
-                    <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span></td>
-                    <td class="px-5 py-3.5 flex items-center gap-2">
-                      <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <a href="{{ route('admin.proses-surat', ['perihal' => 'Permohonan Izin Penelitian', 'pemohon' => 'Ahmad Fauzi']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
-                    </td>
+                  @empty
+                  <tr>
+                    <td colspan="7" class="px-5 py-8 text-center text-xs text-slate-400">Belum ada pengajuan surat biasa dengan status diajukan.</td>
                   </tr>
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-filter-status="diajukan" data-jenis="Surat Biasa" data-perihal="Permohonan Izin Magang" data-pemohon="Siti Rahma" data-tanggal="09 Apr 2025" data-status="Diajukan" data-ringkasan="Pemohon mengajukan surat izin magang di perusahaan teknologi selama 3 bulan.">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">Siti Rahma</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[180px]">Permohonan Izin Magang</p></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">09 Apr 2025</p></td>
-                    <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span></td>
-                    <td class="px-5 py-3.5 flex items-center gap-2">
-                      <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                      <a href="{{ route('admin.proses-surat', ['perihal' => 'Permohonan Izin Magang', 'pemohon' => 'Siti Rahma']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row" data-filter-status="diproses" data-jenis="Surat Biasa" data-perihal="Surat Keterangan Aktif Kuliah" data-pemohon="Rina Dewi" data-tanggal="07 Apr 2025" data-status="Diproses" data-ringkasan="Surat keterangan mahasiswa aktif untuk keperluan beasiswa.">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">Rina Dewi</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600 max-w-[180px]">Surat Keterangan Aktif Kuliah</p></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">07 Apr 2025</p></td>
-                    <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-slate-400"></span>Diproses</span></td>
-                    <td class="px-5 py-3.5 flex items-center gap-2">
-                      <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                    </td>
-                  </tr>
-                  @endif
+                  @endforelse
 
                 </tbody>
               </table>

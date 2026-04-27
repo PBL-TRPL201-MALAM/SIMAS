@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalClose      = document.getElementById('modal-close');
   const modalCloseBtn   = document.getElementById('modal-close-btn');
   const modalDownload   = document.getElementById('modal-download-btn');
+  let activeDownloadUrl = '';
 
   const openModal = (data) => {
     if (!modalOverlay) return;
@@ -92,7 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Tampilkan tombol unduh hanya jika Published
     if (modalDownload) {
-      if (data.status === 'published') {
+      activeDownloadUrl = data.downloadUrl || '';
+      modalDownload.dataset.downloadUrl = activeDownloadUrl;
+      if (data.status === 'published' && activeDownloadUrl) {
         modalDownload.classList.remove('hidden');
       } else {
         modalDownload.classList.add('hidden');
@@ -116,8 +119,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Tombol unduh (simulasi — sambungkan ke route download saat backend siap)
   modalDownload?.addEventListener('click', () => {
+    const downloadUrl = modalDownload.dataset.downloadUrl || activeDownloadUrl;
+    if (!downloadUrl) {
+      showToast('File dokumen belum tersedia untuk diunduh.', 'error');
+      return;
+    }
+
     closeModal();
     showToast('Dokumen sedang diunduh...', 'info');
+    window.location.href = downloadUrl;
   });
 
   // Delegasi event: tombol "Lihat Detail" di semua tabel
@@ -133,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
       nomor      : row.dataset.nomor,
       keterangan : row.dataset.keterangan,
       status     : row.dataset.status,
+      downloadUrl: row.dataset.downloadUrl,
     });
   });
 

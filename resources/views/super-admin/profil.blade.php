@@ -1,4 +1,4 @@
-@include('template.header', ['pageTitle' => 'Profil Super Admin'])
+@include('template.header', ['pageTitle' => 'Detail User'])
 @include('template.super-admin-sidebar')
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -9,23 +9,140 @@
           </svg>
         </button>
         <div>
-          <h1 class="text-sm font-bold text-slate-900">Profil Saya</h1>
-          <p class="text-[11px] text-slate-400 font-light">Informasi akun Super Admin</p>
+          <h1 class="text-sm font-bold text-slate-900">Detail User</h1>
+          <p class="text-[11px] text-slate-400 font-light">Lihat dan ubah data user oleh Super Admin</p>
         </div>
-        <div class="w-9 h-9"></div>
+        <a href="{{ route('super-admin.users.index') }}" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-all duration-200">Kembali</a>
       </header>
 
       <main class="flex-1 overflow-y-auto p-6">
-        <div class="max-w-3xl rounded-2xl bg-white border border-slate-100 p-6">
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center">
-              <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div class="xl:col-span-2 rounded-2xl bg-white border border-slate-100 p-6">
+            <div class="mb-5">
+              <h2 class="text-sm font-semibold text-slate-800">Edit Data User</h2>
+              <p class="text-[11px] text-slate-400 font-light mt-1">Perbarui data akun. Password tidak diubah dari halaman ini.</p>
             </div>
-            <div>
-              <h2 class="text-base font-bold text-slate-900">Super Admin</h2>
-              <p class="text-sm text-slate-500">Halaman profil dipisah agar struktur sidebar dan tampilan konsisten dengan role lain.</p>
+
+            @if (session('status'))
+              <div class="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-700">
+                {{ session('status') }}
+              </div>
+            @endif
+
+            @if ($errors->any())
+              <div class="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
+                {{ $errors->first() }}
+              </div>
+            @endif
+
+            <form action="{{ route('super-admin.users.update', $user) }}" method="POST" class="space-y-5">
+              @csrf
+              @method('PUT')
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-2">Nama Lengkap</label>
+                  <input type="text" name="nama" value="{{ old('nama', $user->nama) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-2">Username</label>
+                  <input type="text" name="username" value="{{ old('username', $user->username) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-2">Email</label>
+                  <input type="email" name="email" value="{{ old('email', $user->email) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-2">Role</label>
+                  <select name="role" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
+                    @foreach ($roles as $role)
+                      <option value="{{ $role }}" {{ old('role', $user->role) === $role ? 'selected' : '' }}>{{ $role }}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-2">Status Akun</label>
+                  <select name="is_active" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
+                    <option value="1" {{ old('is_active', $user->is_active ? '1' : '0') === '1' ? 'selected' : '' }}>Aktif</option>
+                    <option value="0" {{ old('is_active', $user->is_active ? '1' : '0') === '0' ? 'selected' : '' }}>Nonaktif</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-2">NIP / NIK</label>
+                  <input type="text" name="nip_nik" value="{{ old('nip_nik', $user->nip_nik) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-2">Unit Kerja</label>
+                  <input type="text" name="unit_kerja" value="{{ old('unit_kerja', $user->unit_kerja) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-2">Jabatan</label>
+                  <input type="text" name="jabatan" value="{{ old('jabatan', $user->jabatan) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-3">
+                <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700 transition-all duration-200">Simpan Perubahan</button>
+              </div>
+            </form>
+
+            <form action="{{ route('super-admin.users.toggle-status', $user) }}" method="POST" class="mt-3">
+              @csrf
+              @method('PATCH')
+              <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-all duration-200" {{ auth()->id() === $user->user_id && $user->is_active ? 'disabled' : '' }}>
+                {{ $user->is_active ? 'Nonaktifkan User' : 'Aktifkan User' }}
+              </button>
+            </form>
+          </div>
+
+          <div class="space-y-6">
+            <div class="rounded-2xl bg-white border border-slate-100 p-6">
+              <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center">
+                  <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold text-slate-900">{{ $user->nama }}</h2>
+                  <p class="text-sm text-slate-500">{{ $user->email }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-2xl bg-white border border-slate-100 p-5">
+              <h3 class="text-sm font-semibold text-slate-800">Ringkasan User</h3>
+              <div class="mt-4 space-y-3 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Role</span>
+                  <span class="font-medium text-slate-700">{{ $user->role }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Status</span>
+                  <span class="font-medium {{ $user->is_active ? 'text-blue-600' : 'text-slate-500' }}">{{ $user->is_active ? 'Aktif' : 'Nonaktif' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Unit Kerja</span>
+                  <span class="font-medium text-slate-700">{{ $user->unit_kerja ?: '-' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Jabatan</span>
+                  <span class="font-medium text-slate-700">{{ $user->jabatan ?: '-' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Dibuat</span>
+                  <span class="font-medium text-slate-700">{{ optional($user->created_at)->format('d M Y H:i') ?: '-' }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

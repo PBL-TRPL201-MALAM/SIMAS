@@ -10,23 +10,35 @@
           <h1 class="text-sm font-bold text-slate-900">Semua User</h1>
           <p class="text-[11px] text-slate-400 font-light">Daftar akun, status, dan role pengguna</p>
         </div>
-        <a href="{{ route('super-admin.tambah-user') }}" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition-all duration-200">Tambah User</a>
+        <a href="{{ route('super-admin.users.create') }}" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition-all duration-200">Tambah User</a>
       </header>
 
       <main class="flex-1 overflow-y-auto p-6">
         <div class="space-y-6">
+          @if (session('status'))
+            <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-700">
+              {{ session('status') }}
+            </div>
+          @endif
+
+          @if ($errors->has('status'))
+            <div class="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
+              {{ $errors->first('status') }}
+            </div>
+          @endif
+
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="rounded-2xl bg-white border border-slate-100 p-4">
               <p class="text-xs text-slate-400 font-light">User Aktif</p>
-              <p class="text-2xl font-extrabold text-slate-900 mt-2">21</p>
+              <p class="text-2xl font-extrabold text-slate-900 mt-2">{{ $activeCount }}</p>
             </div>
             <div class="rounded-2xl bg-white border border-slate-100 p-4">
               <p class="text-xs text-slate-400 font-light">User Nonaktif</p>
-              <p class="text-2xl font-extrabold text-slate-900 mt-2">3</p>
+              <p class="text-2xl font-extrabold text-slate-900 mt-2">{{ $inactiveCount }}</p>
             </div>
             <div class="rounded-2xl bg-white border border-slate-100 p-4">
               <p class="text-xs text-slate-400 font-light">Role Terbanyak</p>
-              <p class="text-2xl font-extrabold text-slate-900 mt-2">PEMOHON</p>
+              <p class="text-2xl font-extrabold text-slate-900 mt-2">{{ $topRole ?? '-' }}</p>
             </div>
           </div>
 
@@ -37,9 +49,9 @@
                 <p class="text-[11px] text-slate-400 font-light mt-0.5">Super Admin bisa melihat detail, edit, ubah role, dan aktif/nonaktif user.</p>
               </div>
               <div class="flex flex-wrap gap-2">
-                <button type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-500">Semua</button>
-                <button type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-500">Aktif</button>
-                <button type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-500">Nonaktif</button>
+                <a href="{{ route('super-admin.users.index') }}" class="rounded-xl border px-3 py-2 text-xs font-medium {{ $currentStatus === '' ? 'border-blue-200 bg-blue-50 text-blue-600' : 'border-slate-200 text-slate-500' }}">Semua</a>
+                <a href="{{ route('super-admin.users.index', ['status' => 'active']) }}" class="rounded-xl border px-3 py-2 text-xs font-medium {{ $currentStatus === 'active' ? 'border-blue-200 bg-blue-50 text-blue-600' : 'border-slate-200 text-slate-500' }}">Aktif</a>
+                <a href="{{ route('super-admin.users.index', ['status' => 'inactive']) }}" class="rounded-xl border px-3 py-2 text-xs font-medium {{ $currentStatus === 'inactive' ? 'border-blue-200 bg-blue-50 text-blue-600' : 'border-slate-200 text-slate-500' }}">Nonaktif</a>
               </div>
             </div>
             <div class="overflow-x-auto">
@@ -49,65 +61,48 @@
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Nama</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Username</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Role</th>
-                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Unit Kerja</th>
+                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Email</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Status</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Aksi</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                    <td class="px-5 py-3.5"><p class="text-xs font-semibold text-slate-800">Nabila Salsabila</p><p class="text-[11px] text-slate-400">nabila@kampus.ac.id</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600">nabila.sa</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">ADMIN_TU</span></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-500">Akademik</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Aktif</span></td>
-                    <td class="px-5 py-3.5">
-                      <div class="flex flex-wrap gap-2 text-[11px] font-medium">
-                        <a href="{{ route('super-admin.tambah-user') }}" class="text-blue-600 hover:text-blue-700">Edit</a>
-                        <a href="{{ route('super-admin.role-akses') }}" class="text-blue-600 hover:text-blue-700">Ubah Role</a>
-                        <button type="button" class="text-red-500">Nonaktifkan</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                    <td class="px-5 py-3.5"><p class="text-xs font-semibold text-slate-800">Rian Kurniawan</p><p class="text-[11px] text-slate-400">rian@kampus.ac.id</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600">rian.krn</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">VERIFIKATOR</span></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-500">Direktorat</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Aktif</span></td>
-                    <td class="px-5 py-3.5">
-                      <div class="flex flex-wrap gap-2 text-[11px] font-medium">
-                        <a href="{{ route('super-admin.tambah-user') }}" class="text-blue-600 hover:text-blue-700">Detail</a>
-                        <a href="{{ route('super-admin.role-akses') }}" class="text-blue-600 hover:text-blue-700">Ubah Role</a>
-                        <button type="button" class="text-red-500">Nonaktifkan</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                    <td class="px-5 py-3.5"><p class="text-xs font-semibold text-slate-800">Super Admin SIMAS</p><p class="text-[11px] text-slate-400">root@simas.local</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600">superadmin</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">SUPER_ADMIN</span></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-500">Sistem</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">Aktif</span></td>
-                    <td class="px-5 py-3.5">
-                      <div class="flex flex-wrap gap-2 text-[11px] font-medium">
-                        <a href="{{ route('super-admin.role-akses') }}" class="text-blue-600 hover:text-blue-700">Lihat Akses</a>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                    <td class="px-5 py-3.5"><p class="text-xs font-semibold text-slate-800">Dina Oktavia</p><p class="text-[11px] text-slate-400">dina@kampus.ac.id</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600">dina.okt</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">PEMOHON</span></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-500">Mahasiswa</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Nonaktif</span></td>
-                    <td class="px-5 py-3.5">
-                      <div class="flex flex-wrap gap-2 text-[11px] font-medium">
-                        <a href="{{ route('super-admin.tambah-user') }}" class="text-blue-600 hover:text-blue-700">Edit</a>
-                        <button type="button" class="text-blue-600">Aktifkan</button>
-                      </div>
-                    </td>
-                  </tr>
+                  @forelse ($users as $user)
+                    <tr class="hover:bg-slate-50/40 transition-colors duration-150">
+                      <td class="px-5 py-3.5">
+                        <p class="text-xs font-semibold text-slate-800">{{ $user->nama }}</p>
+                        <p class="text-[11px] text-slate-400">{{ $user->unit_kerja ?: '-' }}</p>
+                      </td>
+                      <td class="px-5 py-3.5"><p class="text-xs text-slate-600">{{ $user->username }}</p></td>
+                      <td class="px-5 py-3.5">
+                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {{ $user->role === 'SUPER_ADMIN' ? 'text-slate-700 bg-slate-100' : ($user->role === 'ADMIN_TU' ? 'text-blue-600 bg-blue-50' : ($user->role === 'VERIFIKATOR' ? 'text-amber-600 bg-amber-50' : 'text-indigo-600 bg-indigo-50')) }}">
+                          {{ $user->role }}
+                        </span>
+                      </td>
+                      <td class="px-5 py-3.5"><p class="text-xs text-slate-500">{{ $user->email }}</p></td>
+                      <td class="px-5 py-3.5">
+                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {{ $user->is_active ? 'text-blue-600 bg-blue-50' : 'text-slate-500 bg-slate-100' }}">
+                          {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
+                        </span>
+                      </td>
+                      <td class="px-5 py-3.5">
+                        <div class="flex flex-wrap items-center gap-2 text-[11px] font-medium">
+                          <a href="{{ route('super-admin.users.edit', $user) }}" class="text-blue-600 hover:text-blue-700">Edit</a>
+                          <form action="{{ route('super-admin.users.toggle-status', $user) }}" method="POST">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="{{ $user->is_active ? 'text-red-500' : 'text-blue-600' }}" {{ auth()->id() === $user->user_id && $user->is_active ? 'disabled' : '' }}>
+                              {{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  @empty
+                    <tr>
+                      <td colspan="6" class="px-5 py-8 text-center text-xs text-slate-400">Belum ada user yang sesuai filter.</td>
+                    </tr>
+                  @endforelse
                 </tbody>
               </table>
             </div>

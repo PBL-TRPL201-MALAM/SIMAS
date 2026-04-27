@@ -19,7 +19,10 @@
       </header>
       <main class="flex-1 overflow-y-auto p-6">
         <div id="page-surat-disetujui" class="page-content space-y-4">
-          <h2 class="text-sm font-bold text-slate-900">Surat yang Sudah Disetujui</h2>
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-900">Surat yang Sudah Disetujui</h2>
+            <span class="text-[11px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full">{{ $suratDisetujui->count() }} dokumen</span>
+          </div>
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full">
@@ -33,31 +36,29 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[180px]">Surat Keterangan Mahasiswa Aktif</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600">Dewi Lestari</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level 1</span></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">05 Apr 2025</p></td>
-                    <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-slate-400"></span>Published</span></td>
-                  </tr>
-                  <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                    <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[180px]">Permohonan Surat Pengantar</p></td>
-                    <td class="px-5 py-3.5"><p class="text-xs text-slate-600">Rizki Pratama</p></td>
-                    <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level 2</span></td>
-                    <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">02 Apr 2025</p></td>
-                    <td class="px-5 py-3.5"><span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diproses</span></td>
-                  </tr>
+                  @forelse ($suratDisetujui as $item)
+                    <tr class="hover:bg-slate-50/40 transition-colors duration-150">
+                      <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[220px]">{{ $item->dokumen->suratBiasa?->hal ?? '-' }}</p></td>
+                      <td class="px-5 py-3.5"><p class="text-xs text-slate-600">{{ $item->dokumen->pemohon?->nama ?? '-' }}</p></td>
+                      <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level {{ $item->level }}</span></td>
+                      <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->verified_at)->format('d M Y H:i') ?? '-' }}</p></td>
+                      <td class="px-5 py-3.5">
+                        @php($statusAkhir = $item->dokumen->status_dokumen)
+                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold {{ $statusAkhir === 'SIAP_PUBLISH' ? 'text-emerald-600 bg-emerald-50' : 'text-blue-600 bg-blue-50' }} px-2 py-0.5 rounded-full">
+                          <span class="w-1 h-1 rounded-full {{ $statusAkhir === 'SIAP_PUBLISH' ? 'bg-emerald-500' : 'bg-blue-500' }}"></span>{{ $statusAkhir }}
+                        </span>
+                      </td>
+                    </tr>
+                  @empty
+                    <tr>
+                      <td colspan="5" class="px-5 py-8 text-center text-xs text-slate-400">Belum ada surat yang Anda setujui.</td>
+                    </tr>
+                  @endforelse
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-
-
-        {{-- ============================================================
-             PAGE: SURAT DITOLAK
-        ============================================================ --}}
       </main>
     </div>
 @include('template.footer')
-

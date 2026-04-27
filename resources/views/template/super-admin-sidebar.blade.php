@@ -27,19 +27,19 @@
       <p class="px-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Manajemen User</p>
     </div>
 
-    <a href="{{ route('super-admin.semua-user') }}"
-       class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ request()->routeIs('super-admin.semua-user') ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
+    <a href="{{ route('super-admin.users.index') }}"
+       class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ request()->routeIs('super-admin.users.index') || request()->routeIs('super-admin.semua-user') ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
       <div class="flex items-center gap-3">
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5V4H2v16h5m10 0v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2m12 0H7m10-11a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
         <span>Semua User</span>
       </div>
-      <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full {{ request()->routeIs('super-admin.semua-user') ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600' }}">24</span>
+      <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full {{ request()->routeIs('super-admin.users.index') || request()->routeIs('super-admin.semua-user') ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600' }}">{{ \App\Models\User::count() }}</span>
     </a>
 
-    <a href="{{ route('super-admin.tambah-user') }}"
-       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ request()->routeIs('super-admin.tambah-user') ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
+    <a href="{{ route('super-admin.users.create') }}"
+       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ request()->routeIs('super-admin.users.create') || request()->routeIs('super-admin.tambah-user') ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
       <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v6m3-3h-6M5 20h6a2 2 0 002-2v-1a4 4 0 00-4-4H7a4 4 0 00-4 4v1a2 2 0 002 2zm7-13a4 4 0 11-8 0 4 4 0 018 0z" />
       </svg>
@@ -105,13 +105,17 @@
       <span>Profil Saya</span>
     </a>
 
-    <a href="{{ route('login') }}"
-       class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-500 transition-all duration-200">
-      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a2 2 0 013 3v1" />
-      </svg>
-      <span>Keluar</span>
-    </a>
+    <form action="{{ route('logout') }}" method="POST" class="w-full">
+      @csrf
+
+      <button type="submit"
+          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-500 transition-all duration-200">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          <span>Keluar</span>
+      </button>
+    </form>
+    
   </div>
 </aside>
-
