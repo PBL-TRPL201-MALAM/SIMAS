@@ -128,14 +128,39 @@
                   </div>
 
                   <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Jenis Surat <span class="text-blue-400">*</span></label>
-                    <select name="jenis_surat" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
-                      <option value="" disabled {{ old('jenis_surat', $dokumen->suratBiasa?->jenis_surat) ? '' : 'selected' }}>Pilih jenis surat</option>
-                      @foreach (['Surat Keterangan', 'Surat Permohonan', 'Surat Izin', 'Surat Pengantar', 'Surat Tugas'] as $jenisSurat)
-                        <option value="{{ $jenisSurat }}" @selected(old('jenis_surat', $dokumen->suratBiasa?->jenis_surat) === $jenisSurat)>{{ $jenisSurat }}</option>
-                      @endforeach
+                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">
+                        Jenis Surat <span class="text-blue-400">*</span>
+                    </label>
+
+                    <select name="jenis_surat"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
+
+                        <option value="" disabled {{ old('jenis_surat', $dokumen->suratBiasa?->jenis_surat) ? '' : 'selected' }}>
+                            Pilih jenis surat
+                        </option>
+
+                        @foreach ([
+                            'Surat Undangan',
+                            'Surat Tugas',
+                            'Surat Pengantar',
+                            'Surat Pernyataan',
+                            'Surat Keterangan',
+                            'Surat Rekomendasi',
+                            'Surat Perintah',
+                            'Surat Kuasa',
+                            'Berita Acara',
+                            'Pengumuman',
+                            'Sertifikat',
+                            'Nota Dinas',
+                            'Surat Pernyataan Rencana Penempatan',
+                        ] as $jenisSurat)
+                            <option value="{{ $jenisSurat }}" @selected(old('jenis_surat', $dokumen->suratBiasa?->jenis_surat) === $jenisSurat)>
+                                {{ $jenisSurat }}
+                            </option>
+                        @endforeach
+
                     </select>
-                  </div>
+                </div>
 
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Sifat Surat <span class="text-blue-400">*</span></label>
