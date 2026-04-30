@@ -14,6 +14,7 @@
 
   <nav class="flex-1 px-3 py-4 space-y-0.5">
     <p class="px-2 pb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Menu Utama</p>
+    @php($sidebarStats = $sidebarStats ?? ['user_count' => 0])
 
     <a href="{{ route('super-admin.dashboard') }}"
        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ request()->routeIs('super-admin.dashboard') ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
@@ -35,7 +36,7 @@
         </svg>
         <span>Semua User</span>
       </div>
-      <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full {{ request()->routeIs('super-admin.users.index') || request()->routeIs('super-admin.semua-user') ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600' }}">{{ \App\Models\User::count() }}</span>
+      <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full {{ request()->routeIs('super-admin.users.index') || request()->routeIs('super-admin.semua-user') ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600' }}">{{ $sidebarStats['user_count'] }}</span>
     </a>
 
     <a href="{{ route('super-admin.users.create') }}"

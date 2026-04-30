@@ -10,6 +10,7 @@
   </div>
 
   @php($activePage = $activePage ?? '')
+  @php($sidebarStats = $sidebarStats ?? ['surat_menunggu_count' => 0, 'sk_menunggu_count' => 0])
   <nav class="flex-1 px-3 py-4 space-y-0.5">
     <p class="px-2 pb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Menu Utama</p>
 
@@ -24,7 +25,7 @@
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         <span>Menunggu</span>
       </div>
-      <span class="text-[10px] font-semibold {{ $activePage === 'surat-menunggu' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600' }} px-1.5 py-0.5 rounded-full">3</span>
+      <span class="text-[10px] font-semibold {{ $activePage === 'surat-menunggu' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600' }} px-1.5 py-0.5 rounded-full">{{ $sidebarStats['surat_menunggu_count'] }}</span>
     </a>
     <a href="{{ route('verifikator.surat-disetujui') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $activePage === 'surat-disetujui' ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
       <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -45,7 +46,7 @@
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         <span>Menunggu</span>
       </div>
-      <span class="text-[10px] font-semibold {{ $activePage === 'sk-menunggu' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600' }} px-1.5 py-0.5 rounded-full">2</span>
+      <span class="text-[10px] font-semibold {{ $activePage === 'sk-menunggu' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600' }} px-1.5 py-0.5 rounded-full">{{ $sidebarStats['sk_menunggu_count'] }}</span>
     </a>
     <a href="{{ route('verifikator.sk-disetujui') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $activePage === 'sk-disetujui' ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
       <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -79,4 +80,3 @@
     </form>
   </div>
 </aside>
-

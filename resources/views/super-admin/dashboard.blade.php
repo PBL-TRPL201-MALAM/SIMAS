@@ -40,7 +40,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5V4H2v16h5m10 0v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2m12 0H7m10-11a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
-              <p class="text-2xl font-extrabold text-slate-900">24</p>
+              <p class="text-2xl font-extrabold text-slate-900">{{ $stats['total_user'] }}</p>
               <p class="text-xs text-slate-400 font-light mt-0.5">Total User</p>
             </div>
             <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/70 transition-all duration-300">
@@ -49,7 +49,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p class="text-2xl font-extrabold text-slate-900">186</p>
+              <p class="text-2xl font-extrabold text-slate-900">{{ $stats['total_dokumen'] }}</p>
               <p class="text-xs text-slate-400 font-light mt-0.5">Total Dokumen</p>
             </div>
             <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/70 transition-all duration-300">
@@ -58,7 +58,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p class="text-2xl font-extrabold text-slate-900">132</p>
+              <p class="text-2xl font-extrabold text-slate-900">{{ $stats['published'] }}</p>
               <p class="text-xs text-slate-400 font-light mt-0.5">Dokumen Published</p>
             </div>
             <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/70 transition-all duration-300">
@@ -67,7 +67,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p class="text-2xl font-extrabold text-slate-900">21</p>
+              <p class="text-2xl font-extrabold text-slate-900">{{ $stats['pending'] }}</p>
               <p class="text-xs text-slate-400 font-light mt-0.5">Dokumen Pending</p>
             </div>
           </div>
@@ -82,36 +82,28 @@
                 <a href="{{ route('super-admin.log-aktivitas') }}" class="text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200">Buka log</a>
               </div>
               <div class="divide-y divide-slate-100">
-                <div class="px-5 py-4 flex items-start gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v6m3-3h-6M5 20h6a2 2 0 002-2v-1a4 4 0 00-4-4H7a4 4 0 00-4 4v1a2 2 0 002 2zm7-13a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                @forelse ($recentActivities as $activity)
+                  @php
+                    $judul = $activity->dokumen?->jenis_dokumen === 'SURAT_KEPUTUSAN'
+                        ? ($activity->dokumen?->suratKeputusan?->judul_sk ?: $activity->dokumen?->suratKeputusan?->tentang ?: 'Dokumen')
+                        : ($activity->dokumen?->suratBiasa?->hal ?: 'Dokumen');
+                  @endphp
+                  <div class="px-5 py-4 flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                      <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" /></svg>
+                    </div>
+                    <div class="min-w-0">
+                      <p class="text-sm font-semibold text-slate-800">{{ $activity->aksi }}</p>
+                      <p class="text-xs text-slate-500 font-light mt-1">{{ $judul }}</p>
+                      <p class="text-[11px] text-slate-400 mt-1.5">{{ optional($activity->created_at)->format('d M Y, H:i') }}</p>
+                    </div>
                   </div>
-                  <div class="min-w-0">
-                    <p class="text-sm font-semibold text-slate-800">User baru ditambahkan</p>
-                    <p class="text-xs text-slate-500 font-light mt-1">Akun verifikator atas nama Nur Aisyah dibuat oleh Super Admin.</p>
-                    <p class="text-[11px] text-slate-400 mt-1.5">24 April 2026, 09:10</p>
+                @empty
+                  <div class="px-5 py-10 text-center">
+                    <p class="text-sm font-semibold text-slate-600">Belum ada aktivitas sistem.</p>
+                    <p class="text-[11px] text-slate-400 font-light mt-1">Riwayat perubahan akan tampil di sini setelah ada proses dokumen atau perubahan data.</p>
                   </div>
-                </div>
-                <div class="px-5 py-4 flex items-start gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4 6 4v14M9 9h.01M9 12h.01M9 15h.01M15 9h.01M15 12h.01M15 15h.01" /></svg>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="text-sm font-semibold text-slate-800">Unit kerja diperbarui</p>
-                    <p class="text-xs text-slate-500 font-light mt-1">Data unit kerja "Akademik" ditandai aktif kembali untuk proses dokumen.</p>
-                    <p class="text-[11px] text-slate-400 mt-1.5">24 April 2026, 08:42</p>
-                  </div>
-                </div>
-                <div class="px-5 py-4 flex items-start gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
-                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="text-sm font-semibold text-slate-800">Dokumen pending meningkat</p>
-                    <p class="text-xs text-slate-500 font-light mt-1">Ada 5 dokumen baru yang belum selesai diverifikasi pada shift pagi.</p>
-                    <p class="text-[11px] text-slate-400 mt-1.5">24 April 2026, 08:15</p>
-                  </div>
-                </div>
+                @endforelse
               </div>
             </div>
 
@@ -121,42 +113,23 @@
                 <p class="text-[11px] text-slate-400 font-light mt-0.5">Komposisi user aktif dalam sistem</p>
               </div>
               <div class="space-y-3">
-                <div>
-                  <div class="flex items-center justify-between text-xs mb-1">
-                    <span class="font-medium text-slate-700">Pemohon</span>
-                    <span class="text-slate-400">12 user</span>
+                @foreach ($roleDistribution as $item)
+                  <div>
+                    <div class="flex items-center justify-between text-xs mb-1">
+                      <span class="font-medium text-slate-700">{{ $item['label'] }}</span>
+                      <span class="text-slate-400">{{ $item['total'] }} user</span>
+                    </div>
+                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full {{ $loop->last ? 'bg-slate-700' : ($loop->iteration === 3 ? 'bg-amber-500' : 'bg-blue-500') }}" style="width: {{ max(4, $item['percentage']) }}%"></div></div>
                   </div>
-                  <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full w-[50%] bg-blue-500 rounded-full"></div></div>
-                </div>
-                <div>
-                  <div class="flex items-center justify-between text-xs mb-1">
-                    <span class="font-medium text-slate-700">Admin / TU</span>
-                    <span class="text-slate-400">5 user</span>
-                  </div>
-                  <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full w-[22%] bg-blue-500 rounded-full"></div></div>
-                </div>
-                <div>
-                  <div class="flex items-center justify-between text-xs mb-1">
-                    <span class="font-medium text-slate-700">Verifikator</span>
-                    <span class="text-slate-400">6 user</span>
-                  </div>
-                  <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full w-[28%] bg-amber-500 rounded-full"></div></div>
-                </div>
-                <div>
-                  <div class="flex items-center justify-between text-xs mb-1">
-                    <span class="font-medium text-slate-700">Super Admin</span>
-                    <span class="text-slate-400">1 user</span>
-                  </div>
-                  <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full w-[10%] bg-slate-700 rounded-full"></div></div>
-                </div>
+                @endforeach
               </div>
 
               <div class="rounded-2xl bg-slate-50 p-4">
                 <h4 class="text-xs font-semibold text-slate-700">Fokus hari ini</h4>
                 <ul class="mt-3 space-y-2 text-xs text-slate-500 font-light">
-                  <li>Periksa akun yang belum aktif dalam 7 hari terakhir.</li>
-                  <li>Tinjau dokumen pending lebih dari 2 hari.</li>
-                  <li>Validasi unit kerja dan jabatan yang baru ditambahkan.</li>
+                  <li>Total user aktif: {{ $stats['total_user'] }} akun.</li>
+                  <li>Dokumen pending saat ini: {{ $stats['pending'] }} dokumen.</li>
+                  <li>Dokumen yang sudah published: {{ $stats['published'] }} dokumen.</li>
                 </ul>
               </div>
             </div>
@@ -166,4 +139,3 @@
     </div>
 
 @include('template.footer')
-

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminProsesSuratController;
 use App\Http\Controllers\AdminSemuaSuratController;
 use App\Http\Controllers\AdminSuratMasukController;
@@ -37,9 +38,7 @@ Route::middleware('auth')->group(function () {
 
 // admin
 Route::middleware(['auth', 'role:ADMIN_TU'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
 
     Route::get('/pengajuan-masuk', [AdminSuratMasukController::class, 'index'])->name('pengajuan-masuk');
     Route::get('/pengajuan-masuk/{dokumen}/download-draft', [AdminSuratMasukController::class, 'downloadDraft'])->name('pengajuan-masuk.download-docx');
@@ -78,9 +77,7 @@ Route::middleware(['auth', 'role:ADMIN_TU'])->prefix('admin')->name('admin.')->g
 
 // pemohon
 Route::middleware(['auth', 'role:PEMOHON'])->prefix('pemohon')->name('pemohon.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('pemohon.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'pemohon'])->name('dashboard');
 
     Route::get('/buat-surat', [PemohonSuratController::class, 'create'])->name('buat-surat');
     Route::post('/buat-surat', [PemohonSuratController::class, 'store'])->name('surat.store');
@@ -103,9 +100,7 @@ Route::middleware(['auth', 'role:PEMOHON'])->prefix('pemohon')->name('pemohon.')
 
 // verifikator
 Route::middleware(['auth', 'role:VERIFIKATOR'])->prefix('verifikator')->name('verifikator.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('verifikator.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'verifikator'])->name('dashboard');
 
     Route::get('/surat-menunggu', [VerifikatorSuratController::class, 'menunggu'])->name('surat-menunggu');
     Route::get('/surat/{dokumen}/detail', [VerifikatorSuratController::class, 'detailSurat'])->name('surat.detail');
@@ -143,9 +138,7 @@ Route::middleware(['auth', 'role:VERIFIKATOR'])->prefix('verifikator')->name('ve
 
 // super admin
 Route::middleware(['auth', 'role:SUPER_ADMIN'])->prefix('super-admin')->name('super-admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('super-admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'superAdmin'])->name('dashboard');
 
     Route::prefix('users')->name('users.')->controller(UserController::class)->group(function () {
         Route::get('/', 'index')->name('index');

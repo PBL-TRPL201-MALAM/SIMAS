@@ -14,6 +14,7 @@
 
   <nav class="flex-1 px-3 py-4 space-y-0.5">
     <p class="px-2 pb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Menu Utama</p>
+    @php($sidebarStats = $sidebarStats ?? ['pengajuan_surat_count' => 0, 'pengajuan_sk_count' => 0])
 
     <a href="{{ route('admin.dashboard') }}"
        class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ request()->routeIs('admin.dashboard') ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
@@ -35,7 +36,7 @@
         </svg>
         <span>Pengajuan Masuk</span>
       </div>
-      <span class="text-[10px] font-semibold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">4</span>
+      <span class="text-[10px] font-semibold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">{{ $sidebarStats['pengajuan_surat_count'] }}</span>
     </a>
 
     <a href="{{ route('admin.semua-surat') }}"
@@ -58,7 +59,7 @@
         </svg>
         <span>Pengajuan SK Masuk</span>
       </div>
-      <span class="text-[10px] font-semibold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">2</span>
+      <span class="text-[10px] font-semibold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">{{ $sidebarStats['pengajuan_sk_count'] }}</span>
     </a>
 
     <a href="{{ route('admin.semua-sk') }}"
@@ -104,4 +105,3 @@
     </form>
   </div>
 </aside>
-
