@@ -163,7 +163,7 @@
 
           </form>
 
-          <p class="mt-8 text-center text-[11px] text-slate-300 font-light">&copy; 2025 SIMAS · Politeknik Negeri Batam</p>
+          <p class="mt-8 text-center text-[11px] text-slate-300 font-light">&copy; 2026 SIMAS · Politeknik Negeri Batam</p>
 
         </div>
       </div>
