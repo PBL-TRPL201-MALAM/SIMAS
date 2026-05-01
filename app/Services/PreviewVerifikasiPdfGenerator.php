@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Dokumen;
 use App\Models\PosisiElemenDokumen;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
@@ -151,7 +152,9 @@ class PreviewVerifikasiPdfGenerator
             }
 
             if ($position->elemen === 'tanggal_surat') {
-                $text = optional($dokumen->suratBiasa?->tanggal_surat)->format('d/m/Y') ?: 'Tanggal Surat';
+                $text = $dokumen->suratBiasa?->tanggal_surat
+                    ? Carbon::parse($dokumen->suratBiasa->tanggal_surat)->locale('id')->translatedFormat('d/F/Y')
+                    : 'Tanggal Surat';
                 $parts[] = $this->textCommand($text, $x, $y + max(10, $heightPt / 3), 11);
                 continue;
             }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Dokumen;
 use App\Models\DokumenFile;
+use App\Support\SuratPdfDownloadName;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -59,7 +60,7 @@ class AdminSemuaSuratController extends Controller
 
         return response()->download(
             Storage::disk('public')->path($file->file_path),
-            $file->file_name
+            SuratPdfDownloadName::forDokumen($dokumen)
         );
     }
 

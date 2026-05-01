@@ -9,6 +9,7 @@ use App\Models\SuratBiasa;
 use App\Models\User;
 use App\Models\Verifikasi;
 use App\Services\PreviewVerifikasiPdfGenerator;
+use App\Support\UserReferenceOptions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -62,6 +63,22 @@ class AdminProsesSuratController extends Controller
                 ],
             ]);
 
+        $penandatangans = User::query()
+            ->where('role', 'VERIFIKATOR')
+            ->where('is_active', true)
+            ->whereIn('jabatan', UserReferenceOptions::signerJabatans())
+            ->orderBy('jabatan')
+            ->orderBy('nama')
+            ->get(['user_id', 'nama', 'jabatan', 'unit_kerja']);
+
+        $selectedPenandatanganId = old('penanda_tangan');
+
+        if (! $selectedPenandatanganId && $dokumen->suratBiasa?->penandatangan) {
+            $selectedPenandatanganId = $penandatangans
+                ->firstWhere('nama', $dokumen->suratBiasa->penandatangan)
+                ?->user_id;
+        }
+
         return view('admin.proses-surat', [
             'dokumen' => $dokumen,
             'initialStep' => max(1, min(3, $request->integer('step', 1))),
@@ -75,6 +92,10 @@ class AdminProsesSuratController extends Controller
                 ->where('is_active', true)
                 ->orderBy('nama')
                 ->get(['user_id', 'nama', 'email', 'jabatan', 'unit_kerja']),
+            // Penandatangan tetap berasal dari role verifikator, tetapi disaring ke jabatan pejabat yang berwenang.
+            'penandatangans' => $penandatangans,
+            'selectedPenandatanganId' => $selectedPenandatanganId,
+            'jenisSuratOptions' => UserReferenceOptions::jenisSuratBiasa(),
             'selectedVerifikators' => $dokumen->verifikasi
                 ->keyBy('level')
                 ->map(fn (Verifikasi $verifikasi) => $verifikasi->verifikator_id),
@@ -97,8 +118,14 @@ class AdminProsesSuratController extends Controller
                 'mimetypes:application/pdf',
                 'max:10240',
             ],
-            'penanda_tangan' => ['required', 'string', 'max:150'],
-            'jenis_surat' => ['required', 'string', 'max:150'],
+            'penanda_tangan' => [
+                'required',
+                Rule::exists('users', 'user_id')->where(fn ($query) => $query
+                    ->where('role', 'VERIFIKATOR')
+                    ->where('is_active', true)
+                    ->whereIn('jabatan', UserReferenceOptions::signerJabatans())),
+            ],
+            'jenis_surat' => ['required', Rule::in(UserReferenceOptions::jenisSuratBiasa())],
             'sifat_surat' => ['required', 'string', 'max:100'],
             'nomor_surat' => ['required', 'string', 'max:100'],
             'tanggal_surat' => ['required', 'date'],
@@ -113,8 +140,14 @@ class AdminProsesSuratController extends Controller
 
         $user = $request->user();
         $uploadedPdf = $request->file('hasil_pemeriksaan_pdf');
+        $penandatangan = User::query()
+            ->where('user_id', $validated['penanda_tangan'])
+            ->where('role', 'VERIFIKATOR')
+            ->where('is_active', true)
+            ->whereIn('jabatan', UserReferenceOptions::signerJabatans())
+            ->firstOrFail();
 
-        DB::transaction(function () use ($dokumen, $validated, $user, $uploadedPdf): void {
+        DB::transaction(function () use ($dokumen, $validated, $user, $uploadedPdf, $penandatangan): void {
             if ($uploadedPdf) {
                 // PDF hasil pemeriksaan disimpan terpisah dari DOCX draft pemohon agar riwayat file tetap utuh.
                 $storedPath = $uploadedPdf->store('dokumen/pdf', 'public');
@@ -138,7 +171,7 @@ class AdminProsesSuratController extends Controller
             $suratBiasa->fill([
                 'nomor_surat' => $validated['nomor_surat'],
                 'tanggal_surat' => $validated['tanggal_surat'],
-                'penandatangan' => $validated['penanda_tangan'],
+                'penandatangan' => $penandatangan->nama,
                 'jenis_surat' => $validated['jenis_surat'],
                 'sifat_surat' => $validated['sifat_surat'],
                 'lampiran' => $suratBiasa->lampiran,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\UserReferenceOptions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -45,6 +46,8 @@ class UserController extends Controller
     {
         return view('super-admin.tambah-user', [
             'roles' => $this->roles(),
+            'jabatans' => $this->jabatans(),
+            'unitKerjas' => $this->unitKerjas(),
         ]);
     }
 
@@ -74,6 +77,8 @@ class UserController extends Controller
         return view('super-admin.profil', [
             'user' => $user,
             'roles' => $this->roles(),
+            'jabatans' => $this->jabatans(),
+            'unitKerjas' => $this->unitKerjas(),
         ]);
     }
 
@@ -136,9 +141,9 @@ class UserController extends Controller
                 Rule::unique('users', 'email')->ignore($userId, 'user_id'),
             ],
             'role' => ['required', Rule::in($this->roles())],
-            'unit_kerja' => ['nullable', 'string', 'max:150'],
+            'unit_kerja' => ['nullable', Rule::in($this->unitKerjas())],
             'nip_nik' => ['nullable', 'string', 'max:50'],
-            'jabatan' => ['nullable', 'string', 'max:150'],
+            'jabatan' => ['nullable', Rule::in($this->jabatans())],
             'is_active' => ['nullable', 'boolean'],
         ];
 
@@ -154,6 +159,22 @@ class UserController extends Controller
      */
     private function roles(): array
     {
-        return ['SUPER_ADMIN', 'ADMIN_TU', 'PEMOHON', 'VERIFIKATOR'];
+        return UserReferenceOptions::roles();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function jabatans(): array
+    {
+        return UserReferenceOptions::jabatans();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function unitKerjas(): array
+    {
+        return UserReferenceOptions::unitKerjas();
     }
 }

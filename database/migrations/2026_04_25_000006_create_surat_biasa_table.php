@@ -14,7 +14,21 @@ return new class extends Migration
         Schema::create('surat_biasa', function (Blueprint $table) {
             $table->id('surat_biasa_id');
             $table->foreignId('dokumen_id')->unique()->constrained('dokumen', 'dokumen_id')->cascadeOnDelete();
-            $table->string('jenis_surat', 150);
+            $table->enum('jenis_surat', [
+                'Surat Undangan',
+                'Surat Tugas',
+                'Surat Pengantar',
+                'Surat Pernyataan',
+                'Surat Keterangan',
+                'Surat Rekomendasi',
+                'Surat Perintah',
+                'Surat Kuasa',
+                'Berita Acara',
+                'Pengumuman',
+                'Sertifikat',
+                'Nota Dinas',
+                'Surat Pernyataan Rencana Penempatan',
+            ]);
             $table->string('nomor_surat', 100)->nullable();
             $table->date('tanggal_surat')->nullable();
             $table->string('hal', 255)->nullable();

@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Dokumen;
 use App\Models\DokumenFile;
 use App\Models\SuratBiasa;
+use App\Support\SuratPdfDownloadName;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -131,14 +131,6 @@ class PemohonSuratController extends Controller
 
     protected function buildPublishedDownloadFileName(Dokumen $dokumen): string
     {
-        $dokumen->loadMissing('suratBiasa');
-
-        // Nama file unduhan dibuat konsisten agar tidak mengikuti nama upload mentah dari pengguna.
-        $nomorSurat = $dokumen->suratBiasa?->nomor_surat ?: 'tanpa-nomor';
-        $nomorSurat = preg_replace('/[^A-Za-z0-9]+/', '-', $nomorSurat) ?? 'tanpa-nomor';
-        $nomorSurat = trim($nomorSurat, '-');
-        $nomorSurat = Str::limit($nomorSurat !== '' ? $nomorSurat : 'tanpa-nomor', 120, '');
-
-        return sprintf('SIMAS-Surat-%d-%s.pdf', $dokumen->dokumen_id, $nomorSurat);
+        return SuratPdfDownloadName::forDokumen($dokumen);
     }
 }

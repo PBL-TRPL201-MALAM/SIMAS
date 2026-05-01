@@ -20,9 +20,35 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->enum('role', ['SUPER_ADMIN', 'ADMIN_TU', 'PEMOHON', 'VERIFIKATOR']);
-            $table->string('unit_kerja', 150)->nullable();
+            $table->enum('unit_kerja', [
+                'Direktorat',
+                'Akademik',
+                'Kemahasiswaan',
+                'Keuangan',
+                'Tata Usaha',
+                'Jurusan Teknik Informatika',
+                'Jurusan Teknik Elektro',
+                'Jurusan Teknik Mesin',
+                'Jurusan Manajemen Bisnis',
+                'Program Studi TRPL',
+                'Program Studi Informatika',
+                'Program Studi Teknik Multimedia dan Jaringan',
+                'Program Studi Animasi',
+                'Program Studi Akuntansi',
+                'Program Studi Administrasi Bisnis',
+            ])->nullable();
             $table->string('nip_nik', 50)->nullable();
-            $table->string('jabatan', 150)->nullable();
+            $table->enum('jabatan', [
+                'Direktur',
+                'Wakil Direktur I',
+                'Wakil Direktur II',
+                'Wakil Direktur III',
+                'Kepala Jurusan',
+                'Sekretaris Jurusan',
+                'Koordinator Program Studi',
+                'Dosen',
+                'Staff TU',
+            ])->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

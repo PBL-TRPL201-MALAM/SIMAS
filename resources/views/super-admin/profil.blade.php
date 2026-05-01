@@ -82,11 +82,21 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Unit Kerja</label>
-                  <input type="text" name="unit_kerja" value="{{ old('unit_kerja', $user->unit_kerja) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                  <select name="unit_kerja" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
+                    <option value="">Pilih unit kerja</option>
+                    @foreach ($unitKerjas as $unitKerja)
+                      <option value="{{ $unitKerja }}" {{ old('unit_kerja', $user->unit_kerja) === $unitKerja ? 'selected' : '' }}>{{ $unitKerja }}</option>
+                    @endforeach
+                  </select>
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Jabatan</label>
-                  <input type="text" name="jabatan" value="{{ old('jabatan', $user->jabatan) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                  <select name="jabatan" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
+                    <option value="">Pilih jabatan</option>
+                    @foreach ($jabatans as $jabatan)
+                      <option value="{{ $jabatan }}" {{ old('jabatan', $user->jabatan) === $jabatan ? 'selected' : '' }}>{{ $jabatan }}</option>
+                    @endforeach
+                  </select>
                 </div>
               </div>
 

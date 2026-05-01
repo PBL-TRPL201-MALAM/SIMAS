@@ -110,9 +110,7 @@ Route::middleware(['auth', 'role:VERIFIKATOR'])->prefix('verifikator')->name('ve
     Route::get('/surat/{dokumen}/unduh-pdf', [VerifikatorSuratController::class, 'downloadPdf'])->name('surat.unduh-pdf');
     Route::post('/verifikasi/{verifikasi}/proses', [VerifikatorSuratController::class, 'proses'])->name('verifikasi.proses');
 
-    Route::get('/surat-semua', function () {
-        return view('verifikator.surat-semua');
-    })->name('surat-semua');
+    Route::get('/surat-semua', [VerifikatorSuratController::class, 'semua'])->name('surat-semua');
 
     Route::get('/sk-menunggu', [VerifikatorSuratController::class, 'skMenunggu'])->name('sk-menunggu');
     Route::get('/sk/{dokumen}/detail', [VerifikatorSuratController::class, 'detailSk'])->name('sk.detail');

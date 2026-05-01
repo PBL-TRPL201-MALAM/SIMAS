@@ -6,6 +6,7 @@ use App\Models\Dokumen;
 use App\Models\DokumenFile;
 use App\Models\Verifikasi;
 use App\Services\PreviewVerifikasiPdfGenerator;
+use App\Support\SuratPdfDownloadName;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -78,6 +79,15 @@ class VerifikatorSuratController extends Controller
         ]);
     }
 
+    public function semua(Request $request): View
+    {
+        return view('verifikator.surat-semua', [
+            'suratSemua' => $this->baseQuery($request)
+                ->latest('created_at')
+                ->get(),
+        ]);
+    }
+
     public function downloadPdf(Request $request, Dokumen $dokumen): BinaryFileResponse
     {
         $this->ensureAssignedToVerifikator($request, $dokumen);
@@ -87,7 +97,7 @@ class VerifikatorSuratController extends Controller
 
         return response()->download(
             Storage::disk('public')->path($pdfFile->file_path),
-            $pdfFile->file_name
+            SuratPdfDownloadName::forDokumen($dokumen)
         );
     }
 
