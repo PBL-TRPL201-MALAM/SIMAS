@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class AdminSuratMasukController extends Controller
 {
+    // Halaman ini menjadi pintu kerja awal Admin/TU untuk melihat pengajuan baru yang masih berstatus DIAJUKAN.
     public function index(): View
     {
         $pengajuan = Dokumen::query()
@@ -37,6 +38,7 @@ class AdminSuratMasukController extends Controller
             404
         );
 
+        // Admin/TU mengunduh draft DOCX asli dari pemohon sebagai bahan pemeriksaan sebelum membuat PDF hasil review.
         $draftFile = $dokumen->dokumenFiles()
             ->where('file_type', 'DRAFT_DOCX')
             ->latest('file_id')

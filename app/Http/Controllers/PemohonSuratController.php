@@ -15,11 +15,14 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PemohonSuratController extends Controller
 {
+    // Method ini hanya menampilkan form pengajuan surat biasa untuk pemohon.
     public function create(): View
     {
         return view('pemohon.buat-surat');
     }
 
+    // Method ini menangani pengajuan surat biasa dari Pemohon.
+    // Data utama dokumen disimpan ke tabel dokumen, detail surat ke surat_biasa, dan file DOCX ke dokumen_file.
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([

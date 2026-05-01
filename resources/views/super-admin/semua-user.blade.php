@@ -68,6 +68,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-50">
                   @forelse ($users as $user)
+                    @php($isCurrentUser = auth()->id() === $user->user_id)
                     <tr class="hover:bg-slate-50/40 transition-colors duration-150">
                       <td class="px-5 py-3.5">
                         <p class="text-xs font-semibold text-slate-800">{{ $user->nama }}</p>
@@ -88,13 +89,17 @@
                       <td class="px-5 py-3.5">
                         <div class="flex flex-wrap items-center gap-2 text-[11px] font-medium">
                           <a href="{{ route('super-admin.users.edit', $user) }}" class="text-blue-600 hover:text-blue-700">Edit</a>
-                          <form action="{{ route('super-admin.users.toggle-status', $user) }}" method="POST">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="{{ $user->is_active ? 'text-red-500' : 'text-blue-600' }}" {{ auth()->id() === $user->user_id && $user->is_active ? 'disabled' : '' }}>
-                              {{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
-                            </button>
-                          </form>
+                          @if ($isCurrentUser && $user->is_active)
+                            <span class="text-slate-300 cursor-not-allowed">Sedang Dipakai</span>
+                          @else
+                            <form action="{{ route('super-admin.users.toggle-status', $user) }}" method="POST">
+                              @csrf
+                              @method('PATCH')
+                              <button type="submit" class="{{ $user->is_active ? 'text-red-500' : 'text-blue-600' }}">
+                                {{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                              </button>
+                            </form>
+                          @endif
                         </div>
                       </td>
                     </tr>

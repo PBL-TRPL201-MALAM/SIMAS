@@ -91,6 +91,20 @@ class UserController extends Controller
     {
         $validated = $request->validate($this->rules($user));
 
+        if ($this->isSelfDeactivationAttempt($user, $validated)) {
+            return redirect()
+                ->route('super-admin.users.edit', $user)
+                ->withErrors(['status' => 'Super Admin yang sedang login tidak bisa menonaktifkan akun sendiri.'])
+                ->withInput();
+        }
+
+        if (! $this->canKeepAtLeastOneActiveSuperAdmin($user, $validated)) {
+            return redirect()
+                ->route('super-admin.users.edit', $user)
+                ->withErrors(['status' => 'Minimal harus ada 1 user SUPER_ADMIN yang tetap aktif di sistem.'])
+                ->withInput();
+        }
+
         // Update profil user sengaja dipisahkan dari reset password agar perubahan akses lebih terkontrol.
         $user->update([
             'nama' => $validated['nama'],
@@ -115,6 +129,12 @@ class UserController extends Controller
             return redirect()
                 ->route('super-admin.users.index')
                 ->withErrors(['status' => 'Super Admin yang sedang login tidak bisa menonaktifkan akun sendiri.']);
+        }
+
+        if ($user->role === 'SUPER_ADMIN' && $user->is_active && ! $this->hasAnotherActiveSuperAdmin($user)) {
+            return redirect()
+                ->route('super-admin.users.index')
+                ->withErrors(['status' => 'Minimal harus ada 1 user SUPER_ADMIN yang tetap aktif di sistem.']);
         }
 
         $user->update([
@@ -185,5 +205,40 @@ class UserController extends Controller
     private function unitKerjas(): array
     {
         return UserReferenceOptions::unitKerjas();
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function isSelfDeactivationAttempt(User $user, array $validated): bool
+    {
+        return auth()->id() === $user->user_id
+            && $user->is_active
+            && ! (bool) ($validated['is_active'] ?? true);
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function canKeepAtLeastOneActiveSuperAdmin(User $user, array $validated): bool
+    {
+        $currentIsActiveSuperAdmin = $user->role === 'SUPER_ADMIN' && $user->is_active;
+        $willRemainActiveSuperAdmin = ($validated['role'] ?? $user->role) === 'SUPER_ADMIN'
+            && (bool) ($validated['is_active'] ?? $user->is_active);
+
+        if (! $currentIsActiveSuperAdmin || $willRemainActiveSuperAdmin) {
+            return true;
+        }
+
+        return $this->hasAnotherActiveSuperAdmin($user);
+    }
+
+    private function hasAnotherActiveSuperAdmin(User $user): bool
+    {
+        return User::query()
+            ->where('role', 'SUPER_ADMIN')
+            ->where('is_active', true)
+            ->where('user_id', '!=', $user->user_id)
+            ->exists();
     }
 }

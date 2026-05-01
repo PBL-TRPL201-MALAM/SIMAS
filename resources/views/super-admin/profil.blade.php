@@ -35,6 +35,8 @@
               </div>
             @endif
 
+            @php($isCurrentUser = auth()->id() === $user->user_id)
+
             <form action="{{ route('super-admin.users.update', $user) }}" method="POST" class="space-y-5">
               @csrf
               @method('PUT')
@@ -68,10 +70,14 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Status Akun</label>
-                  <select name="is_active" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none">
+                  <select name="is_active" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" {{ $isCurrentUser && $user->is_active ? 'disabled' : '' }}>
                     <option value="1" {{ old('is_active', $user->is_active ? '1' : '0') === '1' ? 'selected' : '' }}>Aktif</option>
                     <option value="0" {{ old('is_active', $user->is_active ? '1' : '0') === '0' ? 'selected' : '' }}>Nonaktif</option>
                   </select>
+                  @if ($isCurrentUser && $user->is_active)
+                    <input type="hidden" name="is_active" value="1" />
+                    <p class="mt-1 text-[11px] text-slate-400">Akun SUPER_ADMIN yang sedang dipakai tidak bisa dinonaktifkan.</p>
+                  @endif
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">NIP / NIK</label>
@@ -108,9 +114,15 @@
             <form action="{{ route('super-admin.users.toggle-status', $user) }}" method="POST" class="mt-3">
               @csrf
               @method('PATCH')
-              <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-all duration-200" {{ auth()->id() === $user->user_id && $user->is_active ? 'disabled' : '' }}>
-                {{ $user->is_active ? 'Nonaktifkan User' : 'Aktifkan User' }}
-              </button>
+              @if ($isCurrentUser && $user->is_active)
+                <span class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-300 cursor-not-allowed">
+                  User Sedang Dipakai
+                </span>
+              @else
+                <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-all duration-200">
+                  {{ $user->is_active ? 'Nonaktifkan User' : 'Aktifkan User' }}
+                </button>
+              @endif
             </form>
           </div>
 

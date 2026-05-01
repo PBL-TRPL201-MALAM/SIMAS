@@ -17,10 +17,12 @@ class RoleMiddleware
     {
         $user = Auth::user();
 
+        // Middleware ini menjadi pagar utama agar route per role tidak bisa diakses user yang belum login.
         if (! $user) {
             return redirect()->route('login');
         }
 
+        // Akun nonaktif dipaksa logout agar user yang statusnya dicabut tidak bisa tetap memakai sesi lama.
         if (! $user->is_active) {
             Auth::logout();
             $request->session()->invalidate();
@@ -41,6 +43,7 @@ class RoleMiddleware
 
     private function dashboardRoute(object $user): string
     {
+        // Redirect fallback selalu dikembalikan ke dashboard role masing-masing supaya user tidak nyasar ke area lain.
         return match ($user->role) {
             'SUPER_ADMIN' => 'super-admin.dashboard',
             'ADMIN_TU' => 'admin.dashboard',

@@ -25,6 +25,7 @@ class VerifikatorSuratController extends Controller
 
     public function menunggu(Request $request): View
     {
+        // Halaman ini hanya menampilkan surat yang memang sudah terbuka untuk diproses oleh verifikator login.
         return view('verifikator.surat-menunggu', [
             'suratMenunggu' => $this->baseQuery($request)
                 ->where('status_verifikasi', 'MENUNGGU')
@@ -61,6 +62,7 @@ class VerifikatorSuratController extends Controller
 
     public function disetujui(Request $request): View
     {
+        // Riwayat ini membantu verifikator melihat dokumen apa saja yang pernah ia setujui.
         return view('verifikator.surat-disetujui', [
             'suratDisetujui' => $this->baseQuery($request)
                 ->where('status_verifikasi', 'DISETUJUI')
@@ -71,6 +73,7 @@ class VerifikatorSuratController extends Controller
 
     public function ditolak(Request $request): View
     {
+        // Riwayat penolakan dipakai untuk meninjau ulang dokumen yang pernah dikembalikan ke Admin/TU.
         return view('verifikator.surat-ditolak', [
             'suratDitolak' => $this->baseQuery($request)
                 ->where('status_verifikasi', 'DITOLAK')
@@ -81,6 +84,7 @@ class VerifikatorSuratController extends Controller
 
     public function semua(Request $request): View
     {
+        // Halaman semua surat merangkum seluruh dokumen yang pernah masuk ke verifikator, apa pun status tahapnya.
         return view('verifikator.surat-semua', [
             'suratSemua' => $this->baseQuery($request)
                 ->latest('created_at')
@@ -122,6 +126,7 @@ class VerifikatorSuratController extends Controller
 
     public function detailSurat(Request $request, Dokumen $dokumen): View
     {
+        // Detail surat dipakai verifikator untuk membaca dokumen lengkap sebelum memberi keputusan setuju atau tolak.
         $verifikasi = $this->resolveVerifikasiForDokumen(
             $request,
             $dokumen,
@@ -190,6 +195,7 @@ class VerifikatorSuratController extends Controller
 
         abort_unless($this->canProcessVerifikasi($verifikasi), 403);
 
+        // Keputusan verifikator hanya dua: setuju atau tolak. Catatan menjadi wajib jika memilih tolak.
         $validated = $request->validate([
             'keputusan' => ['required', 'in:setuju,tolak'],
             'catatan' => ['nullable', 'string'],
@@ -264,6 +270,7 @@ class VerifikatorSuratController extends Controller
 
     protected function baseQuery(Request $request): Builder
     {
+        // Query dasar ini dipakai ulang oleh beberapa halaman verifikator agar sumber datanya tetap konsisten.
         return Verifikasi::query()
             ->with([
                 'dokumen.pemohon',
@@ -294,6 +301,7 @@ class VerifikatorSuratController extends Controller
     {
         abort_unless($dokumen->jenis_dokumen === $jenisDokumen, 404);
 
+        // Satu verifikator hanya boleh membuka detail dokumen yang memang ditugaskan kepadanya.
         return Verifikasi::query()
             ->with($with)
             ->where('dokumen_id', $dokumen->dokumen_id)
@@ -303,6 +311,7 @@ class VerifikatorSuratController extends Controller
 
     protected function ensureAssignedToVerifikator(Request $request, Dokumen $dokumen): void
     {
+        // Guard tambahan ini menutup akses langsung ke URL unduh/preview jika user bukan bagian dari jalur verifikasi dokumen itu.
         abort_unless(
             $dokumen->verifikasi()->where('verifikator_id', $request->user()->user_id)->exists(),
             403
@@ -338,6 +347,7 @@ class VerifikatorSuratController extends Controller
 
         $verifikasi->loadMissing('dokumen.verifikasi');
 
+        // Level ini baru boleh memutuskan jika semua level di atasnya sudah selesai menyetujui.
         return ! $verifikasi->dokumen->verifikasi
             ->where('level', '<', $verifikasi->level)
             ->contains(fn (Verifikasi $item) => $item->status_verifikasi !== 'DISETUJUI');

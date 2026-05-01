@@ -37,6 +37,7 @@ class AdminProsesSuratController extends Controller
                 ->with('error', 'Dokumen yang akan diproses belum dipilih.');
         }
 
+        // Seluruh data pendukung dipanggil sekaligus agar halaman proses surat bisa dibuka ulang pada step mana pun.
         $dokumen = Dokumen::query()
             ->with([
                 'pemohon',
@@ -121,6 +122,7 @@ class AdminProsesSuratController extends Controller
         $existingProcessedPdf = $dokumen->dokumenFiles
             ->first(fn (DokumenFile $file) => in_array($file->file_type, ['HASIL_PEMERIKSAAN_PDF', 'PDF_REVIEW'], true));
 
+        // Pada tahap ini Admin/TU mengunggah PDF hasil pemeriksaan dan melengkapi metadata resmi surat.
         $validated = $request->validate([
             'hasil_pemeriksaan_pdf' => [
                 $existingProcessedPdf ? 'nullable' : 'required',
@@ -209,6 +211,7 @@ class AdminProsesSuratController extends Controller
     {
         abort_unless($dokumen->jenis_dokumen === 'SURAT_BIASA', 404);
 
+        // Preview PDF yang dilihat admin selalu memakai file hasil pemeriksaan terbaru yang berhasil diunggah.
         $previewFile = $dokumen->dokumenFiles()
             ->whereIn('file_type', ['HASIL_PEMERIKSAAN_PDF', 'PDF_REVIEW'])
             ->latest('file_id')
@@ -274,6 +277,7 @@ class AdminProsesSuratController extends Controller
             'dokumenFiles',
         ]);
 
+        // Verifikator level bersifat opsional, tetapi penandatangan final dari metadata selalu wajib ikut dalam flow approval.
         $rules = [
             'verifikator_1' => [
                 'nullable',

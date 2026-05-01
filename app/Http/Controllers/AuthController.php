@@ -58,6 +58,7 @@ class AuthController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
+        // Logout membersihkan sesi aktif agar user benar-benar keluar dari area SIMAS dan tidak mewariskan token lama.
         Auth::logout();
 
         $request->session()->invalidate();
