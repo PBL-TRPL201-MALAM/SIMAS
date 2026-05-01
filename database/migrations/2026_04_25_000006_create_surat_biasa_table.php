@@ -28,7 +28,7 @@ return new class extends Migration
                 'Sertifikat',
                 'Nota Dinas',
                 'Surat Pernyataan Rencana Penempatan',
-            ]);
+            ])->nullable();
             $table->string('nomor_surat', 100)->nullable();
             $table->date('tanggal_surat')->nullable();
             $table->string('hal', 255)->nullable();

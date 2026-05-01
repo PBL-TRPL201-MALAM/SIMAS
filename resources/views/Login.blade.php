@@ -163,7 +163,20 @@
 
           </form>
 
-          <p class="mt-8 text-center text-[11px] text-slate-300 font-light">&copy; 2026 SIMAS · Politeknik Negeri Batam</p>
+          {{-- Akun Demo --}}
+          <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-[11px] text-slate-500 leading-relaxed">
+              <p class="mb-2 font-semibold text-slate-700">Akun Demo</p>
+
+              <div class="space-y-1">                  
+                  <p><span class="font-semibold text-slate-600">Pemohon</span> : pemohon / 12345678</p>
+                  <p><span class="font-semibold text-slate-600">Admin TU</span> : admintu / 12345678</p>
+                  <p><span class="font-semibold text-slate-600">Verifikator</span> : verifikator / 12345678</p>
+                  <p><span class="font-semibold text-slate-600">Verifikator</span> : direktur / 12345678</p>
+                  <p><span class="font-semibold text-slate-600">Super Admin</span> : superadmin / 12345678</p>
+              </div>
+          </div>
+
+          <p class="mt-8 text-center text-[11px] text-slate-300 font-light">&copy; 2026 SIMAS · PBL-TRPL201-MALAM </p>
 
         </div>
       </div>

@@ -10,22 +10,25 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifikatorSuratController;
 use Illuminate\Support\Facades\Route;
 
-// home & login
+// Route publik dasar untuk landing page SIMAS dan form login.
 Route::get('/', function () {
     return view('home');
 })->name('home');
 
+// Route guest hanya boleh diakses sebelum user login.
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
 });
 
+// Route auth umum dipakai bersama oleh semua role setelah login berhasil.
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
+        // Satu route dashboard umum ini bertugas meneruskan user ke dashboard sesuai role masing-masing.
         return redirect()->route(match ($user->role) {
             'SUPER_ADMIN' => 'super-admin.dashboard',
             'ADMIN_TU' => 'admin.dashboard',
@@ -36,7 +39,7 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 });
 
-// admin
+// Area Admin/TU untuk memproses pengajuan, mengatur verifikasi, dan melakukan publish dokumen.
 Route::middleware(['auth', 'role:ADMIN_TU'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
 
@@ -75,7 +78,7 @@ Route::middleware(['auth', 'role:ADMIN_TU'])->prefix('admin')->name('admin.')->g
     })->name('profil');
 });
 
-// pemohon
+// Area Pemohon untuk membuat pengajuan dan memantau status dokumen miliknya sendiri.
 Route::middleware(['auth', 'role:PEMOHON'])->prefix('pemohon')->name('pemohon.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'pemohon'])->name('dashboard');
 
@@ -98,7 +101,7 @@ Route::middleware(['auth', 'role:PEMOHON'])->prefix('pemohon')->name('pemohon.')
     })->name('profil');
 });
 
-// verifikator
+// Area Verifikator untuk memeriksa dokumen, memberi keputusan, dan melihat PDF preview hasil proses Admin/TU.
 Route::middleware(['auth', 'role:VERIFIKATOR'])->prefix('verifikator')->name('verifikator.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'verifikator'])->name('dashboard');
 
@@ -134,7 +137,7 @@ Route::middleware(['auth', 'role:VERIFIKATOR'])->prefix('verifikator')->name('ve
     })->name('profil');
 });
 
-// super admin
+// Area Super Admin difokuskan untuk pengelolaan user dan monitoring ringkasan sistem.
 Route::middleware(['auth', 'role:SUPER_ADMIN'])->prefix('super-admin')->name('super-admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'superAdmin'])->name('dashboard');
 
@@ -179,3 +182,6 @@ Route::middleware(['auth', 'role:SUPER_ADMIN'])->prefix('super-admin')->name('su
         return $controller->edit(auth()->user());
     })->name('profil');
 });
+
+// Catatan: route verifikasi publik berbasis token/QR belum dibuka di file ini.
+// Jika nanti fitur validasi publik ditambahkan, route tersebut sebaiknya dipisah dari group auth karena diakses tanpa login.

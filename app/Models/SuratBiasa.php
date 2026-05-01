@@ -10,6 +10,7 @@ class SuratBiasa extends Model
 {
     use HasFactory;
 
+    // Tabel ini menyimpan detail isi surat biasa yang melengkapi dokumen induk pada sistem.
     protected $table = 'surat_biasa';
 
     protected $primaryKey = 'surat_biasa_id';
@@ -35,10 +36,12 @@ class SuratBiasa extends Model
     protected function casts(): array
     {
         return [
+            // Tanggal surat tetap disimpan sebagai date agar mudah diformat ulang saat render PDF.
             'tanggal_surat' => 'date',
         ];
     }
 
+    // Setiap surat biasa selalu terhubung ke satu dokumen utama.
     public function dokumen(): BelongsTo
     {
         return $this->belongsTo(Dokumen::class, 'dokumen_id', 'dokumen_id');

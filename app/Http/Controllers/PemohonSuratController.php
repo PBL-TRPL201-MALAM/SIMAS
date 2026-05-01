@@ -40,15 +40,16 @@ class PemohonSuratController extends Controller
         $storedPath = $file->store('dokumen/draft', 'public');
 
         DB::transaction(function () use ($validated, $user, $file, $storedPath): void {
+            // Dokumen utama dibuat lebih dulu sebagai pusat relasi semua proses surat berikutnya.
             $dokumen = Dokumen::create([
                 'jenis_dokumen' => 'SURAT_BIASA',
                 'pemohon_id' => $user->user_id,
                 'status_dokumen' => 'DIAJUKAN',
             ]);
 
+            // Pemohon hanya mengisi perihal dan ringkasan; metadata resmi surat baru dilengkapi oleh Admin/TU.
             SuratBiasa::create([
                 'dokumen_id' => $dokumen->dokumen_id,
-                'jenis_surat' => 'Surat Biasa',
                 'hal' => $validated['perihal'],
                 'ringkasan_isi' => $validated['ringkasan'],
             ]);
@@ -70,6 +71,7 @@ class PemohonSuratController extends Controller
 
     public function index(Request $request): View
     {
+        // Halaman Surat Saya hanya menampilkan surat biasa milik pemohon yang sedang login beserta file terakhirnya.
         $suratSaya = Dokumen::query()
             ->with(['suratBiasa', 'dokumenFiles' => fn ($query) => $query->orderByDesc('file_id')])
             ->where('pemohon_id', $request->user()->user_id)
@@ -131,6 +133,7 @@ class PemohonSuratController extends Controller
 
     protected function buildPublishedDownloadFileName(Dokumen $dokumen): string
     {
+        // Nama unduhan dipisahkan dari nama file storage agar pemohon selalu menerima nama file yang rapi dan konsisten.
         return SuratPdfDownloadName::forDokumen($dokumen);
     }
 }

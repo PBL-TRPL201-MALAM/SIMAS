@@ -79,7 +79,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'user_id' => 5,
-                'nama' => 'Direktur Polibatam',
+                'nama' => 'Direktur',
                 'username' => 'direktur',
                 'email' => 'direktur@gmail.com',
                 'email_verified_at' => $now,

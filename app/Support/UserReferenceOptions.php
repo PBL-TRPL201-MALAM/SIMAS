@@ -4,6 +4,7 @@ namespace App\Support;
 
 class UserReferenceOptions
 {
+    // Helper ini menjadi sumber tunggal pilihan referensi agar dropdown, validasi, dan enum database tetap sejalan.
     /**
      * @return array<int, string>
      */
@@ -81,6 +82,7 @@ class UserReferenceOptions
      */
     public static function signerJabatans(): array
     {
+        // Daftar ini dipakai untuk memfilter siapa saja yang sah dipilih sebagai penandatangan final surat.
         return [
             'Direktur',
             'Wakil Direktur I',

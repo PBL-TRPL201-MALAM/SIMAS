@@ -16,6 +16,7 @@ class DashboardController extends Controller
     {
         $userId = $request->user()->user_id;
 
+        // Semua kartu statistik pemohon dibangun dari query dasar yang sama agar hanya menghitung dokumen milik user login.
         $baseQuery = Dokumen::query()
             ->where('pemohon_id', $userId);
 
@@ -46,6 +47,7 @@ class DashboardController extends Controller
 
     public function admin(): View
     {
+        // Dashboard Admin/TU menonjolkan antrean kerja paling depan, yaitu dokumen yang baru diajukan pemohon.
         $incomingQuery = Dokumen::query()
             ->where('status_dokumen', 'DIAJUKAN');
 
@@ -70,6 +72,7 @@ class DashboardController extends Controller
     {
         $userId = $request->user()->user_id;
 
+        // Dokumen yang tampil di dashboard verifikator hanya level yang benar-benar sudah aktif untuk diproses user login.
         $pendingQuery = $this->processableVerificationQuery($userId)
             ->where('status_verifikasi', 'MENUNGGU')
             ->whereHas('dokumen', fn (Builder $query) => $query->where('status_dokumen', 'MENUNGGU_VERIFIKASI'));
@@ -97,6 +100,7 @@ class DashboardController extends Controller
 
     public function superAdmin(): View
     {
+        // Distribusi role dipakai untuk memberi gambaran cepat komposisi user SIMAS pada dashboard Super Admin.
         $userCounts = User::query()
             ->selectRaw('role, COUNT(*) as total')
             ->groupBy('role')
@@ -138,6 +142,7 @@ class DashboardController extends Controller
 
     protected function processableVerificationQuery(int $userId): Builder
     {
+        // Level verifikasi baru dianggap aktif jika seluruh level sebelumnya pada dokumen yang sama sudah disetujui.
         return Verifikasi::query()
             ->where('verifikator_id', $userId)
             ->whereNotExists(function ($query) {

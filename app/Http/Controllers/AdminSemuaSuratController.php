@@ -101,6 +101,7 @@ class AdminSemuaSuratController extends Controller
             ]);
 
             if ($finalPdfPayload) {
+                // Record FINAL_PDF disimpan terpisah agar riwayat file draft, preview, dan hasil publish tetap terbaca jelas.
                 DokumenFile::query()->updateOrCreate(
                     [
                         'dokumen_id' => $dokumen->dokumen_id,
@@ -139,6 +140,7 @@ class AdminSemuaSuratController extends Controller
 
     protected function resolvePublishSourcePdf(Dokumen $dokumen): ?DokumenFile
     {
+        // Preview verifikasi diprioritaskan karena sudah berisi nomor surat, tanggal, QR/TTE, dan daftar verifikator yang setuju.
         foreach (['PREVIEW_VERIFIKASI_PDF', 'HASIL_PEMERIKSAAN_PDF'] as $fileType) {
             $file = $dokumen->dokumenFiles
                 ->first(fn (DokumenFile $item) => $item->file_type === $fileType);

@@ -39,6 +39,7 @@ class PreviewVerifikasiPdfGenerator
             throw new RuntimeException('Posisi elemen dokumen belum tersedia.');
         }
 
+        // Generator preview/final bekerja dari PDF hasil pemeriksaan yang sudah ada, lalu menempelkan elemen di koordinat simpanan admin.
         $pdfWithPreview = $this->appendPreviewOverlays($sourcePdf, $dokumen, $positions);
         $outputPath = 'dokumen/preview-verifikasi/' . pathinfo($sourceRelativePath, PATHINFO_FILENAME) . '-preview.pdf';
 
@@ -160,6 +161,7 @@ class PreviewVerifikasiPdfGenerator
             }
 
             if ($position->elemen === 'tte') {
+                // QR/TTE masih berupa dummy pattern sampai token atau gambar QR final benar-benar dipakai.
                 $parts[] = $this->qrDummyCommands($x, $y, $widthPt, $heightPt);
             }
         }
@@ -193,6 +195,7 @@ class PreviewVerifikasiPdfGenerator
 
     private function qrDummyCommands(float $x, float $y, float $width, float $height): string
     {
+        // Dummy QR digambar manual sebagai blok-blok persegi agar bisa ditaruh langsung ke PDF tanpa render HTML/browser.
         $gridSize = 7;
         $cellWidth = $width / $gridSize;
         $cellHeight = $height / $gridSize;
@@ -220,27 +223,23 @@ class PreviewVerifikasiPdfGenerator
 
     private function verificationTextCommands(string $verifierNames, float $pageHeight): string
     {
-        $lines = $this->wrapVerificationText('Terverifikasi oleh: ' . $verifierNames, 52);
-        $baseX = 40.0;
-        $bottomMargin = 60.0;
-        $lineHeight = 10.0;
-        $topLineY = max(
-            18.0,
-            min($pageHeight - 18.0, $bottomMargin + (($lineHeight) * (count($lines) - 1)))
-        );
+        $text = 'Terverifikasi oleh: ' . $verifierNames;
 
-        $commands = [];
-
-        foreach ($lines as $index => $line) {
-            $commands[] = $this->textCommand(
-                $line,
-                $baseX,
-                $topLineY - ($index * $lineHeight),
-                8.5
-            );
+        // Potong jika terlalu panjang agar tidak turun/baris baru.
+        if (strlen($text) > 110) {
+            $text = substr($text, 0, 107) . '...';
         }
 
-        return implode("\n", $commands);
+        $baseX = 40.0;
+        $bottomMargin = 60.0;
+        $fontSize = strlen($text) > 70 ? 7.0 : 8.0;
+
+        return $this->textCommand(
+            $text,
+            $baseX,
+            $bottomMargin,
+            $fontSize
+        );
     }
 
     private function wrapVerificationText(string $text, int $maxChars): array

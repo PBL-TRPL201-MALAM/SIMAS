@@ -175,21 +175,9 @@
 
                 <div class="space-y-4 mt-4">
                   <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Kepada / Tujuan <span class="text-blue-400">*</span></label>
-                    <input type="text" name="tujuan" placeholder="Contoh: Yth. Kepala Dinas Pendidikan Kota Batam" value="{{ old('tujuan', $dokumen->suratBiasa?->kepada_tujuan) }}"
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
-                  </div>
-
-                  <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Isi / Ringkasan</label>
                     <textarea name="isi_ringkasan" rows="4" readonly
                       class="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm text-slate-700 font-light outline-none resize-none cursor-not-allowed">{{ $ringkasanSurat }}</textarea>
-                  </div>
-
-                  <div class="space-y-1.5">
-                    <label class="block text-xs font-semibold text-slate-700 tracking-wide">Tembusan</label>
-                    <textarea name="tembusan" rows="3" placeholder="Contoh:&#10;1. Direktur Polibatam&#10;2. Wakil Direktur II"
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('tembusan', $dokumen->suratBiasa?->tembusan) }}</textarea>
                   </div>
 
                   <div class="space-y-1.5">
@@ -406,16 +394,17 @@
 
               <div class="rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3 flex items-start gap-3">
                 <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <p class="text-[11px] text-blue-600 font-light leading-relaxed">Pilih verifikator aktif untuk setiap level yang dibutuhkan. Level 1 wajib dipilih. Level 2 dan Level 3 bersifat opsional, dan proses verifikasi akan berjalan berurutan dari level paling rendah.</p>
+                <p class="text-[11px] text-blue-600 font-light leading-relaxed">Pilih verifikator jika memang diperlukan. Penandatangan final dari metadata surat akan otomatis ditempatkan sebagai level terakhir setelah seluruh verifikator yang dipilih.</p>
               </div>
 
               <div class="space-y-3">
                 <p class="text-xs font-semibold text-slate-700">Pilih Verifikator</p>
+                <input type="hidden" name="penandatangan_final" value="{{ $selectedPenandatanganId }}">
 
                 <div class="space-y-1.5">
-                  <label class="block text-[11px] font-medium text-slate-500">Verifikator Level 1 <span class="text-blue-400">*</span></label>
+                  <label class="block text-[11px] font-medium text-slate-500">Verifikator Level 1</label>
                   <select name="verifikator_1" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all duration-200">
-                    <option value="" disabled {{ old('verifikator_1', $selectedVerifikators->get(1)) ? '' : 'selected' }}>Pilih verifikator level 1</option>
+                    <option value="">- Tidak ada (opsional) -</option>
                     @foreach ($verifikators as $verifikator)
                       <option value="{{ $verifikator->user_id }}" @selected((string) old('verifikator_1', $selectedVerifikators->get(1)) === (string) $verifikator->user_id)>
                         {{ $verifikator->nama }}{{ $verifikator->jabatan ? ' - ' . $verifikator->jabatan : '' }}
@@ -447,11 +436,18 @@
                     @endforeach
                   </select>
                 </div>
+
+                <div class="space-y-1.5">
+                  <label class="block text-[11px] font-medium text-slate-500">Penandatangan Final</label>
+                  <div class="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm text-slate-700 font-light">
+                    {{ $selectedPenandatangan?->nama ? $selectedPenandatangan->nama . ' - ' . $selectedPenandatangan->jabatan : 'Pilih penandatangan di metadata surat terlebih dulu' }}
+                  </div>
+                </div>
               </div>
 
               <div class="rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3 flex items-start gap-3">
                 <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <p class="text-[11px] text-blue-600 font-light leading-relaxed">Saat dokumen dikirim, Level 1 akan mulai dengan status menunggu. Level berikutnya baru diproses setelah level sebelumnya selesai menyetujui dokumen.</p>
+                <p class="text-[11px] text-blue-600 font-light leading-relaxed">Jika semua dropdown verifikator dikosongkan, penandatangan final otomatis menjadi Level 1. Jika ada verifikator yang dipilih, penandatangan akan diproses setelah level terakhir tersebut selesai menyetujui dokumen.</p>
               </div>
 
               <div class="flex items-center justify-between pt-2">

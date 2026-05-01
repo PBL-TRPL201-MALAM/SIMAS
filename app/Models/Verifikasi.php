@@ -10,6 +10,7 @@ class Verifikasi extends Model
 {
     use HasFactory;
 
+    // Satu baris verifikasi mewakili satu tahap approval pada dokumen, termasuk tahap penandatangan final.
     protected $table = 'verifikasi';
 
     protected $primaryKey = 'verifikasi_id';
@@ -26,16 +27,19 @@ class Verifikasi extends Model
     protected function casts(): array
     {
         return [
+            // Level menentukan urutan proses verifikasi bertingkat yang harus dilalui dokumen.
             'level' => 'integer',
             'verified_at' => 'datetime',
         ];
     }
 
+    // Dokumen yang sedang diperiksa pada tahap verifikasi ini.
     public function dokumen(): BelongsTo
     {
         return $this->belongsTo(Dokumen::class, 'dokumen_id', 'dokumen_id');
     }
 
+    // Verifikator bisa berupa pemeriksa biasa atau penandatangan akhir, tergantung posisi level pada flow dokumen.
     public function verifikator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verifikator_id', 'user_id');

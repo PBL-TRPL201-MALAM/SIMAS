@@ -222,10 +222,12 @@ class VerifikatorSuratController extends Controller
                         'status_verifikasi' => 'MENUNGGU',
                     ]);
 
+                    // Dokumen tetap berada di tahap verifikasi selama masih ada level berikutnya yang harus memeriksa.
                     $verifikasi->dokumen->update([
                         'status_dokumen' => 'MENUNGGU_VERIFIKASI',
                     ]);
                 } else {
+                    // Jika level terakhir sudah setuju, Admin/TU boleh melanjutkan ke tahap publish.
                     $verifikasi->dokumen->update([
                         'status_dokumen' => 'SIAP_PUBLISH',
                     ]);
@@ -240,6 +242,7 @@ class VerifikatorSuratController extends Controller
                 'catatan' => $validated['catatan'],
             ]);
 
+            // Penolakan mengembalikan dokumen ke Admin/TU untuk diperbaiki sebelum bisa dikirim ulang.
             $verifikasi->dokumen->update([
                 'status_dokumen' => 'PERLU_REVISI',
             ]);
@@ -312,6 +315,7 @@ class VerifikatorSuratController extends Controller
             ? ['FINAL_PDF', 'HASIL_PEMERIKSAAN_PDF']
             : ['PREVIEW_VERIFIKASI_PDF', 'HASIL_PEMERIKSAAN_PDF'];
 
+        // Verifikator diprioritaskan melihat file preview terbaru agar keputusan diambil dari versi dokumen yang sudah ditempeli metadata.
         foreach ($preferredTypes as $fileType) {
             $file = $dokumen->dokumenFiles()
                 ->where('file_type', $fileType)
@@ -362,6 +366,7 @@ class VerifikatorSuratController extends Controller
         }
 
         try {
+            // Preview diregenerate setiap ada persetujuan agar PDF terbaru selalu mencerminkan siapa saja yang sudah menyetujui.
             $previewPath = $this->previewVerifikasiPdfGenerator->generate($dokumen, $sourcePdf->file_path);
         } catch (\Throwable $exception) {
             report($exception);

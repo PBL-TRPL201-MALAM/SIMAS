@@ -14,6 +14,7 @@ class AuthController extends Controller
 {
     public function showLoginForm(Request $request): View|RedirectResponse
     {
+        // User yang sudah login tidak perlu melihat form lagi dan langsung diarahkan ke dashboard sesuai peran.
         if (Auth::check()) {
             return redirect()->route($this->dashboardRoute(Auth::user()));
         }
@@ -67,6 +68,7 @@ class AuthController extends Controller
 
     private function dashboardRoute(User $user): string
     {
+        // Satu pintu redirect dipakai ulang agar mapping role ke dashboard tetap konsisten di seluruh alur auth.
         return match ($user->role) {
             'SUPER_ADMIN' => 'super-admin.dashboard',
             'ADMIN_TU' => 'admin.dashboard',

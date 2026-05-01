@@ -10,6 +10,7 @@ class PosisiElemenDokumen extends Model
 {
     use HasFactory;
 
+    // Koordinat di tabel ini menjadi dasar penempelan nomor surat, tanggal, dan QR/TTE ke PDF hasil generate.
     protected $table = 'posisi_elemen_dokumen';
 
     protected $primaryKey = 'posisi_id';
@@ -28,6 +29,7 @@ class PosisiElemenDokumen extends Model
     {
         return [
             'halaman' => 'integer',
+            // Nilai desimal dipakai agar hasil drag posisi elemen tetap presisi saat dipindahkan ke ukuran PDF asli.
             'posisi_x' => 'decimal:2',
             'posisi_y' => 'decimal:2',
             'lebar' => 'decimal:2',
@@ -35,6 +37,7 @@ class PosisiElemenDokumen extends Model
         ];
     }
 
+    // Posisi elemen selalu menempel ke satu dokumen yang sedang diproses oleh Admin/TU.
     public function dokumen(): BelongsTo
     {
         return $this->belongsTo(Dokumen::class, 'dokumen_id', 'dokumen_id');

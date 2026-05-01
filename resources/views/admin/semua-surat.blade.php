@@ -117,22 +117,22 @@
                         </div>
 
                         @if (in_array($status, ['PERLU_REVISI', 'DITOLAK'], true) && $latestRejectedVerification)
-                          <details class="mt-2 group">
-                            <summary class="list-none inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium text-red-600 hover:text-red-700">
-                              <span>Lihat Catatan</span>
-                              <svg class="h-3.5 w-3.5 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </summary>
-                            <div class="mt-2 rounded-xl border border-red-100 bg-red-50/70 px-3 py-2.5">
+                          <div class="mt-2 rounded-xl border border-red-100 bg-red-50/70 px-3 py-2.5 max-w-[320px]">
+                            <div class="flex items-center gap-1.5">
+                              <span class="inline-flex h-1.5 w-1.5 rounded-full bg-red-500"></span>
                               <p class="text-[10px] font-semibold uppercase tracking-wider text-red-500">
-                                Level {{ $latestRejectedVerification->level }} | {{ $latestRejectedVerification->verifikator?->nama ?? 'Verifikator' }}
-                              </p>
-                              <p class="mt-1 text-[11px] font-light leading-relaxed text-red-700">
-                                {{ $latestRejectedVerification->catatan }}
+                                Catatan Revisi
                               </p>
                             </div>
-                          </details>
+
+                            <p class="mt-1.5 text-[11px] font-light leading-relaxed text-red-700">
+                              {{ $latestRejectedVerification->catatan }}
+                            </p>
+
+                            <p class="mt-1.5 text-[10px] font-light text-red-400">
+                              Dari {{ $latestRejectedVerification->verifikator?->nama ?? 'Verifikator' }}
+                            </p>
+                          </div>
                         @endif
                       </td>
                     </tr>

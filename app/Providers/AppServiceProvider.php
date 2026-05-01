@@ -33,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
+            // Badge sidebar pemohon selalu dihitung real-time dari database agar jumlah surat dan SK tidak hardcode.
             $view->with('sidebarStats', [
                 'surat_count' => Dokumen::query()->where('pemohon_id', $user->user_id)->where('jenis_dokumen', 'SURAT_BIASA')->count(),
                 'sk_count' => Dokumen::query()->where('pemohon_id', $user->user_id)->where('jenis_dokumen', 'SURAT_KEPUTUSAN')->count(),
@@ -40,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('template.admin-sidebar', function ($view): void {
+            // Sidebar Admin/TU menampilkan jumlah pengajuan yang benar-benar masih menunggu diproses dari masing-masing jenis dokumen.
             $view->with('sidebarStats', [
                 'pengajuan_surat_count' => Dokumen::query()->where('jenis_dokumen', 'SURAT_BIASA')->where('status_dokumen', 'DIAJUKAN')->count(),
                 'pengajuan_sk_count' => Dokumen::query()->where('jenis_dokumen', 'SURAT_KEPUTUSAN')->where('status_dokumen', 'DIAJUKAN')->count(),
@@ -65,6 +67,7 @@ class AppServiceProvider extends ServiceProvider
                         ->where('previous_levels.status_verifikasi', '!=', 'DISETUJUI');
                 });
 
+            // Badge verifikator hanya menghitung level yang sudah terbuka untuk diproses, bukan semua record verifikasi.
             $view->with('sidebarStats', [
                 'surat_menunggu_count' => (clone $baseQuery)->whereHas('dokumen', fn (Builder $query) => $query
                     ->where('jenis_dokumen', 'SURAT_BIASA')
@@ -76,6 +79,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('template.super-admin-sidebar', function ($view): void {
+            // Sidebar Super Admin cukup memakai total user sebagai ringkasan cepat kondisi sistem.
             $view->with('sidebarStats', [
                 'user_count' => User::query()->count(),
             ]);

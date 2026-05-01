@@ -79,6 +79,21 @@ class AdminProsesSuratController extends Controller
                 ?->user_id;
         }
 
+        // Dropdown verifikator sengaja tidak memuat penandatangan final agar tahap otorisasi akhir tetap terpisah.
+        $verifikators = User::query()
+            ->where('role', 'VERIFIKATOR')
+            ->where('is_active', true)
+            ->when($selectedPenandatanganId, fn ($query) => $query->where('user_id', '!=', $selectedPenandatanganId))
+            ->orderBy('nama')
+            ->get(['user_id', 'nama', 'email', 'jabatan', 'unit_kerja']);
+
+        // Jika dokumen sudah pernah disimpan, level verifikasi non-penandatangan dipetakan ulang ke slot Level 1/2/3 di form.
+        $selectedVerifikators = $dokumen->verifikasi
+            ->sortBy('level')
+            ->reject(fn (Verifikasi $verifikasi) => (string) $verifikasi->verifikator_id === (string) $selectedPenandatanganId)
+            ->values()
+            ->mapWithKeys(fn (Verifikasi $verifikasi, int $index) => [$index + 1 => $verifikasi->verifikator_id]);
+
         return view('admin.proses-surat', [
             'dokumen' => $dokumen,
             'initialStep' => max(1, min(3, $request->integer('step', 1))),
@@ -87,18 +102,13 @@ class AdminProsesSuratController extends Controller
                 : null,
             'previewPdfName' => $previewFile?->file_name,
             'existingPositions' => $existingPositions,
-            'verifikators' => User::query()
-                ->where('role', 'VERIFIKATOR')
-                ->where('is_active', true)
-                ->orderBy('nama')
-                ->get(['user_id', 'nama', 'email', 'jabatan', 'unit_kerja']),
+            'verifikators' => $verifikators,
             // Penandatangan tetap berasal dari role verifikator, tetapi disaring ke jabatan pejabat yang berwenang.
             'penandatangans' => $penandatangans,
             'selectedPenandatanganId' => $selectedPenandatanganId,
+            'selectedPenandatangan' => $penandatangans->firstWhere('user_id', $selectedPenandatanganId),
             'jenisSuratOptions' => UserReferenceOptions::jenisSuratBiasa(),
-            'selectedVerifikators' => $dokumen->verifikasi
-                ->keyBy('level')
-                ->map(fn (Verifikasi $verifikasi) => $verifikasi->verifikator_id),
+            'selectedVerifikators' => $selectedVerifikators,
         ]);
     }
 
@@ -129,8 +139,6 @@ class AdminProsesSuratController extends Controller
             'sifat_surat' => ['required', 'string', 'max:100'],
             'nomor_surat' => ['required', 'string', 'max:100'],
             'tanggal_surat' => ['required', 'date'],
-            'tujuan' => ['required', 'string'],
-            'tembusan' => ['nullable', 'string'],
             'catatan_tambahan' => ['nullable', 'string'],
         ], [
             'hasil_pemeriksaan_pdf.required' => 'PDF hasil pemeriksaan wajib diunggah.',
@@ -171,12 +179,11 @@ class AdminProsesSuratController extends Controller
             $suratBiasa->fill([
                 'nomor_surat' => $validated['nomor_surat'],
                 'tanggal_surat' => $validated['tanggal_surat'],
+                // Nama penandatangan disimpan ke metadata surat agar bisa ditampilkan kembali pada preview/final PDF.
                 'penandatangan' => $penandatangan->nama,
                 'jenis_surat' => $validated['jenis_surat'],
                 'sifat_surat' => $validated['sifat_surat'],
                 'lampiran' => $suratBiasa->lampiran,
-                'kepada_tujuan' => $validated['tujuan'],
-                'tembusan' => $validated['tembusan'] ?? null,
                 'keterangan_tambahan' => $validated['catatan_tambahan'] ?? null,
                 'catatan_admin' => $validated['catatan_tambahan'] ?? null,
                 'unit_kerja' => $user->unit_kerja,
@@ -185,6 +192,7 @@ class AdminProsesSuratController extends Controller
             $suratBiasa->save();
 
             $dokumen->update([
+                // Setelah PDF dan metadata resmi masuk, dokumen berpindah ke status diproses sebelum masuk jalur verifikasi.
                 'status_dokumen' => 'DIPROSES',
             ]);
         });
@@ -268,9 +276,10 @@ class AdminProsesSuratController extends Controller
 
         $rules = [
             'verifikator_1' => [
-                'required',
+                'nullable',
                 'different:verifikator_2',
                 'different:verifikator_3',
+                'different:penandatangan_final',
                 Rule::exists('users', 'user_id')->where(fn ($query) => $query
                     ->where('role', 'VERIFIKATOR')
                     ->where('is_active', true)),
@@ -279,6 +288,7 @@ class AdminProsesSuratController extends Controller
                 'nullable',
                 'different:verifikator_1',
                 'different:verifikator_3',
+                'different:penandatangan_final',
                 Rule::exists('users', 'user_id')->where(fn ($query) => $query
                     ->where('role', 'VERIFIKATOR')
                     ->where('is_active', true)),
@@ -287,17 +297,28 @@ class AdminProsesSuratController extends Controller
                 'nullable',
                 'different:verifikator_1',
                 'different:verifikator_2',
+                'different:penandatangan_final',
                 Rule::exists('users', 'user_id')->where(fn ($query) => $query
                     ->where('role', 'VERIFIKATOR')
                     ->where('is_active', true)),
+            ],
+            'penandatangan_final' => [
+                'required',
+                Rule::exists('users', 'user_id')->where(fn ($query) => $query
+                    ->where('role', 'VERIFIKATOR')
+                    ->where('is_active', true)
+                    ->whereIn('jabatan', UserReferenceOptions::signerJabatans())),
             ],
         ];
 
         try {
             $validated = $request->validate($rules, [
-                'verifikator_1.required' => 'Verifikator Level 1 wajib dipilih.',
+                'penandatangan_final.required' => 'Penandatangan final wajib dipilih di metadata surat.',
                 'verifikator_2.different' => 'Verifikator Level 2 tidak boleh sama dengan level lain.',
                 'verifikator_3.different' => 'Verifikator Level 3 tidak boleh sama dengan level lain.',
+                'verifikator_1.different' => 'Verifikator Level 1 tidak boleh sama dengan level lain atau penandatangan final.',
+                'verifikator_2.different' => 'Verifikator Level 2 tidak boleh sama dengan level lain atau penandatangan final.',
+                'verifikator_3.different' => 'Verifikator Level 3 tidak boleh sama dengan level lain atau penandatangan final.',
             ]);
         } catch (ValidationException $exception) {
             return redirect()
@@ -309,11 +330,27 @@ class AdminProsesSuratController extends Controller
                 ->withInput();
         }
 
-        $selectedLevels = array_filter([
-            1 => $validated['verifikator_1'] ?? null,
-            2 => $validated['verifikator_2'] ?? null,
-            3 => $validated['verifikator_3'] ?? null,
-        ]);
+        // Admin bebas memilih level verifikator yang diperlukan; penandatangan final akan ditambahkan otomatis setelahnya.
+        $approvalFlow = array_values(array_filter([
+            $validated['verifikator_1'] ?? null,
+            $validated['verifikator_2'] ?? null,
+            $validated['verifikator_3'] ?? null,
+        ]));
+
+        $finalFlow = [];
+
+        foreach ($approvalFlow as $index => $verifikatorId) {
+            $finalFlow[] = [
+                'level' => $index + 1,
+                'verifikator_id' => $verifikatorId,
+            ];
+        }
+
+        // Penandatangan selalu menjadi tahap terakhir agar surat baru sah setelah seluruh pemeriksa sebelumnya selesai.
+        $finalFlow[] = [
+            'level' => count($finalFlow) + 1,
+            'verifikator_id' => $validated['penandatangan_final'],
+        ];
 
         $sourcePdf = $dokumen->dokumenFiles
             ->where('file_type', 'HASIL_PEMERIKSAAN_PDF')
@@ -361,29 +398,25 @@ class AdminProsesSuratController extends Controller
                 ->with('error', 'Preview PDF verifikasi belum berhasil dibuat. Silakan cek file PDF dan posisi elemen.');
         }
 
-        DB::transaction(function () use ($dokumen, $selectedLevels, $previewPath, $sourcePdf, $request): void {
+        DB::transaction(function () use ($dokumen, $finalFlow, $previewPath, $sourcePdf, $request): void {
             Verifikasi::query()
                 ->where('dokumen_id', $dokumen->dokumen_id)
-                ->whereNotIn('level', array_keys($selectedLevels))
                 ->delete();
 
-            // Semua level disiapkan sekaligus, tetapi halaman verifikator hanya membuka level berikutnya setelah level sebelumnya setuju.
-            foreach ($selectedLevels as $level => $verifikatorId) {
-                Verifikasi::query()->updateOrCreate(
-                    [
-                        'dokumen_id' => $dokumen->dokumen_id,
-                        'level' => $level,
-                    ],
-                    [
-                        'verifikator_id' => $verifikatorId,
-                        'status_verifikasi' => 'MENUNGGU',
-                        'catatan' => null,
-                        'verified_at' => null,
-                    ]
-                );
+            // Seluruh flow verifikasi dibangun ulang agar nomor level tetap rapi mengikuti pilihan Admin/TU terbaru.
+            foreach ($finalFlow as $step) {
+                Verifikasi::query()->create([
+                    'dokumen_id' => $dokumen->dokumen_id,
+                    'level' => $step['level'],
+                    'verifikator_id' => $step['verifikator_id'],
+                    'status_verifikasi' => 'MENUNGGU',
+                    'catatan' => null,
+                    'verified_at' => null,
+                ]);
             }
 
             $dokumen->update([
+                // Status dokumen berubah ke menunggu verifikasi setelah preview dan jalur approval selesai disiapkan.
                 'status_dokumen' => 'MENUNGGU_VERIFIKASI',
             ]);
 

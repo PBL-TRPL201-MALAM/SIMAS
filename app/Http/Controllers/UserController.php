@@ -12,6 +12,7 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
+    // Method ini menyiapkan halaman manajemen user untuk Super Admin, termasuk filter status aktif/nonaktif.
     public function index(Request $request): View
     {
         $status = $request->string('status')->toString();
@@ -37,11 +38,13 @@ class UserController extends Controller
             'users' => $usersQuery->get(),
             'activeCount' => User::query()->where('is_active', true)->count(),
             'inactiveCount' => User::query()->where('is_active', false)->count(),
+            // Role terbanyak dipakai sebagai ringkasan cepat komposisi akun di sistem.
             'topRole' => $topRole,
             'currentStatus' => $status,
         ]);
     }
 
+    // Form tambah user memakai daftar referensi agar role, jabatan, dan unit kerja tetap konsisten di seluruh sistem.
     public function create(): View
     {
         return view('super-admin.tambah-user', [
@@ -55,6 +58,7 @@ class UserController extends Controller
     {
         $validated = $request->validate($this->rules());
 
+        // Password selalu di-hash saat pembuatan akun agar tidak pernah tersimpan dalam bentuk plain text.
         User::create([
             'nama' => $validated['nama'],
             'username' => $validated['username'],
@@ -74,6 +78,7 @@ class UserController extends Controller
 
     public function edit(User $user): View
     {
+        // Halaman edit mengambil referensi dropdown yang sama dengan form tambah agar perubahan data tetap seragam.
         return view('super-admin.profil', [
             'user' => $user,
             'roles' => $this->roles(),
@@ -86,6 +91,7 @@ class UserController extends Controller
     {
         $validated = $request->validate($this->rules($user));
 
+        // Update profil user sengaja dipisahkan dari reset password agar perubahan akses lebih terkontrol.
         $user->update([
             'nama' => $validated['nama'],
             'username' => $validated['username'],
@@ -104,6 +110,7 @@ class UserController extends Controller
 
     public function toggleStatus(User $user): RedirectResponse
     {
+        // Super Admin tidak boleh menonaktifkan dirinya sendiri agar tidak kehilangan akses pengelolaan sistem.
         if (auth()->id() === $user->user_id && $user->is_active) {
             return redirect()
                 ->route('super-admin.users.index')
@@ -126,6 +133,7 @@ class UserController extends Controller
     {
         $userId = $user?->user_id;
 
+        // Semua validasi pilihan mengacu ke helper referensi agar UI, validasi, dan database selalu sinkron.
         $rules = [
             'nama' => ['required', 'string', 'max:150'],
             'username' => [
@@ -148,6 +156,7 @@ class UserController extends Controller
         ];
 
         if ($user === null) {
+            // Password hanya wajib saat akun baru dibuat.
             $rules['password'] = ['required', 'string', 'min:8'];
         }
 
