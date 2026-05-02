@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// Model Verifikasi menyimpan setiap tahap approval dokumen.
+// Satu dokumen dapat memiliki beberapa baris verifikasi, dan kolom level menentukan urutan pemeriksa sampai penandatangan final.
 class Verifikasi extends Model
 {
     use HasFactory;
@@ -15,6 +17,7 @@ class Verifikasi extends Model
 
     protected $primaryKey = 'verifikasi_id';
 
+    // Fillable ini dipakai saat Admin/TU membangun ulang flow verifikasi bertingkat.
     protected $fillable = [
         'dokumen_id',
         'verifikator_id',
@@ -26,6 +29,7 @@ class Verifikasi extends Model
 
     protected function casts(): array
     {
+        // Cast memastikan level menjadi integer dan waktu verifikasi menjadi datetime saat dipakai di PHP.
         return [
             // Level menentukan urutan proses verifikasi bertingkat yang harus dilalui dokumen.
             'level' => 'integer',

@@ -1,5 +1,6 @@
 @include('template.header', ['pageTitle' => 'Dashboard', 'modalVariant' => 'none'])
 @include('template.verifikator-sidebar', ['activePage' => 'dashboard'])
+    <!-- Dashboard Verifikator menerima $stats dan $latestPending dari DashboardControllerverifikator. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -31,6 +32,7 @@
           </div>
 
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- $stats berisi hitungan verifikasi milik user login: menunggu, disetujui, ditolak, dan total selesai. -->
             <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
               <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
                 <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -79,7 +81,9 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
+                  <!-- forelse menampilkan dokumen yang levelnya sudah aktif untuk verifikator ini. -->
                   @forelse ($latestPending as $item)
+                    <!-- Blok php menentukan judul dan route detail berdasarkan jenis dokumen surat biasa atau SK. -->
                     @php
                       $isSk = $item->dokumen->jenis_dokumen === 'SURAT_KEPUTUSAN';
                       $judul = $isSk
@@ -96,6 +100,7 @@
                       <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level {{ $item->level }}</span></td>
                       <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->dokumen->created_at)->format('d M Y') }}</p></td>
                       <td class="px-5 py-3.5">
+                        <!-- Tombol Verifikasi membawa user ke halaman detail sebelum mengambil keputusan. -->
                         <a href="{{ $detailRoute }}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Verifikasi</a>
                       </td>
                     </tr>

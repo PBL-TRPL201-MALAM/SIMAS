@@ -51,9 +51,9 @@
 
   <body class="bg-white text-slate-900 antialiased overflow-x-hidden">
 
-    {{-- ============================================================
+    <!-- ============================================================
          NAVBAR
-    ============================================================ --}}
+    ============================================================ -->
     <header id="navbar" class="fixed inset-x-0 top-0 z-50 transition-all duration-500 bg-white/70 backdrop-blur-xl border-b border-slate-100/60">
       <nav class="mx-auto max-w-7xl px-6 lg:px-10 flex items-center justify-between h-16">
 
@@ -61,7 +61,7 @@
   <img src="{{ asset('images/logo.png') }}"
        alt="Logo SIMAS"
        class="h-8 w-auto object-contain" />
-  {{-- Hapus <span> ini kalau logo sudah include teks nama --}}
+  <!-- Hapus <span> ini kalau logo sudah include teks nama -->
   <span class="text-base font-bold tracking-tight text-slate-900">SIMAS</span>
 </a>
 
@@ -103,9 +103,9 @@
 
     <main>
 
-      {{-- ============================================================
+      <!-- ============================================================
            SECTION 1: HERO
-      ============================================================ --}}
+      ============================================================ -->
       <section id="hero" class="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
         <div class="absolute inset-0 -z-10 bg-gradient-to-br from-slate-50 via-white to-blue-50/40"></div>
         <div class="absolute -z-10 -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-100/70 to-sky-100/50 blur-3xl"></div>
@@ -151,21 +151,21 @@
       </section>
 
 
-      {{-- ============================================================
+      <!-- ============================================================
            SECTION 2: CAROUSEL PRODUK
            Gambar: simpan di public/images/carousel/
            - slide-1.png → screenshot dashboard utama
            - slide-2.png → screenshot form pengajuan
            - slide-3.png → screenshot alur verifikasi
-      ============================================================ --}}
+      ============================================================ -->
       <section id="showcase" class="py-20 sm:py-28 relative overflow-hidden bg-gradient-to-b from-slate-50/60 to-white">
 
-        {{-- Dekorasi background --}}
+        <!-- Dekorasi background -->
         <div class="absolute -z-10 top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-blue-50/60 blur-3xl pointer-events-none"></div>
 
         <div class="mx-auto max-w-6xl px-6 lg:px-10">
 
-          {{-- Section header --}}
+          <!-- Section header -->
           <div class="text-center mb-12">
             <span class="text-[11px] font-semibold tracking-widest text-blue-600 uppercase">Tampilan Produk</span>
             <h2 class="mt-2 text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
@@ -176,10 +176,10 @@
             </p>
           </div>
 
-          {{-- Carousel wrapper --}}
+          <!-- Carousel wrapper -->
           <div class="relative" id="carousel-wrapper">
 
-            {{-- Slide area --}}
+            <!-- Slide area -->
             <div class="overflow-hidden rounded-2xl shadow-2xl shadow-blue-100/60 ring-1 ring-slate-200/60"
               id="carousel-container"
               @mouseenter="pause"
@@ -187,7 +187,7 @@
 
               <div class="carousel-track" id="carousel-track">
 
-                {{-- SLIDE 1: Dashboard Utama --}}
+                <!-- SLIDE 1: Dashboard Utama -->
 <div class="carousel-slide">
   <div class="relative w-full aspect-video overflow-hidden">
     <img src="{{ asset('images/carousel/r1.png') }}"
@@ -215,10 +215,10 @@
   </div>
 </div>
 
-              </div>{{-- end track --}}
-            </div>{{-- end container --}}
+              </div><!-- end track -->
+            </div><!-- end container -->
 
-            {{-- Tombol Prev --}}
+            <!-- Tombol Prev -->
             <button id="carousel-prev" type="button"
               class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-6 w-11 h-11 rounded-full bg-white shadow-lg shadow-slate-200/80 border border-slate-100 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-200 hover:shadow-blue-100/60 active:scale-95 transition-all duration-200 z-10">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -226,7 +226,7 @@
               </svg>
             </button>
 
-            {{-- Tombol Next --}}
+            <!-- Tombol Next -->
             <button id="carousel-next" type="button"
               class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-6 w-11 h-11 rounded-full bg-white shadow-lg shadow-slate-200/80 border border-slate-100 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-200 hover:shadow-blue-100/60 active:scale-95 transition-all duration-200 z-10">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -234,12 +234,12 @@
               </svg>
             </button>
 
-          </div>{{-- end carousel-wrapper --}}
+          </div><!-- end carousel-wrapper -->
 
-          {{-- Caption + Dots --}}
+          <!-- Caption + Dots -->
           <div class="mt-8 flex flex-col items-center gap-5">
 
-            {{-- Caption teks per slide --}}
+            <!-- Caption teks per slide -->
             <div class="relative h-16 w-full max-w-lg text-center overflow-hidden">
 
               <div class="slide-caption absolute inset-0 flex flex-col items-center justify-center" data-slide="0">
@@ -259,7 +259,7 @@
 
             </div>
 
-            {{-- Dots indicator --}}
+            <!-- Dots indicator -->
             <div class="flex items-center gap-2" id="carousel-dots">
               <button type="button" data-dot="0"
                 class="carousel-dot active h-2 w-6 rounded-full bg-blue-600 transition-all duration-300"></button>
@@ -269,15 +269,15 @@
                 class="carousel-dot h-2 w-2 rounded-full bg-slate-300 hover:bg-slate-400 transition-all duration-300"></button>
             </div>
 
-          </div>{{-- end caption + dots --}}
+          </div><!-- end caption + dots -->
 
-        </div>{{-- end max-w --}}
+        </div><!-- end max-w -->
       </section>
 
 
-      {{-- ============================================================
+      <!-- ============================================================
            SECTION 3: FEATURES
-      ============================================================ --}}
+      ============================================================ -->
       <section id="fitur" class="py-24 sm:py-32 relative overflow-hidden">
         <div class="absolute inset-0 -z-10 bg-gradient-to-b from-white via-slate-50/50 to-white"></div>
         <div class="absolute -z-10 top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-blue-50/50 blur-3xl"></div>
@@ -313,9 +313,9 @@
       </section>
 
 
-      {{-- ============================================================
+      <!-- ============================================================
            SECTION 4: HOW IT WORKS
-      ============================================================ --}}
+      ============================================================ -->
       <section id="cara-kerja" class="py-24 sm:py-32 relative overflow-hidden">
         <div class="absolute inset-0 -z-10 bg-gradient-to-br from-slate-50/80 via-blue-50/20 to-white"></div>
         <div class="absolute -z-10 bottom-0 right-0 w-[500px] h-[400px] rounded-full bg-gradient-to-tl from-sky-100/40 to-transparent blur-3xl"></div>
@@ -347,9 +347,9 @@
       </section>
 
 
-      {{-- ============================================================
+      <!-- ============================================================
            SECTION 5: CTA
-      ============================================================ --}}
+      ============================================================ -->
       <section id="cta" class="py-20 sm:py-28">
         <div class="mx-auto max-w-5xl px-6 lg:px-8">
           <div class="relative rounded-3xl overflow-hidden px-8 py-16 sm:px-16 sm:py-20 text-center">
@@ -386,9 +386,9 @@
     </main>
 
 
-    {{-- ============================================================
+    <!-- ============================================================
          FOOTER
-    ============================================================ --}}
+    ============================================================ -->
     <footer id="footer" class="border-t border-slate-100/80 bg-gradient-to-b from-white to-slate-50/50">
       <div class="mx-auto max-w-7xl px-6 lg:px-10 py-12 lg:py-16">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -397,7 +397,7 @@
   <img src="{{ asset('images/logo.png') }}"
        alt="Logo SIMAS"
        class="h-8 w-auto object-contain" />
-  {{-- Hapus span di bawah ini kalau logo sudah include teks --}}
+  <!-- Hapus span di bawah ini kalau logo sudah include teks -->
   <span class="text-base font-bold text-slate-900">SIMAS</span>
 </a>
             <p class="mt-4 max-w-xs text-xs text-slate-400 font-light leading-relaxed">

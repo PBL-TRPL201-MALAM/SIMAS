@@ -1,5 +1,6 @@
 @include('template.header', ['pageTitle' => 'Buat Surat Baru', 'modalVariant' => 'pemohon'])
 @include('template.pemohon-sidebar', ['activePage' => 'buat-surat'])
+    <!-- View ini menampilkan wizard Pemohon untuk mengunggah draft DOCX dan mengisi data awal surat biasa. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -38,11 +39,13 @@
             </div>
 
             <div id="surat-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
+              <!-- Step 1 hanya memilih file draft; file ini tetap dikirim bersama form di step 2 melalui atribut form="surat-biasa-form". -->
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 1 - Upload Draft Surat</h2>
                 <p class="text-xs text-slate-400 font-light mt-0.5">Siapkan draft surat dalam format DOCX lalu unggah ke sistem.</p>
               </div>
               <div class="px-6 py-6 space-y-5">
+                <!-- Error validasi dari PemohonSuratControllerstore muncul di sini setelah redirect back. -->
                 @if ($errors->any())
                   <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
                     {{ $errors->first() }}
@@ -69,6 +72,7 @@
                     </div>
                     <input id="surat-file-input" name="draft_surat" form="surat-biasa-form" type="file" accept=".docx" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                   </div>
+                  <!-- Preview nama file diisi oleh JavaScript agar user tahu file DOCX mana yang akan dikirim. -->
                   <div id="surat-file-preview" class="hidden flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-2.5 mt-2">
                     <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <p id="surat-file-name" class="text-[11px] font-medium text-blue-700 truncate"></p>
@@ -88,11 +92,13 @@
             </div>
 
             <div id="surat-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
+              <!-- Step 2 berisi form utama; action route pemohon.surat.store diproses oleh PemohonSuratControllerstore. -->
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 2 - Data Surat</h2>
                 <p class="text-xs text-slate-400 font-light mt-0.5">Lengkapi informasi awal surat yang akan diajukan.</p>
               </div>
               <form id="surat-biasa-form" action="{{ route('pemohon.surat.store') }}" method="POST" enctype="multipart/form-data" class="px-6 py-6 space-y-5">
+                <!-- csrf wajib untuk form POST Laravel dan enctype diperlukan karena form mengirim file DOCX. -->
                 @csrf
                 <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-2.5">
                   <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -101,12 +107,14 @@
                 </div>
                 <div class="space-y-1.5">
                   <label class="block text-xs font-semibold text-slate-700 tracking-wide">Perihal <span class="text-blue-400">*</span></label>
+                  <!-- old('perihal') menjaga input tetap terisi jika validasi gagal. -->
                   <input type="text" name="perihal" value="{{ old('perihal') }}" placeholder="Contoh: Permohonan Izin Penelitian Lapangan"
                     class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                   <p class="text-[10px] text-slate-400 font-light">Tuliskan pokok/inti dari surat yang diajukan.</p>
                 </div>
                 <div class="space-y-1.5">
                   <label class="block text-xs font-semibold text-slate-700 tracking-wide">Ringkasan Isi Surat <span class="text-blue-400">*</span></label>
+                  <!-- Ringkasan dikirim sebagai data awal surat_biasa agar Admin/TU memahami isi pengajuan sebelum memeriksa DOCX. -->
                   <textarea name="ringkasan" rows="5" placeholder="Tuliskan ringkasan isi surat secara singkat dan jelas..."
                     class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('ringkasan') }}</textarea>
                   <p class="text-[10px] text-slate-400 font-light">Ringkasan ini membantu Admin/TU memahami isi surat sebelum memeriksa file DOCX.</p>

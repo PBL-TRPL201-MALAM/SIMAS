@@ -22,9 +22,9 @@
 
   <body class="bg-slate-50 antialiased overflow-hidden h-screen">
 
-  {{-- ================================================================
+  <!-- ================================================================
        TOAST NOTIFICATION — muncul di pojok kanan bawah
-  ================================================================ --}}
+  ================================================================ -->
   <div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
     <div class="flex items-center gap-3 rounded-2xl bg-slate-900 px-4 py-3 shadow-xl shadow-slate-900/20 min-w-[220px]">
       <div id="toast-icon" class="w-5 h-5 shrink-0"></div>
@@ -32,12 +32,12 @@
     </div>
   </div>
 
-  {{-- ================================================================
+  <!-- ================================================================
        MODAL DETAIL DOKUMEN
-  ================================================================ --}}
+  ================================================================ -->
   <div id="modal-overlay" class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="relative w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
-      {{-- Modal header --}}
+      <!-- Modal header -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
         <div>
           <h3 class="text-sm font-bold text-slate-900">Detail Dokumen</h3>
@@ -47,7 +47,7 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
       </div>
-      {{-- Modal body --}}
+      <!-- Modal body -->
       <div class="px-6 py-5 space-y-3">
         <div class="grid grid-cols-2 gap-3">
           <div class="rounded-xl bg-slate-50 px-4 py-3">
@@ -72,7 +72,7 @@
           <p id="modal-keterangan" class="text-xs text-slate-600 font-light leading-relaxed"></p>
         </div>
       </div>
-      {{-- Modal footer --}}
+      <!-- Modal footer -->
       <div id="modal-footer" class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
         <button id="modal-close-btn" type="button"
           class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700 transition-all duration-200">
@@ -89,24 +89,24 @@
 
   <div class="flex h-screen w-full overflow-hidden">
 
-    {{-- ================================================================
+    <!-- ================================================================
          SIDEBAR
-    ================================================================ --}}
+    ================================================================ -->
     <aside id="sidebar" class="relative flex flex-col w-64 shrink-0 bg-white border-r border-slate-100 h-screen overflow-y-auto z-30 transition-all duration-300">
 
       <div class="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-50/80 blur-2xl pointer-events-none"></div>
 
-      {{-- Logo --}}
-      {{-- Logo --}}
+      <!-- Logo -->
+      <!-- Logo -->
 <div class="relative flex items-center gap-2.5 px-5 h-16 border-b border-slate-100/80 shrink-0">
   <img src="{{ asset('images/logo.png') }}"
        alt="Logo SIMAS"
        class="h-7 w-auto object-contain" />
-  {{-- Hapus span ini kalau logo sudah include teks --}}
+  <!-- Hapus span ini kalau logo sudah include teks -->
   <span class="text-sm font-bold tracking-tight text-slate-900">SIMAS</span>
 </div>
 
-      {{-- Navigasi --}}
+      <!-- Navigasi -->
       <nav class="flex-1 px-3 py-4 space-y-0.5">
 
         <p class="px-2 pb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Menu Utama</p>
@@ -167,7 +167,7 @@
 
       </nav>
 
-      {{-- Profil & Logout --}}
+      <!-- Profil & Logout -->
       <div class="px-3 py-4 border-t border-slate-100/80 shrink-0 space-y-0.5">
         <a href="#" data-page="profil"
            class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
@@ -187,12 +187,12 @@
     </aside>
 
 
-    {{-- ================================================================
+    <!-- ================================================================
          AREA KONTEN UTAMA
-    ================================================================ --}}
+    ================================================================ -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
-      {{-- Topbar --}}
+      <!-- Topbar -->
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -203,7 +203,7 @@
           <h1 id="page-title" class="text-sm font-bold text-slate-900">Dashboard</h1>
           <p id="page-subtitle" class="text-[11px] text-slate-400 font-light">Selamat datang di SIMAS</p>
         </div>
-        {{-- Icon user profil --}}
+        <!-- Icon user profil -->
         <button type="button" data-page="profil"
           class="nav-link w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200">
           <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
@@ -212,13 +212,13 @@
         </button>
       </header>
 
-      {{-- Konten --}}
+      <!-- Konten -->
       <main class="flex-1 overflow-y-auto p-6">
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: DASHBOARD
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-dashboard" class="page-content space-y-6">
 
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -238,7 +238,7 @@
             </div>
           </div>
 
-          {{-- Stats Cards — semua biru --}}
+          <!-- Stats Cards — semua biru -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
             <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
@@ -275,10 +275,10 @@
 
           </div>
 
-          {{-- Tabel + Aktivitas --}}
+          <!-- Tabel + Aktivitas -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-            {{-- Tabel dokumen terbaru --}}
+            <!-- Tabel dokumen terbaru -->
             <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <h3 class="text-sm font-semibold text-slate-800">Dokumen Terbaru</h3>
@@ -324,7 +324,7 @@
               </div>
             </div>
 
-            {{-- Aktivitas --}}
+            <!-- Aktivitas -->
             <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-5 py-4 border-b border-slate-100">
                 <h3 class="text-sm font-semibold text-slate-800">Aktivitas Terbaru</h3>
@@ -367,13 +367,13 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: BUAT SURAT BARU — 2 STEP WIZARD
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-buat-surat" class="page-content hidden">
           <div class="max-w-2xl mx-auto">
 
-            {{-- Step indicator --}}
+            <!-- Step indicator -->
             <div class="flex items-center mb-6">
               <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="surat-step2-circle-wrap">
@@ -390,7 +390,7 @@
               </div>
             </div>
 
-            {{-- Step 1 --}}
+            <!-- Step 1 -->
             <div id="surat-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 1 — Upload Draft Surat</h2>
@@ -435,7 +435,7 @@
               </div>
             </div>
 
-            {{-- Step 2 --}}
+            <!-- Step 2 -->
             <div id="surat-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 2 — Data Surat</h2>
@@ -479,13 +479,13 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: BUAT PENGAJUAN SK — 3 STEP WIZARD
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-buat-sk" class="page-content hidden">
           <div class="max-w-2xl mx-auto">
 
-            {{-- Step indicator --}}
+            <!-- Step indicator -->
             <div class="flex items-center mb-6">
               <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="sk-circle-1"><span class="text-[11px] font-bold text-white">1</span></div>
@@ -503,7 +503,7 @@
               </div>
             </div>
 
-            {{-- Step 1 --}}
+            <!-- Step 1 -->
             <div id="sk-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 1 — Data Surat Keputusan</h2>
@@ -543,7 +543,7 @@
               </div>
             </div>
 
-            {{-- Step 2 --}}
+            <!-- Step 2 -->
             <div id="sk-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 2 — Dasar Hukum (Mengingat)</h2>
@@ -589,7 +589,7 @@
               </div>
             </div>
 
-            {{-- Step 3 --}}
+            <!-- Step 3 -->
             <div id="sk-step-3" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 3 — Review & Submit</h2>
@@ -622,23 +622,23 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: SURAT SAYA — Tabel + Filter + Aksi
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-surat-saya" class="page-content hidden space-y-4">
 
-          {{-- Header + Filter --}}
+          <!-- Header + Filter -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h2 class="text-sm font-bold text-slate-900">Surat Saya</h2>
             <div class="flex items-center gap-2 flex-wrap">
-              {{-- Filter status --}}
+              <!-- Filter status -->
               <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1">
                 <button data-filter="semua" data-target="surat" class="filter-btn active-filter rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white bg-blue-600 transition-all duration-200">Semua</button>
                 <button data-filter="diproses" data-target="surat" class="filter-btn rounded-lg px-3 py-1.5 text-[11px] font-medium text-slate-500 hover:bg-slate-50 transition-all duration-200">Diproses</button>
                 <button data-filter="published" data-target="surat" class="filter-btn rounded-lg px-3 py-1.5 text-[11px] font-medium text-slate-500 hover:bg-slate-50 transition-all duration-200">Published</button>
                 <button data-filter="ditolak" data-target="surat" class="filter-btn rounded-lg px-3 py-1.5 text-[11px] font-medium text-slate-500 hover:bg-slate-50 transition-all duration-200">Ditolak</button>
               </div>
-              {{-- Buat baru --}}
+              <!-- Buat baru -->
               <a href="#" data-page="buat-surat" class="quick-nav inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition-all duration-200">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
                 Buat Baru
@@ -646,7 +646,7 @@
             </div>
           </div>
 
-          {{-- Tabel --}}
+          <!-- Tabel -->
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full" id="tabel-surat">
@@ -703,7 +703,7 @@
                 </tbody>
               </table>
             </div>
-            {{-- Empty state --}}
+            <!-- Empty state -->
             <div id="surat-empty" class="hidden flex flex-col items-center justify-center py-16 text-center">
               <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-3">
                 <svg class="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -715,9 +715,9 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: SK SAYA — Tabel + Filter + Aksi
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-sk-saya" class="page-content hidden space-y-4">
 
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -785,9 +785,9 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: PROFIL — Placeholder
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-profil" class="page-content hidden">
           <div class="flex flex-col items-center justify-center h-64 text-center">
             <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-3">

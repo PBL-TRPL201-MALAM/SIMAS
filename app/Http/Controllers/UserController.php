@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
+// Controller ini menangani CRUD user untuk Super Admin.
+// Di Laravel, route model binding otomatis mengisi parameter User $user dari ID di URL.
 class UserController extends Controller
 {
     // Method ini menyiapkan halaman manajemen user untuk Super Admin, termasuk filter status aktif/nonaktif.
@@ -17,6 +19,7 @@ class UserController extends Controller
     {
         $status = $request->string('status')->toString();
 
+        // Query daftar user dibuat sebagai builder dulu supaya filter status bisa ditambahkan bertahap.
         $usersQuery = User::query()->orderByDesc('user_id');
 
         if ($status === 'active') {
@@ -27,6 +30,7 @@ class UserController extends Controller
             $usersQuery->where('is_active', false);
         }
 
+        // Query agregasi ini menghitung jumlah user per role untuk ringkasan dashboard/list user.
         $roleStats = User::query()
             ->selectRaw('role, COUNT(*) as total')
             ->groupBy('role')
@@ -56,6 +60,7 @@ class UserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // Validasi request melindungi tabel users dari email/username duplikat dan pilihan role yang tidak dikenal.
         $validated = $request->validate($this->rules());
 
         // Password selalu di-hash saat pembuatan akun agar tidak pernah tersimpan dalam bentuk plain text.
@@ -71,11 +76,13 @@ class UserController extends Controller
             'is_active' => (bool) ($validated['is_active'] ?? true),
         ]);
 
+        // Setelah user dibuat, Super Admin dikembalikan ke daftar user agar langsung melihat hasil tambah data.
         return redirect()
             ->route('super-admin.users.index')
             ->with('status', 'User berhasil ditambahkan.');
     }
 
+    // Method ini menampilkan form edit untuk user yang dipilih melalui route model binding.
     public function edit(User $user): View
     {
         // Halaman edit mengambil referensi dropdown yang sama dengan form tambah agar perubahan data tetap seragam.
@@ -87,11 +94,14 @@ class UserController extends Controller
         ]);
     }
 
+    // Method ini memproses perubahan data user tanpa mengubah password.
     public function update(Request $request, User $user): RedirectResponse
     {
+        // Rule unique memakai ignore($userId) supaya user bisa menyimpan email/username miliknya sendiri.
         $validated = $request->validate($this->rules($user));
 
         if ($this->isSelfDeactivationAttempt($user, $validated)) {
+            // Redirect balik ke form edit memberi pesan error tanpa membuang input yang sudah diketik.
             return redirect()
                 ->route('super-admin.users.edit', $user)
                 ->withErrors(['status' => 'Super Admin yang sedang login tidak bisa menonaktifkan akun sendiri.'])
@@ -99,6 +109,7 @@ class UserController extends Controller
         }
 
         if (! $this->canKeepAtLeastOneActiveSuperAdmin($user, $validated)) {
+            // Validasi bisnis ini menjaga sistem tetap memiliki minimal satu akun pengelola aktif.
             return redirect()
                 ->route('super-admin.users.edit', $user)
                 ->withErrors(['status' => 'Minimal harus ada 1 user SUPER_ADMIN yang tetap aktif di sistem.'])
@@ -117,11 +128,13 @@ class UserController extends Controller
             'is_active' => (bool) ($validated['is_active'] ?? true),
         ]);
 
+        // Redirect ke halaman edit yang sama agar Super Admin tetap berada pada konteks user yang baru diperbarui.
         return redirect()
             ->route('super-admin.users.edit', $user)
             ->with('status', 'Data user berhasil diperbarui.');
     }
 
+    // Method ini mengaktifkan atau menonaktifkan user tanpa membuka form edit penuh.
     public function toggleStatus(User $user): RedirectResponse
     {
         // Super Admin tidak boleh menonaktifkan dirinya sendiri agar tidak kehilangan akses pengelolaan sistem.
@@ -188,6 +201,7 @@ class UserController extends Controller
      */
     private function roles(): array
     {
+        // Helper reference dipakai agar daftar role di controller sama dengan pilihan di UI.
         return UserReferenceOptions::roles();
     }
 
@@ -196,6 +210,7 @@ class UserController extends Controller
      */
     private function jabatans(): array
     {
+        // Jabatan diambil dari satu sumber agar validasi dan dropdown tidak berbeda.
         return UserReferenceOptions::jabatans();
     }
 
@@ -204,6 +219,7 @@ class UserController extends Controller
      */
     private function unitKerjas(): array
     {
+        // Unit kerja juga dipusatkan agar perubahan referensi cukup dilakukan di helper.
         return UserReferenceOptions::unitKerjas();
     }
 
@@ -212,6 +228,7 @@ class UserController extends Controller
      */
     private function isSelfDeactivationAttempt(User $user, array $validated): bool
     {
+        // Cek ini mencegah Super Admin mengunci dirinya sendiri dari aplikasi.
         return auth()->id() === $user->user_id
             && $user->is_active
             && ! (bool) ($validated['is_active'] ?? true);
@@ -222,6 +239,7 @@ class UserController extends Controller
      */
     private function canKeepAtLeastOneActiveSuperAdmin(User $user, array $validated): bool
     {
+        // Method ini mengecek apakah perubahan role/status masih menyisakan minimal satu SUPER_ADMIN aktif.
         $currentIsActiveSuperAdmin = $user->role === 'SUPER_ADMIN' && $user->is_active;
         $willRemainActiveSuperAdmin = ($validated['role'] ?? $user->role) === 'SUPER_ADMIN'
             && (bool) ($validated['is_active'] ?? $user->is_active);
@@ -235,6 +253,7 @@ class UserController extends Controller
 
     private function hasAnotherActiveSuperAdmin(User $user): bool
     {
+        // Query exists lebih ringan daripada get/count karena cukup mencari apakah ada satu admin aktif lain.
         return User::query()
             ->where('role', 'SUPER_ADMIN')
             ->where('is_active', true)

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+// Model User adalah representasi tabel users sekaligus model autentikasi Laravel.
+// Karena extend Authenticatable, model ini bisa dipakai langsung oleh Auth::login(), auth()->user(), dan middleware auth.
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -16,8 +18,10 @@ class User extends Authenticatable
     // Model ini mewakili semua akun yang terlibat di SIMAS, baik pemohon, admin, verifikator, maupun super admin.
     protected $table = 'users';
 
+    // Primary key disesuaikan dengan nama kolom di database SIMAS, bukan default Laravel yaitu id.
     protected $primaryKey = 'user_id';
 
+    // Fillable menentukan kolom yang boleh diisi mass assignment lewat User::create() atau $user->update().
     protected $fillable = [
         'nama',
         'username',
@@ -32,6 +36,7 @@ class User extends Authenticatable
         'is_active',
     ];
 
+    // Hidden membuat password dan remember_token tidak ikut muncul saat model diubah menjadi array/JSON.
     protected $hidden = [
         'password',
         'remember_token',
@@ -44,6 +49,7 @@ class User extends Authenticatable
      */
     protected function casts(): array
     {
+        // Cast mengubah tipe data database menjadi tipe PHP yang lebih nyaman dipakai di controller/view.
         return [
             'email_verified_at' => 'datetime',
             'is_active' => 'boolean',

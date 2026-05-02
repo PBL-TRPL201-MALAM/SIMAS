@@ -16,13 +16,17 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+// Controller ini menangani area Verifikator: melihat dokumen yang menunggu, membaca detail, preview/unduh PDF, lalu memberi keputusan.
+// Alur bisnis penting di sini adalah verifikasi bertingkat: level berikutnya baru boleh bekerja setelah level sebelumnya menyetujui.
 class VerifikatorSuratController extends Controller
 {
+    // Service PDF dipakai ulang untuk memperbarui preview setelah verifikator menyetujui dokumen.
     public function __construct(
         protected PreviewVerifikasiPdfGenerator $previewVerifikasiPdfGenerator
     ) {
     }
 
+    // Method ini menampilkan surat biasa yang sedang menunggu keputusan verifikator login.
     public function menunggu(Request $request): View
     {
         // Halaman ini hanya menampilkan surat yang memang sudah terbuka untuk diproses oleh verifikator login.
@@ -30,6 +34,7 @@ class VerifikatorSuratController extends Controller
             'suratMenunggu' => $this->baseQuery($request)
                 ->where('status_verifikasi', 'MENUNGGU')
                 ->whereHas('dokumen', fn (Builder $query) => $query->where('status_dokumen', 'MENUNGGU_VERIFIKASI'))
+                // Subquery ini memastikan level saat ini belum muncul jika level sebelumnya belum DISETUJUI.
                 ->whereNotExists(function ($query) {
                     $query->selectRaw('1')
                         ->from('verifikasi as previous_levels')
@@ -42,12 +47,14 @@ class VerifikatorSuratController extends Controller
         ]);
     }
 
+    // Method ini menampilkan SK yang menunggu verifikasi dengan aturan level bertingkat yang sama.
     public function skMenunggu(Request $request): View
     {
         return view('verifikator.sk-menunggu', [
             'skMenunggu' => $this->baseSkQuery($request)
                 ->where('status_verifikasi', 'MENUNGGU')
                 ->whereHas('dokumen', fn (Builder $query) => $query->where('status_dokumen', 'MENUNGGU_VERIFIKASI'))
+                // Subquery ini menjaga agar verifikator tidak memproses SK sebelum giliran levelnya aktif.
                 ->whereNotExists(function ($query) {
                     $query->selectRaw('1')
                         ->from('verifikasi as previous_levels')
@@ -60,6 +67,7 @@ class VerifikatorSuratController extends Controller
         ]);
     }
 
+    // Method ini menampilkan riwayat surat biasa yang pernah disetujui oleh verifikator login.
     public function disetujui(Request $request): View
     {
         // Riwayat ini membantu verifikator melihat dokumen apa saja yang pernah ia setujui.
@@ -71,6 +79,7 @@ class VerifikatorSuratController extends Controller
         ]);
     }
 
+    // Method ini menampilkan riwayat surat biasa yang pernah ditolak oleh verifikator login.
     public function ditolak(Request $request): View
     {
         // Riwayat penolakan dipakai untuk meninjau ulang dokumen yang pernah dikembalikan ke Admin/TU.
@@ -82,6 +91,7 @@ class VerifikatorSuratController extends Controller
         ]);
     }
 
+    // Method ini menampilkan seluruh surat biasa yang pernah ditugaskan ke verifikator login.
     public function semua(Request $request): View
     {
         // Halaman semua surat merangkum seluruh dokumen yang pernah masuk ke verifikator, apa pun status tahapnya.
@@ -92,19 +102,23 @@ class VerifikatorSuratController extends Controller
         ]);
     }
 
+    // Method ini mengunduh PDF dokumen yang ditugaskan kepada verifikator.
     public function downloadPdf(Request $request, Dokumen $dokumen): BinaryFileResponse
     {
+        // Guard ini memastikan URL unduh tidak bisa dipakai oleh verifikator yang tidak ditugaskan.
         $this->ensureAssignedToVerifikator($request, $dokumen);
 
         $pdfFile = $this->resolvePdfFileForDokumen($dokumen);
         abort_unless($pdfFile, 404);
 
+        // response()->download mengirim file sebagai attachment dengan nama unduhan resmi SIMAS.
         return response()->download(
             Storage::disk('public')->path($pdfFile->file_path),
             SuratPdfDownloadName::forDokumen($dokumen)
         );
     }
 
+    // Method ini menampilkan PDF secara inline agar verifikator bisa membaca dokumen sebelum mengambil keputusan.
     public function previewPdf(Request $request, Dokumen $dokumen): StreamedResponse
     {
         $this->ensureAssignedToVerifikator($request, $dokumen);
@@ -124,6 +138,7 @@ class VerifikatorSuratController extends Controller
         );
     }
 
+    // Method ini menampilkan detail surat biasa beserta file preview dan status apakah masih bisa diproses.
     public function detailSurat(Request $request, Dokumen $dokumen): View
     {
         // Detail surat dipakai verifikator untuk membaca dokumen lengkap sebelum memberi keputusan setuju atau tolak.
@@ -156,6 +171,7 @@ class VerifikatorSuratController extends Controller
         ]);
     }
 
+    // Method ini menampilkan detail Surat Keputusan dengan relasi khusus SK.
     public function detailSk(Request $request, Dokumen $dokumen): View
     {
         $verifikasi = $this->resolveVerifikasiForDokumen(
@@ -185,8 +201,10 @@ class VerifikatorSuratController extends Controller
         ]);
     }
 
+    // Method ini memproses keputusan setuju/tolak dari form verifikasi.
     public function proses(Request $request, Verifikasi $verifikasi): RedirectResponse
     {
+        // Verifikator hanya boleh memproses baris verifikasi yang memang ditugaskan kepadanya.
         abort_unless($verifikasi->verifikator_id === $request->user()->user_id, 403);
 
         $verifikasi->loadMissing(['dokumen.verifikasi']);
@@ -209,6 +227,8 @@ class VerifikatorSuratController extends Controller
                 ->withInput();
         }
 
+        // Transaction dipakai karena perubahan status verifikasi dan status dokumen harus konsisten.
+        // Contohnya, jika level terakhir setuju, dokumen harus ikut berubah menjadi SIAP_PUBLISH.
         DB::transaction(function () use ($verifikasi, $validated): void {
             if ($validated['keputusan'] === 'setuju') {
                 $verifikasi->update([
@@ -259,6 +279,7 @@ class VerifikatorSuratController extends Controller
             $this->refreshPreviewVerifikasiPdf($verifikasi, $request->user()->user_id);
         }
 
+        // Setelah keputusan disimpan, user kembali ke daftar menunggu sesuai jenis dokumennya.
         return redirect()
             ->route($verifikasi->dokumen->jenis_dokumen === 'SURAT_KEPUTUSAN'
                 ? 'verifikator.sk-menunggu'
@@ -268,6 +289,7 @@ class VerifikatorSuratController extends Controller
                 : 'Dokumen berhasil ditolak dan dikembalikan untuk revisi.');
     }
 
+    // Helper query dasar surat biasa yang ditugaskan ke verifikator login.
     protected function baseQuery(Request $request): Builder
     {
         // Query dasar ini dipakai ulang oleh beberapa halaman verifikator agar sumber datanya tetap konsisten.
@@ -283,6 +305,7 @@ class VerifikatorSuratController extends Controller
             ->where('verifikator_id', $request->user()->user_id);
     }
 
+    // Helper query dasar SK yang ditugaskan ke verifikator login.
     protected function baseSkQuery(Request $request): Builder
     {
         return Verifikasi::query()
@@ -297,6 +320,7 @@ class VerifikatorSuratController extends Controller
             ->where('verifikator_id', $request->user()->user_id);
     }
 
+    // Helper ini mengambil baris verifikasi untuk detail dokumen dan sekaligus memastikan jenis dokumennya benar.
     protected function resolveVerifikasiForDokumen(Request $request, Dokumen $dokumen, string $jenisDokumen, array $with = []): Verifikasi
     {
         abort_unless($dokumen->jenis_dokumen === $jenisDokumen, 404);
@@ -309,6 +333,7 @@ class VerifikatorSuratController extends Controller
             ->firstOrFail();
     }
 
+    // Helper guard akses file: hanya verifikator yang ada dalam flow dokumen boleh preview/unduh.
     protected function ensureAssignedToVerifikator(Request $request, Dokumen $dokumen): void
     {
         // Guard tambahan ini menutup akses langsung ke URL unduh/preview jika user bukan bagian dari jalur verifikasi dokumen itu.
@@ -318,6 +343,7 @@ class VerifikatorSuratController extends Controller
         );
     }
 
+    // Helper ini memilih PDF terbaik yang bisa dibaca verifikator sesuai jenis dokumen.
     protected function resolvePdfFileForDokumen(Dokumen $dokumen): ?DokumenFile
     {
         $preferredTypes = $dokumen->jenis_dokumen === 'SURAT_KEPUTUSAN'
@@ -339,6 +365,7 @@ class VerifikatorSuratController extends Controller
         return null;
     }
 
+    // Helper ini menentukan apakah level verifikasi saat ini sudah boleh diproses.
     protected function canProcessVerifikasi(Verifikasi $verifikasi): bool
     {
         if ($verifikasi->status_verifikasi !== 'MENUNGGU') {
@@ -353,8 +380,10 @@ class VerifikatorSuratController extends Controller
             ->contains(fn (Verifikasi $item) => $item->status_verifikasi !== 'DISETUJUI');
     }
 
+    // Helper ini membuat ulang preview PDF setelah ada persetujuan agar tanda verifikasi terbaru ikut terlihat.
     protected function refreshPreviewVerifikasiPdf(Verifikasi $verifikasi, int $actorId): void
     {
+        // Relasi diload ulang dari database agar generator membaca status verifikasi paling baru.
         $dokumen = $verifikasi->dokumen()->with([
             'suratBiasa',
             'posisiElemenDokumen',
@@ -366,6 +395,7 @@ class VerifikatorSuratController extends Controller
             return;
         }
 
+        // File sumber tetap PDF hasil pemeriksaan; preview baru akan ditempel ulang dengan data verifikasi terbaru.
         $sourcePdf = $dokumen->dokumenFiles
             ->where('file_type', 'HASIL_PEMERIKSAAN_PDF')
             ->sortByDesc('file_id')

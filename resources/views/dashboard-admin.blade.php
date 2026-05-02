@@ -22,9 +22,9 @@
 
   <body class="bg-slate-50 antialiased overflow-hidden h-screen">
 
-  {{-- ================================================================
+  <!-- ================================================================
        TOAST NOTIFICATION
-  ================================================================ --}}
+  ================================================================ -->
   <div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
     <div class="flex items-center gap-3 rounded-2xl bg-slate-900 px-4 py-3 shadow-xl min-w-[220px]">
       <div id="toast-icon" class="w-5 h-5 shrink-0"></div>
@@ -32,9 +32,9 @@
     </div>
   </div>
 
-  {{-- ================================================================
+  <!-- ================================================================
        MODAL DETAIL DOKUMEN
-  ================================================================ --}}
+  ================================================================ -->
   <div id="modal-overlay" class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="relative w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
@@ -93,27 +93,27 @@
 
   <div class="flex h-screen w-full overflow-hidden">
 
-    {{-- ================================================================
+    <!-- ================================================================
          SIDEBAR ADMIN/TU
-    ================================================================ --}}
+    ================================================================ -->
     <aside id="sidebar" class="relative flex flex-col w-64 shrink-0 bg-white border-r border-slate-100 h-screen overflow-y-auto z-30 transition-all duration-300">
 
       <div class="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-50/80 blur-2xl pointer-events-none"></div>
 
-      {{-- Logo --}}
-      {{-- Logo --}}
+      <!-- Logo -->
+      <!-- Logo -->
 <div class="relative flex items-center gap-2.5 px-5 h-16 border-b border-slate-100/80 shrink-0">
   <img src="{{ asset('images/logo.png') }}"
        alt="Logo SIMAS"
        class="h-7 w-auto object-contain" />
   <div>
-    {{-- Hapus span pertama ini kalau logo sudah include teks --}}
+    <!-- Hapus span pertama ini kalau logo sudah include teks -->
     <span class="text-sm font-bold tracking-tight text-slate-900 block">SIMAS</span>
     <span class="text-[10px] font-medium text-blue-500">Admin / TU</span>
   </div>
 </div>
 
-      {{-- Nav --}}
+      <!-- Nav -->
       <nav class="flex-1 px-3 py-4 space-y-0.5">
 
         <p class="px-2 pb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Menu Utama</p>
@@ -126,7 +126,7 @@
           <span>Dashboard</span>
         </a>
 
-        {{-- Surat Biasa --}}
+        <!-- Surat Biasa -->
         <div class="pt-3 pb-1.5">
           <p class="px-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Surat Biasa</p>
         </div>
@@ -150,7 +150,7 @@
           <span>Semua Surat</span>
         </a>
 
-        {{-- SK --}}
+        <!-- SK -->
         <div class="pt-3 pb-1.5">
           <p class="px-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Surat Keputusan</p>
         </div>
@@ -174,7 +174,7 @@
           <span>Semua SK</span>
         </a>
 
-        {{-- Master Data --}}
+        <!-- Master Data -->
         <div class="pt-3 pb-1.5">
           <p class="px-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Master Data</p>
         </div>
@@ -189,7 +189,7 @@
 
       </nav>
 
-      {{-- Profil & Logout --}}
+      <!-- Profil & Logout -->
       <div class="px-3 py-4 border-t border-slate-100/80 shrink-0 space-y-0.5">
         <a href="#" data-page="profil"
            class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
@@ -209,12 +209,12 @@
     </aside>
 
 
-    {{-- ================================================================
+    <!-- ================================================================
          AREA KONTEN UTAMA
-    ================================================================ --}}
+    ================================================================ -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
-      {{-- Topbar --}}
+      <!-- Topbar -->
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="lg:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -236,9 +236,9 @@
       <main class="flex-1 overflow-y-auto p-6">
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: DASHBOARD
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-dashboard" class="page-content space-y-6">
 
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -252,7 +252,7 @@
             </a>
           </div>
 
-          {{-- Stats --}}
+          <!-- Stats -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
               <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
@@ -284,7 +284,7 @@
             </div>
           </div>
 
-          {{-- Tabel pengajuan terbaru --}}
+          <!-- Tabel pengajuan terbaru -->
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <h3 class="text-sm font-semibold text-slate-800">Pengajuan Masuk Terbaru</h3>
@@ -345,9 +345,9 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: PENGAJUAN MASUK (Surat Biasa)
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-pengajuan-masuk" class="page-content hidden space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h2 class="text-sm font-bold text-slate-900">Pengajuan Surat Masuk</h2>
@@ -407,16 +407,16 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: PROSES SURAT — MULTI-STEP WIZARD 3 STEP
              Step 1: Upload PDF + Isi Metadata
              Step 2: Atur Posisi Elemen (nomor, tanggal, TTE)
              Step 3: Tentukan Tingkat Verifikasi
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-proses-surat" class="page-content hidden">
           <div class="max-w-2xl mx-auto">
 
-            {{-- Info surat yang diproses --}}
+            <!-- Info surat yang diproses -->
             <div id="proses-info-bar" class="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3 mb-5">
               <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <div class="min-w-0">
@@ -426,7 +426,7 @@
               <button id="proses-back-to-list" type="button" class="ml-auto text-[10px] font-medium text-blue-500 hover:text-blue-700 shrink-0 transition-colors duration-200">← Kembali ke daftar</button>
             </div>
 
-            {{-- Step Indicator --}}
+            <!-- Step Indicator -->
             <div class="flex items-center mb-6">
               <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="proses-circle-1"><span class="text-[11px] font-bold text-white">1</span></div>
@@ -445,7 +445,7 @@
             </div>
 
 
-            {{-- STEP 1: Upload PDF + Metadata --}}
+            <!-- STEP 1: Upload PDF + Metadata -->
             <div id="proses-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 1 — Upload PDF & Data Surat</h2>
@@ -453,7 +453,7 @@
               </div>
               <div class="px-6 py-6 space-y-5">
 
-                {{-- Upload PDF --}}
+                <!-- Upload PDF -->
                 <div class="space-y-1.5">
                   <label class="block text-xs font-semibold text-slate-700 tracking-wide">Unggah Draf PDF <span class="text-blue-400">*</span></label>
                   <div id="pdf-drop-zone" class="relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-6 py-8 hover:border-blue-300 hover:bg-blue-50/30 transition-all duration-200 cursor-pointer">
@@ -479,14 +479,14 @@
                   <p class="text-xs font-semibold text-slate-700 mb-4">Metadata Surat</p>
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                    {{-- 1. Unit Kerja --}}
+                    <!-- 1. Unit Kerja -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Unit Kerja / Unit Pengolah <span class="text-blue-400">*</span></label>
                       <input type="text" name="unit_kerja" placeholder="Contoh: Tata Usaha Jurusan TRPL"
                         class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                     </div>
 
-                    {{-- 2. Penanda Tangan --}}
+                    <!-- 2. Penanda Tangan -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Penanda Tangan <span class="text-blue-400">*</span></label>
                       <select name="penanda_tangan" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
@@ -499,7 +499,7 @@
                       </select>
                     </div>
 
-                    {{-- 3. Templat Surat --}}
+                    <!-- 3. Templat Surat -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Templat Surat</label>
                       <select name="templat" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
@@ -510,7 +510,7 @@
                       </select>
                     </div>
 
-                    {{-- 4. Versi Kop Surat --}}
+                    <!-- 4. Versi Kop Surat -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Versi Kop Surat</label>
                       <select name="versi_kop" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
@@ -521,7 +521,7 @@
                       </select>
                     </div>
 
-                    {{-- 5. Jenis --}}
+                    <!-- 5. Jenis -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Jenis <span class="text-blue-400">*</span></label>
                       <select name="jenis" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
@@ -534,7 +534,7 @@
                       </select>
                     </div>
 
-                    {{-- 6. Sifat --}}
+                    <!-- 6. Sifat -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Sifat <span class="text-blue-400">*</span></label>
                       <select name="sifat" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
@@ -547,14 +547,14 @@
                       </select>
                     </div>
 
-                    {{-- 7. Kode Hal --}}
+                    <!-- 7. Kode Hal -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Kode Hal</label>
                       <input type="text" name="kode_hal" placeholder="Contoh: ADM/001"
                         class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                     </div>
 
-                    {{-- 8. Hal --}}
+                    <!-- 8. Hal -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Hal <span class="text-blue-400">*</span></label>
                       <input type="text" name="hal" placeholder="Contoh: Permohonan Izin Penelitian"
@@ -563,48 +563,48 @@
 
                   </div>
 
-                  {{-- Full width fields --}}
+                  <!-- Full width fields -->
                   <div class="space-y-4 mt-4">
 
-                    {{-- 9. Kepada/Tujuan --}}
+                    <!-- 9. Kepada/Tujuan -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Kepada / Tujuan <span class="text-blue-400">*</span></label>
                       <input type="text" name="tujuan" placeholder="Contoh: Yth. Kepala Dinas Pendidikan Kota Batam"
                         class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                     </div>
 
-                    {{-- 10. Isi/Ringkasan --}}
+                    <!-- 10. Isi/Ringkasan -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Isi / Ringkasan <span class="text-blue-400">*</span></label>
                       <textarea name="isi_ringkasan" rows="3" placeholder="Tuliskan ringkasan isi surat secara singkat..."
                         class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none"></textarea>
                     </div>
 
-                    {{-- 11. Tembusan --}}
+                    <!-- 11. Tembusan -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Tembusan</label>
                       <textarea name="tembusan" rows="2" placeholder="Contoh:&#10;1. Direktur Polibatam&#10;2. Wakil Direktur II"
                         class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none"></textarea>
                     </div>
 
-                    {{-- 12. Keterangan Tambahan --}}
+                    <!-- 12. Keterangan Tambahan -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Keterangan Tambahan</label>
                       <textarea name="keterangan_tambahan" rows="2" placeholder="Catatan atau informasi tambahan jika diperlukan..."
                         class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none"></textarea>
                     </div>
 
-                    {{-- Grid 2 kolom lagi --}}
+                    <!-- Grid 2 kolom lagi -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                      {{-- 13. Pengonsep Surat --}}
+                      <!-- 13. Pengonsep Surat -->
                       <div class="space-y-1.5">
                         <label class="block text-xs font-semibold text-slate-700 tracking-wide">Pengonsep Surat</label>
                         <input type="text" name="pengonsep" placeholder="Nama pengonsep surat"
                           class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                       </div>
 
-                      {{-- 14. Pemberkasan --}}
+                      <!-- 14. Pemberkasan -->
                       <div class="space-y-1.5">
                         <label class="block text-xs font-semibold text-slate-700 tracking-wide">Pemberkasan (Nama Arsip)</label>
                         <input type="text" name="pemberkasan" placeholder="Nama arsip / judul berkas"
@@ -613,7 +613,7 @@
 
                     </div>
 
-                    {{-- 15. Dilihat Publik --}}
+                    <!-- 15. Dilihat Publik -->
                     <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3">
                       <div>
                         <p class="text-xs font-semibold text-slate-700">Dilihat Publik</p>
@@ -626,7 +626,7 @@
                       </label>
                     </div>
 
-                    {{-- 16. Lampiran --}}
+                    <!-- 16. Lampiran -->
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Lampiran</label>
                       <input type="file" name="lampiran" multiple
@@ -648,7 +648,7 @@
             </div>
 
 
-            {{-- STEP 2: Atur Posisi Elemen --}}
+            <!-- STEP 2: Atur Posisi Elemen -->
             <div id="proses-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 2 — Atur Posisi Elemen</h2>
@@ -656,13 +656,13 @@
               </div>
               <div class="px-6 py-6 space-y-5">
 
-                {{-- Info --}}
+                <!-- Info -->
                 <div class="rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3">
                   <p class="text-[11px] font-semibold text-blue-700 mb-1">Catatan penting:</p>
                   <p class="text-[11px] text-blue-600 font-light">Posisi yang diatur di sini hanya disimpan sebagai data koordinat. Elemen belum digenerate ke dokumen final — generate dilakukan setelah semua verifikator menyetujui.</p>
                 </div>
 
-                {{-- Nomor Surat --}}
+                <!-- Nomor Surat -->
                 <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
                   <p class="text-xs font-semibold text-slate-700">📄 Nomor Surat</p>
                   <div class="grid grid-cols-2 gap-3">
@@ -679,7 +679,7 @@
                   </div>
                 </div>
 
-                {{-- Tanggal Surat --}}
+                <!-- Tanggal Surat -->
                 <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
                   <p class="text-xs font-semibold text-slate-700">📅 Tanggal Surat</p>
                   <div class="grid grid-cols-2 gap-3">
@@ -696,7 +696,7 @@
                   </div>
                 </div>
 
-                {{-- TTE --}}
+                <!-- TTE -->
                 <div class="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
                   <p class="text-xs font-semibold text-slate-700">✍️ TTE (Tanda Tangan Elektronik)</p>
                   <div class="grid grid-cols-2 gap-3">
@@ -743,7 +743,7 @@
             </div>
 
 
-            {{-- STEP 3: Tentukan Tingkat Verifikasi --}}
+            <!-- STEP 3: Tentukan Tingkat Verifikasi -->
             <div id="proses-step-3" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 3 — Tingkat Verifikasi</h2>
@@ -751,7 +751,7 @@
               </div>
               <div class="px-6 py-6 space-y-5">
 
-                {{-- Pilih jalur --}}
+                <!-- Pilih jalur -->
                 <div class="space-y-2">
                   <label class="block text-xs font-semibold text-slate-700 tracking-wide">Jalur Verifikasi <span class="text-blue-400">*</span></label>
 
@@ -780,7 +780,7 @@
                   </label>
                 </div>
 
-                {{-- Pilih verifikator per level --}}
+                <!-- Pilih verifikator per level -->
                 <div class="space-y-3">
                   <p class="text-xs font-semibold text-slate-700">Pilih Verifikator</p>
 
@@ -814,7 +814,7 @@
                   </div>
                 </div>
 
-                {{-- Info --}}
+                <!-- Info -->
                 <div class="rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3 flex items-start gap-3">
                   <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   <p class="text-[11px] text-blue-600 font-light leading-relaxed">Setelah dikirim, sistem akan meneruskan dokumen ke verifikator pertama. Jika ditolak oleh salah satu verifikator, proses berhenti dan dokumen dikembalikan untuk diperbaiki.</p>
@@ -840,9 +840,9 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: SEMUA SURAT
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-semua-surat" class="page-content hidden space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-slate-900">Semua Surat Biasa</h2>
@@ -888,9 +888,9 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: PENGAJUAN SK MASUK
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-pengajuan-sk" class="page-content hidden space-y-4">
           <h2 class="text-sm font-bold text-slate-900">Pengajuan SK Masuk</h2>
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
@@ -933,9 +933,9 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: SEMUA SK
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-semua-sk" class="page-content hidden space-y-4">
           <h2 class="text-sm font-bold text-slate-900">Semua Surat Keputusan</h2>
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
@@ -963,9 +963,9 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: MASTER DASAR HUKUM
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-master-dasar-hukum" class="page-content hidden space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-slate-900">Master Dasar Hukum</h2>
@@ -976,7 +976,7 @@
             </button>
           </div>
 
-          {{-- Form tambah (toggle via JS) --}}
+          <!-- Form tambah (toggle via JS) -->
           <div id="form-tambah-dasar" class="hidden rounded-2xl bg-white border border-blue-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
               <h3 class="text-sm font-bold text-slate-900">Tambah Dasar Hukum Baru</h3>
@@ -1005,7 +1005,7 @@
             </div>
           </div>
 
-          {{-- Tabel dasar hukum --}}
+          <!-- Tabel dasar hukum -->
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full">
@@ -1049,16 +1049,16 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: PROSES SK — MULTI-STEP WIZARD 3 STEP
              Step 1: Review isi SK + catatan/komentar
              Step 2: Tentukan tingkat verifikasi
              Step 3: Konfirmasi & kirim ke verifikator
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-proses-sk" class="page-content hidden">
           <div class="max-w-2xl mx-auto">
 
-            {{-- Info bar SK yang diproses --}}
+            <!-- Info bar SK yang diproses -->
             <div class="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3 mb-5">
               <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <div class="min-w-0">
@@ -1068,7 +1068,7 @@
               <button id="sk-proses-back-to-list" type="button" class="ml-auto text-[10px] font-medium text-blue-500 hover:text-blue-700 shrink-0 transition-colors duration-200">← Kembali ke daftar</button>
             </div>
 
-            {{-- Step Indicator --}}
+            <!-- Step Indicator -->
             <div class="flex items-center mb-6">
               <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="sk-proses-circle-1">
@@ -1093,7 +1093,7 @@
             </div>
 
 
-            {{-- STEP 1: Review Isi SK + Catatan --}}
+            <!-- STEP 1: Review Isi SK + Catatan -->
             <div id="sk-proses-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 1 — Review Isi SK</h2>
@@ -1101,7 +1101,7 @@
               </div>
               <div class="px-6 py-6 space-y-4">
 
-                {{-- Isi SK dari pemohon (readonly) --}}
+                <!-- Isi SK dari pemohon (readonly) -->
                 <div class="space-y-3">
 
                   <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
@@ -1133,11 +1133,11 @@
 
                 </div>
 
-                {{-- Divider --}}
+                <!-- Divider -->
                 <div class="border-t border-slate-100 pt-4">
                   <p class="text-xs font-semibold text-slate-700 mb-3">Catatan / Komentar Admin</p>
 
-                  {{-- Status review --}}
+                  <!-- Status review -->
                   <div class="space-y-2 mb-4">
                     <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
                       <input type="radio" name="status_review_sk" value="lanjut" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" checked />
@@ -1155,7 +1155,7 @@
                     </label>
                   </div>
 
-                  {{-- Kolom catatan --}}
+                  <!-- Kolom catatan -->
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">
                       Catatan untuk Pemohon
@@ -1168,7 +1168,7 @@
                   </div>
                 </div>
 
-                {{-- Actions --}}
+                <!-- Actions -->
                 <div class="flex items-center justify-between pt-2">
                   <button id="sk-proses-tolak-btn" type="button"
                     class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700 transition-all duration-200">
@@ -1185,7 +1185,7 @@
             </div>
 
 
-            {{-- STEP 2: Tentukan Tingkat Verifikasi --}}
+            <!-- STEP 2: Tentukan Tingkat Verifikasi -->
             <div id="sk-proses-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 2 — Tingkat Verifikasi</h2>
@@ -1193,7 +1193,7 @@
               </div>
               <div class="px-6 py-6 space-y-5">
 
-                {{-- Pilih jalur --}}
+                <!-- Pilih jalur -->
                 <div class="space-y-2">
                   <label class="block text-xs font-semibold text-slate-700 tracking-wide">Jalur Verifikasi <span class="text-blue-400">*</span></label>
 
@@ -1222,7 +1222,7 @@
                   </label>
                 </div>
 
-                {{-- Pilih verifikator per level --}}
+                <!-- Pilih verifikator per level -->
                 <div class="space-y-3">
                   <p class="text-xs font-semibold text-slate-700">Pilih Verifikator</p>
 
@@ -1272,7 +1272,7 @@
             </div>
 
 
-            {{-- STEP 3: Konfirmasi & Kirim --}}
+            <!-- STEP 3: Konfirmasi & Kirim -->
             <div id="sk-proses-step-3" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 3 — Konfirmasi & Kirim</h2>
@@ -1280,7 +1280,7 @@
               </div>
               <div class="px-6 py-6 space-y-4">
 
-                {{-- Ringkasan konfirmasi --}}
+                <!-- Ringkasan konfirmasi -->
                 <div class="space-y-3">
 
                   <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
@@ -1303,7 +1303,7 @@
                     <div id="sk-konfirmasi-verifikator" class="space-y-1"></div>
                   </div>
 
-                  {{-- Catatan jika ada --}}
+                  <!-- Catatan jika ada -->
                   <div id="sk-konfirmasi-catatan-wrap" class="hidden rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
                     <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Catatan Admin</p>
                     <p id="sk-konfirmasi-catatan" class="text-xs text-slate-600 font-light leading-relaxed">—</p>
@@ -1311,7 +1311,7 @@
 
                 </div>
 
-                {{-- Info --}}
+                <!-- Info -->
                 <div class="rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3 flex items-start gap-3">
                   <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   <p class="text-[11px] text-blue-600 font-light leading-relaxed">Setelah dikirim, sistem akan meneruskan SK ke verifikator pertama. Jika ditolak oleh salah satu verifikator, proses berhenti dan SK dikembalikan untuk diperbaiki.</p>
@@ -1337,9 +1337,9 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: PROFIL — Placeholder
-        ============================================================ --}}
+        ============================================================ -->
         <div id="page-profil" class="page-content hidden">
           <div class="flex flex-col items-center justify-center h-64 text-center">
             <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-3">

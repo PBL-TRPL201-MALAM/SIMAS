@@ -1,6 +1,7 @@
 @include('template.header', ['pageTitle' => 'Proses Surat'])
 @include('template.admin-sidebar')
 
+    <!-- View ini menerima $dokumen dan data pendukung dari AdminProsesSuratControllershow untuk wizard proses surat. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
@@ -24,6 +25,7 @@
       <main class="flex-1 overflow-y-auto p-6">
         <div class="max-w-6xl mx-auto">
 
+          <!-- Variabel lokal ini merapikan data dari relasi dokumen sebelum dipakai di tampilan. -->
           @php
             $perihalSurat = $dokumen->suratBiasa?->hal ?? request('perihal') ?? '-';
             $pemohonSurat = $dokumen->pemohon?->nama ?? request('pemohon');
@@ -33,6 +35,7 @@
             $selectedVerifikators = $selectedVerifikators ?? collect();
           @endphp
 
+          <!-- Error validasi dari step metadata atau step verifikasi ditampilkan di bagian atas wizard. -->
           @if ($errors->any())
             <div class="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3">
               <p class="text-[11px] font-semibold text-red-700 mb-1">Data proses surat belum bisa disimpan:</p>
@@ -44,6 +47,7 @@
             </div>
           @endif
 
+          <!-- Flash status berasal dari redirect setelah metadata/PDF berhasil disimpan. -->
           @if (session('status'))
             <div class="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
               <p class="text-[11px] font-semibold text-emerald-700">{{ session('status') }}</p>
@@ -59,6 +63,7 @@
             <a href="{{ route('admin.pengajuan-masuk') }}" class="ml-auto text-[10px] font-medium text-blue-500 hover:text-blue-700 shrink-0 transition-colors duration-200">Kembali ke daftar</a>
           </div>
 
+          <!-- Stepper ini hanya penanda UI; perpindahan step dikontrol oleh JavaScript dan nilai $initialStep dari controller. -->
           <div class="flex items-center mb-6">
             <div class="flex items-center gap-2">
               <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="proses-circle-1"><span class="text-[11px] font-bold text-white">1</span></div>
@@ -76,10 +81,13 @@
             </div>
           </div>
 
+          <!-- Form step 1 mengirim PDF hasil pemeriksaan dan metadata surat ke route admin.proses-surat.store. -->
           <form id="proses-metadata-form" action="{{ route('admin.proses-surat.store', $dokumen) }}" method="POST" enctype="multipart/form-data" class="contents">
+            <!-- csrf wajib untuk request POST dan enctype dibutuhkan karena form mengunggah file PDF. -->
             @csrf
             <input type="hidden" id="proses-start-step" value="{{ $initialStep }}">
           <div id="proses-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
+            <!-- Step 1 melengkapi metadata resmi surat sebelum dokumen masuk ke tahap posisi elemen dan verifikasi. -->
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
               <h2 class="text-sm font-bold text-slate-900">Langkah 1 - Upload PDF & Data Surat</h2>
               <p class="text-xs text-slate-400 font-light mt-0.5">Unggah PDF hasil pemeriksaan lalu lengkapi metadata inti surat.</p>
@@ -119,6 +127,7 @@
 
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Penandatangan <span class="text-blue-400">*</span></label>
+                    <!-- $penandatangans berisi user role VERIFIKATOR yang jabatannya boleh menjadi penandatangan final. -->
                     <select name="penanda_tangan" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
                       <option value="" disabled {{ $selectedPenandatanganId ? '' : 'selected' }}>Pilih penanda tangan</option>
                       @foreach ($penandatangans as $penandatangan)
@@ -137,6 +146,7 @@
                     <select name="jenis_surat"
                         class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
 
+                        <!-- $jenisSuratOptions berasal dari helper UserReferenceOptions agar pilihan UI sama dengan validasi controller. -->
                         <option value="" disabled {{ old('jenis_surat', $dokumen->suratBiasa?->jenis_surat) ? '' : 'selected' }}>
                             Pilih jenis surat
                         </option>
@@ -199,11 +209,13 @@
           </div>
           </form>
 
+          <!-- Step 2 menyimpan koordinat nomor surat, tanggal, dan QR/TTE melalui endpoint JSON storePosisiElemen. -->
           <div id="proses-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
               <h2 class="text-sm font-bold text-slate-900">Langkah 2 - Atur Posisi Elemen</h2>
               <p class="text-xs text-slate-400 font-light mt-0.5">Tentukan posisi penempatan nomor surat, tanggal, dan TTE pada dokumen PDF.</p>
             </div>
+            <!-- data-* ini menjadi jembatan data dari Blade ke JavaScript pengatur preview PDF dan posisi elemen. -->
             <div
               id="posisi-elemen-config"
               class="px-6 py-6 space-y-5"
@@ -227,6 +239,7 @@
                       <p class="text-[11px] text-slate-400 font-light mt-0.5">Setelah tombol dipilih, klik area preview di kanan.</p>
                     </div>
 
+                    <!-- Tombol berikut memilih elemen aktif; klik di preview akan menyimpan koordinat elemen yang dipilih. -->
                     <button type="button" class="btn-set-elemen w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/40" data-elemen="nomor_surat">
                       <p class="text-xs font-semibold text-slate-700">Set Lokasi Nomor Surat</p>
                       <p id="status-elemen-nomor_surat" class="text-[10px] text-slate-400 font-light mt-1">Belum ditentukan</p>
@@ -290,6 +303,7 @@
                   </div>
 
                   <div id="pdf-preview-stage" class="hidden rounded-xl border border-slate-200 bg-white overflow-hidden">
+                    <!-- Preview PDF dipakai sebagai kanvas klik; posisi disimpan relatif agar bisa dipetakan kembali saat generate PDF. -->
                     <div id="pdf-scroll-container" class="overflow-auto bg-slate-100/60" style="height: max(900px, calc(100vh - 250px));">
                       <div id="pdf-preview-canvas" class="relative mx-auto my-4 rounded-lg shadow-sm overflow-hidden bg-white">
                         <iframe id="pdf-preview-frame" title="Preview PDF proses surat" class="absolute inset-0 border-0 bg-white"></iframe>
@@ -383,9 +397,12 @@
             </div>
           </div>
 
+          <!-- Form step 3 mengirim susunan verifikator dan penandatangan final ke route kirim-verifikasi. -->
           <form id="proses-verifikasi-form" action="{{ route('admin.proses-surat.kirim-verifikasi', $dokumen) }}" method="POST" class="contents">
+            <!-- csrf melindungi request POST yang membuat ulang flow verifikasi dokumen. -->
             @csrf
           <div id="proses-step-3" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
+            <!-- Step 3 menentukan alur verifikasi bertingkat; penandatangan final selalu ditempatkan sebagai level terakhir. -->
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
               <h2 class="text-sm font-bold text-slate-900">Langkah 3 - Tingkat Verifikasi</h2>
               <p class="text-xs text-slate-400 font-light mt-0.5">Tentukan jalur verifikasi dokumen sebelum dikirim ke verifikator.</p>
@@ -399,10 +416,12 @@
 
               <div class="space-y-3">
                 <p class="text-xs font-semibold text-slate-700">Pilih Verifikator</p>
+                <!-- penandatangan_final dikirim hidden karena nilainya dipilih pada metadata step 1. -->
                 <input type="hidden" name="penandatangan_final" value="{{ $selectedPenandatanganId }}">
 
                 <div class="space-y-1.5">
                   <label class="block text-[11px] font-medium text-slate-500">Verifikator Level 1</label>
+                  <!-- $verifikators berisi user aktif role VERIFIKATOR selain penandatangan final. -->
                   <select name="verifikator_1" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all duration-200">
                     <option value="">- Tidak ada (opsional) -</option>
                     @foreach ($verifikators as $verifikator)

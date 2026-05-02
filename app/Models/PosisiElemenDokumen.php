@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// Model PosisiElemenDokumen menyimpan koordinat elemen yang ditempelkan ke PDF.
+// Data ini diisi dari UI Admin/TU lalu dipakai service generator untuk menaruh nomor surat, tanggal, dan QR/TTE.
 class PosisiElemenDokumen extends Model
 {
     use HasFactory;
@@ -15,6 +17,7 @@ class PosisiElemenDokumen extends Model
 
     protected $primaryKey = 'posisi_id';
 
+    // Fillable berisi koordinat relatif dari kanvas preview yang aman diisi melalui endpoint storePosisiElemen.
     protected $fillable = [
         'dokumen_id',
         'elemen',
@@ -27,6 +30,7 @@ class PosisiElemenDokumen extends Model
 
     protected function casts(): array
     {
+        // Cast menjaga angka koordinat konsisten saat dibaca dari database untuk proses generate PDF.
         return [
             'halaman' => 'integer',
             // Nilai desimal dipakai agar hasil drag posisi elemen tetap presisi saat dipindahkan ke ukuran PDF asli.

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// Model DokumenFile mencatat semua file yang berhubungan dengan dokumen.
+// Pendekatan ini menjaga riwayat file tetap lengkap: draft DOCX, PDF hasil pemeriksaan, preview verifikasi, sampai PDF final.
 class DokumenFile extends Model
 {
     use HasFactory;
@@ -15,6 +17,7 @@ class DokumenFile extends Model
 
     protected $primaryKey = 'file_id';
 
+    // Fillable menentukan metadata file yang boleh disimpan dari controller/service.
     protected $fillable = [
         'dokumen_id',
         'file_type',
@@ -26,6 +29,7 @@ class DokumenFile extends Model
 
     protected function casts(): array
     {
+        // Cast uploaded_at menjadi datetime agar bisa diurutkan dan diformat seperti objek tanggal Laravel.
         return [
             // Waktu upload membantu sistem menentukan file terbaru yang harus ditampilkan atau dijadikan fallback.
             'uploaded_at' => 'datetime',

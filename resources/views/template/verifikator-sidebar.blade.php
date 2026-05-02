@@ -1,4 +1,5 @@
 <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col overflow-y-auto border-r border-slate-100 bg-white shadow-xl transition-all duration-300 xl:relative xl:z-30 xl:h-screen xl:translate-x-0 xl:shadow-none">
+  <!-- Sidebar Verifikator memisahkan menu surat biasa dan SK berdasarkan status verifikasi. -->
   <div class="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-50/80 blur-2xl pointer-events-none"></div>
 
   <div class="relative flex items-center gap-2.5 px-5 h-16 border-b border-slate-100/80 shrink-0">
@@ -9,6 +10,7 @@
     </div>
   </div>
 
+  <!-- $activePage menentukan class aktif, sedangkan $sidebarStats menampilkan jumlah dokumen yang menunggu. -->
   @php($activePage = $activePage ?? '')
   @php($sidebarStats = $sidebarStats ?? ['surat_menunggu_count' => 0, 'sk_menunggu_count' => 0])
   <nav class="flex-1 px-3 py-4 space-y-0.5">
@@ -20,6 +22,7 @@
     </a>
 
     <div class="pt-3 pb-1.5"><p class="px-2 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Surat Biasa</p></div>
+    <!-- Badge pada menu Menunggu membantu verifikator melihat antrean aktif tanpa membuka halaman dulu. -->
     <a href="{{ route('verifikator.surat-menunggu') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $activePage === 'surat-menunggu' ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
       <div class="flex items-center gap-3">
         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -63,11 +66,13 @@
   </nav>
 
   <div class="px-3 py-4 border-t border-slate-100/80 shrink-0 space-y-0.5">
+    <!-- Area bawah sidebar berisi profil verifikator dan form logout. -->
     <a href="{{ route('verifikator.profil') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ $activePage === 'profil' ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
       <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
       <span>Profil Saya</span>
     </a>
     <form action="{{ route('logout') }}" method="POST" class="w-full">
+      <!-- csrf wajib karena logout adalah request POST yang mengubah session user. -->
       @csrf
 
       <button type="submit"

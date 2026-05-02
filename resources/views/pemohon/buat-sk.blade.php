@@ -21,7 +21,7 @@
         <div id="page-buat-sk" class="page-content">
           <div class="max-w-2xl mx-auto">
 
-            {{-- Step indicator --}}
+            <!-- Step indicator -->
             <div class="flex items-center mb-6">
               <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="sk-circle-1"><span class="text-[11px] font-bold text-white">1</span></div>
@@ -39,7 +39,7 @@
               </div>
             </div>
 
-            {{-- Step 1 --}}
+            <!-- Step 1 -->
             <div id="sk-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 1 Data Surat Keputusan</h2>
@@ -79,7 +79,7 @@
               </div>
             </div>
 
-            {{-- Step 2 --}}
+            <!-- Step 2 -->
             <div id="sk-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 2 Dasar Hukum (Mengingat)</h2>
@@ -125,7 +125,7 @@
               </div>
             </div>
 
-            {{-- Step 3 --}}
+            <!-- Step 3 -->
             <div id="sk-step-3" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 3 Review & Submit</h2>
@@ -158,9 +158,9 @@
         </div>
 
 
-        {{-- ============================================================
+        <!-- ============================================================
              PAGE: SURAT SAYA Tabel + Filter + Aksi
-        ============================================================ --}}
+        ============================================================ -->
       </main>
     </div>
 @include('template.footer')

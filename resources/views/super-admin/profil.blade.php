@@ -1,6 +1,7 @@
 @include('template.header', ['pageTitle' => 'Detail User'])
 @include('template.super-admin-sidebar')
 
+    <!-- View edit user menerima $user, $roles, $jabatans, dan $unitKerjas dari UserControlleredit. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -23,21 +24,26 @@
               <p class="text-[11px] text-slate-400 font-light mt-1">Perbarui data akun. Password tidak diubah dari halaman ini.</p>
             </div>
 
+            <!-- Flash status muncul setelah data user berhasil diperbarui. -->
             @if (session('status'))
               <div class="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-700">
                 {{ session('status') }}
               </div>
             @endif
 
+            <!-- Error validasi atau error bisnis seperti self-deactivation ditampilkan di sini. -->
             @if ($errors->any())
               <div class="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
                 {{ $errors->first() }}
               </div>
             @endif
 
+            <!-- $isCurrentUser dipakai untuk mencegah Super Admin menonaktifkan akun yang sedang dipakai. -->
             @php($isCurrentUser = auth()->id() === $user->user_id)
 
+            <!-- Form update mengirim data ke route super-admin.users.update dengan method PUT. -->
             <form action="{{ route('super-admin.users.update', $user) }}" method="POST" class="space-y-5">
+              <!-- csrf wajib, dan method('PUT') memberi tahu Laravel bahwa form POST ini harus diproses sebagai PUT. -->
               @csrf
               @method('PUT')
 
@@ -70,11 +76,13 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-2">Status Akun</label>
+                  <!-- Select status dinonaktifkan jika user yang diedit adalah akun Super Admin yang sedang login. -->
                   <select name="is_active" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" {{ $isCurrentUser && $user->is_active ? 'disabled' : '' }}>
                     <option value="1" {{ old('is_active', $user->is_active ? '1' : '0') === '1' ? 'selected' : '' }}>Aktif</option>
                     <option value="0" {{ old('is_active', $user->is_active ? '1' : '0') === '0' ? 'selected' : '' }}>Nonaktif</option>
                   </select>
                   @if ($isCurrentUser && $user->is_active)
+                    <!-- Hidden input menjaga nilai is_active tetap terkirim meskipun select status sedang disabled. -->
                     <input type="hidden" name="is_active" value="1" />
                     <p class="mt-1 text-[11px] text-slate-400">Akun SUPER_ADMIN yang sedang dipakai tidak bisa dinonaktifkan.</p>
                   @endif
@@ -111,14 +119,18 @@
               </div>
             </form>
 
+            <!-- Form toggle status memakai PATCH untuk aksi cepat aktif/nonaktif tanpa mengubah field profil lain. -->
             <form action="{{ route('super-admin.users.toggle-status', $user) }}" method="POST" class="mt-3">
+              <!-- csrf dan method('PATCH') diperlukan karena HTML form tidak punya method PATCH bawaan. -->
               @csrf
               @method('PATCH')
               @if ($isCurrentUser && $user->is_active)
+                <!-- Tombol dibuat nonaktif jika targetnya adalah akun yang sedang dipakai. -->
                 <span class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-300 cursor-not-allowed">
                   User Sedang Dipakai
                 </span>
               @else
+                <!-- Tombol ini mengaktifkan atau menonaktifkan user sesuai kondisi is_active saat ini. -->
                 <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-all duration-200">
                   {{ $user->is_active ? 'Nonaktifkan User' : 'Aktifkan User' }}
                 </button>
@@ -128,6 +140,7 @@
 
           <div class="space-y-6">
             <div class="rounded-2xl bg-white border border-slate-100 p-6">
+              <!-- Panel ringkasan membaca langsung properti $user dari model Eloquent yang dikirim controller. -->
               <div class="flex items-center gap-4">
                 <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center">
                   <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">

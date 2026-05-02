@@ -1,5 +1,6 @@
 <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col overflow-y-auto border-r border-slate-100 bg-white shadow-xl transition-all duration-300 xl:relative xl:z-30 xl:h-screen xl:translate-x-0 xl:shadow-none">
 
+  <!-- Sidebar Admin/TU berisi navigasi untuk memproses pengajuan, melihat arsip, dan membuka master data. -->
   <div class="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-blue-50/80 blur-2xl pointer-events-none"></div>
 
   <div class="relative flex items-center gap-2.5 px-5 h-16 border-b border-slate-100/80 shrink-0">
@@ -14,8 +15,10 @@
 
   <nav class="flex-1 px-3 py-4 space-y-0.5">
     <p class="px-2 pb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Menu Utama</p>
+    <!-- $sidebarStats biasanya dikirim dari view composer/controller; default ini mencegah error saat belum ada data. -->
     @php($sidebarStats = $sidebarStats ?? ['pengajuan_surat_count' => 0, 'pengajuan_sk_count' => 0])
 
+    <!-- request()->routeIs() dipakai untuk memberi style aktif pada menu yang sesuai dengan route saat ini. -->
     <a href="{{ route('admin.dashboard') }}"
        class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ request()->routeIs('admin.dashboard') ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
       <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -84,6 +87,7 @@
   </nav>
 
   <div class="px-3 py-4 border-t border-slate-100/80 shrink-0 space-y-0.5">
+    <!-- Area bawah sidebar berisi profil dan form logout untuk user Admin/TU. -->
     <a href="{{ route('admin.profil') }}"
        class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 {{ request()->routeIs('admin.profil') ? 'bg-blue-600 text-white shadow-sm shadow-blue-200' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-600' }}">
       <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -93,6 +97,7 @@
     </a>
 
     <form action="{{ route('logout') }}" method="POST" class="w-full">
+      <!-- csrf wajib di form POST Laravel, termasuk logout, untuk melindungi request dari CSRF. -->
       @csrf
 
       <button type="submit"

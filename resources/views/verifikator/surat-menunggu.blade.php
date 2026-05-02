@@ -1,5 +1,6 @@
 @include('template.header', ['pageTitle' => 'Surat Menunggu Verifikasi', 'modalVariant' => 'none'])
 @include('template.verifikator-sidebar', ['activePage' => 'surat-menunggu'])
+    <!-- View ini menerima $suratMenunggu dari VerifikatorSuratControllermenunggu untuk user verifikator yang login. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -19,12 +20,14 @@
       </header>
       <main class="flex-1 overflow-y-auto p-6">
         <div id="page-surat-menunggu" class="page-content space-y-4">
+          <!-- Flash status muncul setelah verifikator berhasil setuju/tolak dokumen. -->
           @if (session('status'))
             <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
               <p class="text-[11px] font-semibold text-emerald-700">{{ session('status') }}</p>
             </div>
           @endif
 
+          <!-- Error validasi tampil jika keputusan verifikasi belum lengkap, misalnya catatan tolak kosong. -->
           @if ($errors->any())
             <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3">
               <p class="text-[11px] font-semibold text-red-700 mb-1">Keputusan verifikasi belum bisa diproses:</p>
@@ -53,7 +56,9 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
+                  <!-- forelse menampilkan surat yang sedang menunggu; jika kosong, pesan empty state ditampilkan. -->
                   @forelse ($suratMenunggu as $item)
+                    <!-- $pdfFile berasal dari relasi dokumenFiles dan menentukan apakah tombol Unduh PDF ditampilkan. -->
                     @php($pdfFile = $item->dokumen->dokumenFiles->first())
                     <tr class="hover:bg-slate-50/40 transition-colors duration-150">
                       <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[220px]">{{ $item->dokumen->suratBiasa?->hal ?? '-' }}</p></td>
@@ -64,8 +69,10 @@
                         <div class="flex flex-wrap items-center gap-2">
                           <a href="{{ route('verifikator.surat.detail', $item->dokumen) }}" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</a>
                           @if ($pdfFile)
+                            <!-- Tombol unduh hanya muncul jika dokumen sudah punya file PDF preview/hasil pemeriksaan. -->
                             <a href="{{ route('verifikator.surat.unduh-pdf', $item->dokumen) }}" class="text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-colors duration-200">Unduh PDF</a>
                           @endif
+                          <!-- Tombol Setujui/Tolak membuka detail dengan query aksi untuk memilih default keputusan di form detail. -->
                           <a href="{{ route('verifikator.surat.detail', ['dokumen' => $item->dokumen, 'aksi' => 'setuju']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Setujui</a>
                           <a href="{{ route('verifikator.surat.detail', ['dokumen' => $item->dokumen, 'aksi' => 'tolak']) }}" class="inline-flex items-center text-[11px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg transition-all duration-200">Tolak</a>
                         </div>

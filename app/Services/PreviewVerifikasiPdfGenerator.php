@@ -9,14 +9,18 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
+// Service ini bertanggung jawab membuat PDF preview verifikasi dari PDF hasil pemeriksaan Admin/TU.
+// Controller hanya memanggil service ini, sedangkan detail teknis manipulasi PDF disimpan di sini agar controller tetap fokus ke alur request.
 class PreviewVerifikasiPdfGenerator
 {
     // Nilai ini mengikuti kanvas preview admin agar koordinat klik bisa dipetakan ke ukuran PDF asli.
     private const PREVIEW_WIDTH = 980.0;
     private const PREVIEW_HEIGHT = 1386.0;
 
+    // Method publik ini menjadi pintu masuk generator: ambil data dokumen, baca PDF sumber, tempel overlay, lalu simpan file preview.
     public function generate(Dokumen $dokumen, string $sourceRelativePath): string
     {
+        // Relasi diload agar generator punya metadata surat, posisi elemen, dan daftar verifikator tanpa query manual di controller.
         $dokumen->loadMissing([
             'suratBiasa',
             'posisiElemenDokumen',
@@ -31,6 +35,7 @@ class PreviewVerifikasiPdfGenerator
         }
 
         $sourcePdf = $disk->get($sourceRelativePath);
+        // Posisi dikelompokkan per halaman karena overlay PDF harus ditempel pada object halaman yang sesuai.
         $positions = $dokumen->posisiElemenDokumen
             ->groupBy('halaman')
             ->filter(fn (Collection $items) => $items->isNotEmpty());
@@ -48,8 +53,10 @@ class PreviewVerifikasiPdfGenerator
         return $outputPath;
     }
 
+    // Method ini membaca object PDF, mencari halaman, lalu menyiapkan object overlay baru untuk setiap halaman yang punya posisi elemen.
     private function appendPreviewOverlays(string $pdfContent, Dokumen $dokumen, Collection $positionsByPage): string
     {
+        // Regex ini mengambil object-object PDF mentah agar service bisa melakukan incremental update tanpa library eksternal.
         preg_match_all('/(\d+)\s+(\d+)\s+obj(.*?)endobj/s', $pdfContent, $matches, PREG_OFFSET_CAPTURE);
 
         $objects = [];
@@ -70,6 +77,7 @@ class PreviewVerifikasiPdfGenerator
             $maxObjectNumber = max($maxObjectNumber, $objectNumber);
         }
 
+        // Object halaman dicari dari struktur PDF, lalu diurutkan berdasarkan posisi kemunculan di file.
         $pageObjectNumbers = collect($objects)
             ->filter(fn (array $object) => str_contains($object['body'], '/Type/Page') && ! str_contains($object['body'], '/Type/Pages'))
             ->sortBy('offset')
@@ -81,6 +89,7 @@ class PreviewVerifikasiPdfGenerator
         }
 
         $fontObjectNumber = ++$maxObjectNumber;
+        // Font khusus overlay didaftarkan sebagai object PDF baru agar teks nomor/tanggal/verifikasi bisa dirender.
         $updatedObjects = [
             $fontObjectNumber => "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
         ];
@@ -112,6 +121,7 @@ class PreviewVerifikasiPdfGenerator
         return $this->appendIncrementalUpdate($pdfContent, $updatedObjects, $maxObjectNumber);
     }
 
+    // Method ini membaca ukuran halaman dari MediaBox PDF; jika tidak ada, fallback ke ukuran A4 point.
     private function extractPageSize(string $pageBody): array
     {
         if (preg_match('/\/MediaBox\s*\[\s*([0-9.\-]+)\s+([0-9.\-]+)\s+([0-9.\-]+)\s+([0-9.\-]+)\s*\]/', $pageBody, $matches)) {
@@ -124,6 +134,7 @@ class PreviewVerifikasiPdfGenerator
         return [595.32, 841.92];
     }
 
+    // Method ini membuat perintah gambar/teks PDF berdasarkan posisi elemen yang disimpan Admin/TU.
     private function buildOverlayStream(Dokumen $dokumen, Collection $positions, float $pageWidth, float $pageHeight): string
     {
         $parts = [];
@@ -137,6 +148,7 @@ class PreviewVerifikasiPdfGenerator
 
         /** @var PosisiElemenDokumen $position */
         foreach ($positions as $position) {
+            // Koordinat dari kanvas preview dikonversi ke satuan point PDF asli agar posisi tetap proporsional.
             $width = (float) ($position->lebar ?? ($position->elemen === 'tte' ? 80 : 180));
             $height = (float) ($position->tinggi ?? ($position->elemen === 'tte' ? 80 : 34));
 
@@ -177,6 +189,7 @@ class PreviewVerifikasiPdfGenerator
         return implode("\n", array_filter($parts));
     }
 
+    // Method ini menyusun command PDF untuk menggambar teks pada koordinat tertentu.
     private function textCommand(string $text, float $x, float $y, float $fontSize): string
     {
         $escaped = $this->escapePdfText($text);
@@ -193,6 +206,7 @@ class PreviewVerifikasiPdfGenerator
         ]);
     }
 
+    // Method ini membuat placeholder QR/TTE langsung sebagai command PDF berbentuk grid.
     private function qrDummyCommands(float $x, float $y, float $width, float $height): string
     {
         // Dummy QR digambar manual sebagai blok-blok persegi agar bisa ditaruh langsung ke PDF tanpa render HTML/browser.
@@ -221,6 +235,7 @@ class PreviewVerifikasiPdfGenerator
         return implode("\n", $commands);
     }
 
+    // Method ini menyusun teks daftar verifikator yang sudah menyetujui dokumen.
     private function verificationTextCommands(string $verifierNames, float $pageHeight): string
     {
         $text = 'Terverifikasi oleh: ' . $verifierNames;
@@ -242,6 +257,7 @@ class PreviewVerifikasiPdfGenerator
         );
     }
 
+    // Helper ini memecah teks panjang menjadi beberapa baris; disiapkan jika layout verifikasi perlu dibuat multi-line.
     private function wrapVerificationText(string $text, int $maxChars): array
     {
         $words = preg_split('/\s+/', trim($text)) ?: [];
@@ -270,6 +286,7 @@ class PreviewVerifikasiPdfGenerator
         return $lines === [] ? [$text] : $lines;
     }
 
+    // Method ini menyisipkan object overlay ke Resources dan Contents halaman PDF.
     private function injectOverlayIntoPageObject(string $pageBody, int $contentObjectNumber, int $fontObjectNumber): string
     {
         $updated = preg_replace_callback(
@@ -307,11 +324,13 @@ class PreviewVerifikasiPdfGenerator
         return $updated;
     }
 
+    // Method ini membungkus command overlay menjadi stream object sesuai format PDF.
     private function wrapStream(string $stream): string
     {
         return sprintf("<< /Length %d >>\nstream\n%s\nendstream", strlen($stream), $stream);
     }
 
+    // Method ini menambahkan object baru di akhir PDF dan membuat xref/trailer baru tanpa menulis ulang PDF dari nol.
     private function appendIncrementalUpdate(string $originalPdf, array $updatedObjects, int $maxObjectNumber): string
     {
         // PDF diperbarui dengan incremental update supaya file sumber tidak perlu dibangun ulang dari nol.
@@ -381,6 +400,7 @@ class PreviewVerifikasiPdfGenerator
         return $pdf;
     }
 
+    // Helper ini meng-escape karakter khusus agar teks aman dimasukkan ke literal string PDF.
     private function escapePdfText(string $text): string
     {
         return str_replace(

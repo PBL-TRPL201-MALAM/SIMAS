@@ -1,6 +1,7 @@
 @include('template.header', ['pageTitle' => 'Semua Surat'])
 @include('template.admin-sidebar')
 
+    <!-- View ini menerima $suratList dari AdminSemuaSuratControllerindex, berisi semua dokumen jenis SURAT_BIASA. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
@@ -26,6 +27,7 @@
 
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-slate-900">Semua Surat Biasa</h2>
+            <!-- Filter status memakai data-filter-status pada baris tabel dan diproses oleh JavaScript frontend. -->
             <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1">
               <button data-filter="semua" data-target="semua-surat" class="filter-btn rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white bg-blue-600 transition-all duration-200">Semua</button>
               <button data-filter="diajukan" data-target="semua-surat" class="filter-btn rounded-lg px-3 py-1.5 text-[11px] font-medium text-slate-500 hover:bg-slate-50 transition-all duration-200">Diajukan</button>
@@ -49,7 +51,9 @@
                   </tr>
                 </thead>
                 <tbody id="tbody-pengajuan" class="divide-y divide-slate-50">
+                  <!-- forelse menampilkan seluruh surat dan tetap memberi pesan ketika belum ada data. -->
                   @forelse ($suratList as $dokumen)
+                    <!-- Blok php menyiapkan label status, filter, file preview, dan catatan revisi dari relasi dokumen. -->
                     @php
                       $status = $dokumen->status_dokumen;
                       $statusLabel = ucwords(strtolower(str_replace('_', ' ', $status)));
@@ -95,17 +99,21 @@
                       </td>
                       <td class="px-5 py-3.5">
                         <div class="flex flex-wrap items-center gap-2">
+                          <!-- if status dokumen menentukan tombol aksi yang boleh muncul pada fase alur surat. -->
                           @if ($status === 'DIAJUKAN')
                             <a href="{{ route('admin.proses-surat', ['dokumen' => $dokumen->dokumen_id, 'step' => 1]) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
                           @elseif ($status === 'MENUNGGU_VERIFIKASI')
                             <a href="{{ route('admin.proses-surat', ['dokumen' => $dokumen->dokumen_id, 'step' => 3]) }}" class="inline-flex items-center text-[11px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-all duration-200">Lihat</a>
                           @elseif ($status === 'SIAP_PUBLISH')
+                            <!-- Tombol Publish hanya muncul saat status SIAP_PUBLISH setelah semua level verifikasi menyetujui. -->
                             <form action="{{ route('admin.surat.publish', $dokumen) }}" method="POST" class="inline-flex">
+                              <!-- csrf wajib karena publish mengubah status dokumen menjadi PUBLISHED. -->
                               @csrf
                               <button type="submit" class="inline-flex items-center text-[11px] font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-all duration-200">Publish</button>
                             </form>
                           @elseif ($status === 'PUBLISHED')
                             @if ($hasPreviewablePdf)
+                              <!-- Tombol Lihat membuka PDF inline, sedangkan Unduh Final memaksa download file final. -->
                               <a href="{{ route('admin.semua-surat.preview-final', $dokumen) }}" target="_blank" class="inline-flex items-center text-[11px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-all duration-200">Lihat</a>
                               <a href="{{ route('admin.semua-surat.download-final', $dokumen) }}" class="inline-flex items-center text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-all duration-200">Unduh Final</a>
                             @else
@@ -116,6 +124,7 @@
                           @endif
                         </div>
 
+                        <!-- Catatan revisi ditampilkan jika dokumen ditolak dan ada catatan dari verifikator. -->
                         @if (in_array($status, ['PERLU_REVISI', 'DITOLAK'], true) && $latestRejectedVerification)
                           <div class="mt-2 rounded-xl border border-red-100 bg-red-50/70 px-3 py-2.5 max-w-[320px]">
                             <div class="flex items-center gap-1.5">

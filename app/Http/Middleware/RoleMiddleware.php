@@ -8,11 +8,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+// Middleware ini mengecek apakah user yang sudah login memiliki role yang diizinkan oleh route.
+// Di Laravel, middleware berjalan sebelum controller; cocok untuk menahan akses halaman berdasarkan auth/role.
 class RoleMiddleware
 {
     /**
      * Handle an incoming request.
      */
+    // $roles berasal dari parameter route seperti role:ADMIN_TU atau role:SUPER_ADMIN.
     public function handle(Request $request, Closure $next, string ...$roles): Response|RedirectResponse
     {
         $user = Auth::user();
@@ -38,9 +41,11 @@ class RoleMiddleware
             return redirect()->route($this->dashboardRoute($user));
         }
 
+        // Jika semua pengecekan lolos, request diteruskan ke controller/closure route berikutnya.
         return $next($request);
     }
 
+    // Helper ini menentukan dashboard tujuan ketika user mencoba membuka area role lain.
     private function dashboardRoute(object $user): string
     {
         // Redirect fallback selalu dikembalikan ke dashboard role masing-masing supaya user tidak nyasar ke area lain.

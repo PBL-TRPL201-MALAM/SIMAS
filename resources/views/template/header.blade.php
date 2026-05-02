@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="id">
   <head>
+    <!-- Partial header ini dipakai sebagai layout pembuka untuk halaman dashboard per role. -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Token CSRF disediakan di meta agar JavaScript/AJAX bisa mengirim request aman ke Laravel. -->
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <!-- $pageTitle dikirim dari view pemanggil lewat include untuk mengatur judul tab browser. -->
     <title>{{ $pageTitle ?? 'Dashboard' }} - SIMAS</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
+    <!-- vite memuat asset CSS dan JavaScript hasil build Laravel Vite tanpa menulis path manual. -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -22,8 +26,10 @@
   </head>
 
   <body class="bg-slate-50 antialiased overflow-hidden h-screen">
+  <!-- $modalVariant menentukan modal global mana yang disiapkan: admin, pemohon, verifikator, atau none. -->
   @php($modalVariant = $modalVariant ?? 'admin')
 
+  <!-- Toast global ini dapat dipakai script frontend untuk menampilkan notifikasi singkat tanpa reload halaman. -->
   <div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
     <div class="flex items-center gap-3 rounded-2xl bg-slate-900 px-4 py-3 shadow-xl min-w-[220px]">
       <div id="toast-icon" class="w-5 h-5 shrink-0"></div>
@@ -32,6 +38,7 @@
   </div>
 
   @if($modalVariant === 'admin')
+  <!-- Modal admin dipakai untuk detail pengajuan; data modal diisi dari atribut data-* pada baris tabel. -->
   <div id="modal-overlay" class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="relative w-full max-w-5xl rounded-2xl bg-white shadow-xl overflow-hidden">
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
@@ -72,6 +79,7 @@
           Tutup
         </button>
         <div class="flex items-center gap-2">
+          <!-- Tombol unduh DOCX dan proses surat memakai route/data dari JavaScript sesuai dokumen yang dipilih. -->
           <button id="modal-download-docx" type="button" class="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-all duration-200">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
             Unduh DOCX
@@ -85,6 +93,7 @@
     </div>
   </div>
   @elseif($modalVariant === 'pemohon')
+  <!-- Modal pemohon menampilkan ringkasan dokumen milik pemohon dan tombol unduh jika dokumen sudah published. -->
   <div id="modal-overlay" class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="relative w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
@@ -132,6 +141,7 @@
     </div>
   </div>
   @elseif($modalVariant === 'verifikator')
+  <!-- Modal verifikator disiapkan untuk preview dokumen dan form keputusan pada tampilan yang memakai modal. -->
   <div id="modal-overlay" class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="relative w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden">
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
@@ -202,6 +212,7 @@
         <div class="border-t border-slate-100 pt-3">
           <p class="text-xs font-semibold text-slate-700 mb-3">Keputusan Verifikasi</p>
 
+          <!-- Input radio ini memilih keputusan setuju atau tolak; JavaScript menampilkan catatan saat opsi tolak dipilih. -->
           <div class="space-y-2 mb-3">
             <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 cursor-pointer transition-all duration-200 group">
               <input type="radio" name="keputusan_verifikasi" value="setuju" id="radio-setuju" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-100 shrink-0" checked />
@@ -220,6 +231,7 @@
           </div>
 
           <div id="alasan-wrap" class="hidden space-y-1.5">
+            <!-- Catatan penolakan wajib diisi saat verifikator menolak dokumen agar Admin/TU tahu revisinya. -->
             <label class="block text-xs font-semibold text-slate-700 tracking-wide">
               Alasan Penolakan <span class="text-blue-400">*</span>
             </label>
@@ -247,4 +259,5 @@
   </div>
   @endif
 
+  <!-- Wrapper utama halaman: sidebar berada di kiri, konten role berada di kanan. -->
   <div class="flex h-screen w-full overflow-hidden">

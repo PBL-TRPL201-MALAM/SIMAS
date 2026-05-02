@@ -3,7 +3,7 @@
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
-      {{-- Topbar --}}
+      <!-- Topbar -->
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -34,7 +34,7 @@
             $memutuskanSk = $sk->memutuskan ?? request('ringkasan') ?? '-';
           @endphp
 
-          {{-- Info bar SK yang diproses --}}
+          <!-- Info bar SK yang diproses -->
           <div class="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3 mb-5">
             <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <div class="min-w-0">
@@ -44,7 +44,7 @@
             <a href="{{ route('admin.pengajuan-sk') }}" class="ml-auto text-[10px] font-medium text-blue-500 hover:text-blue-700 shrink-0 transition-colors duration-200">Kembali ke daftar</a>
           </div>
 
-          {{-- Step Indicator --}}
+          <!-- Step Indicator -->
           <div class="flex items-center mb-6">
             <div class="flex items-center gap-2">
               <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="sk-proses-circle-1">

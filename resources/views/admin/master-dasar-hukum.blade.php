@@ -3,7 +3,7 @@
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
-      {{-- Topbar --}}
+      <!-- Topbar -->
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -34,7 +34,7 @@
             </button>
           </div>
 
-          {{-- Form tambah (toggle via JS) --}}
+          <!-- Form tambah (toggle via JS) -->
           <div id="form-tambah-dasar" class="hidden rounded-2xl bg-white border border-blue-100 overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
               <h3 class="text-sm font-bold text-slate-900">Tambah Dasar Hukum Baru</h3>
@@ -63,7 +63,7 @@
             </div>
           </div>
 
-          {{-- Tabel dasar hukum --}}
+          <!-- Tabel dasar hukum -->
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full">
@@ -90,7 +90,7 @@
                   </tr>
                   @endforeach
 
-                  {{-- Fallback data statis --}}
+                  <!-- Fallback data statis -->
                   @if(empty($dasarHukumList) || count($dasarHukumList) === 0)
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150">
                     <td class="px-5 py-3.5"><p class="text-xs text-slate-400 font-light">1</p></td>

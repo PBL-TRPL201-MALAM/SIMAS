@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+// Controller ini menangani alur Pemohon untuk membuat pengajuan surat biasa, melihat suratnya, dan mengunduh hasil publish.
+// Dalam alur MVC Laravel, controller ini menjadi jembatan antara form/view Pemohon dan model Dokumen/SuratBiasa/DokumenFile.
 class PemohonSuratController extends Controller
 {
     // Method ini hanya menampilkan form pengajuan surat biasa untuk pemohon.
@@ -25,6 +27,7 @@ class PemohonSuratController extends Controller
     // Data utama dokumen disimpan ke tabel dokumen, detail surat ke surat_biasa, dan file DOCX ke dokumen_file.
     public function store(Request $request): RedirectResponse
     {
+        // Validasi request memastikan file yang masuk benar-benar DOCX dan data wajib surat sudah lengkap.
         $validated = $request->validate([
             'draft_surat' => ['required', 'file', 'mimes:docx', 'max:10240'],
             'perihal' => ['required', 'string', 'max:255'],
@@ -42,6 +45,8 @@ class PemohonSuratController extends Controller
         // Draft awal pemohon selalu disimpan sebagai DOCX agar admin masih bisa memeriksa dokumen sumbernya.
         $storedPath = $file->store('dokumen/draft', 'public');
 
+        // Transaction dipakai karena 3 tabel harus berhasil bersama: dokumen, detail surat, dan file draft.
+        // Jika salah satu gagal, Laravel akan rollback agar data pengajuan tidak setengah tersimpan.
         DB::transaction(function () use ($validated, $user, $file, $storedPath): void {
             // Dokumen utama dibuat lebih dulu sebagai pusat relasi semua proses surat berikutnya.
             $dokumen = Dokumen::create([
@@ -67,11 +72,13 @@ class PemohonSuratController extends Controller
             ]);
         });
 
+        // Setelah pengajuan tersimpan, pemohon diarahkan ke daftar Surat Saya untuk memantau statusnya.
         return redirect()
             ->route('pemohon.surat-saya')
             ->with('status', 'Pengajuan surat berhasil dikirim.');
     }
 
+    // Method ini mengambil daftar surat biasa milik pemohon login untuk halaman Surat Saya.
     public function index(Request $request): View
     {
         // Halaman Surat Saya hanya menampilkan surat biasa milik pemohon yang sedang login beserta file terakhirnya.
@@ -87,8 +94,10 @@ class PemohonSuratController extends Controller
         ]);
     }
 
+    // Method ini mengirim file PDF hasil publish ke browser pemohon.
     public function download(Request $request, Dokumen $dokumen): BinaryFileResponse|RedirectResponse
     {
+        // abort_unless adalah guard Laravel: hentikan request jika dokumen bukan milik pemohon login.
         abort_unless(
             $dokumen->jenis_dokumen === 'SURAT_BIASA' && $dokumen->pemohon_id === $request->user()->user_id,
             403
@@ -100,23 +109,27 @@ class PemohonSuratController extends Controller
         $file = $this->resolvePublishedFile($dokumen);
 
         if (! $file) {
+            // Redirect dengan flash error memberi feedback ke halaman Surat Saya tanpa menampilkan error teknis.
             return redirect()
                 ->route('pemohon.surat-saya')
                 ->with('error', 'File dokumen belum tersedia untuk diunduh.');
         }
 
         if (! Storage::disk('public')->exists($file->file_path)) {
+            // File record ada di database, tetapi file fisik hilang di storage; user dikembalikan dengan pesan aman.
             return redirect()
                 ->route('pemohon.surat-saya')
                 ->with('error', 'File PDF dokumen tidak ditemukan di penyimpanan.');
         }
 
+        // response()->download membuat browser mengunduh file dengan nama rapi dari helper SuratPdfDownloadName.
         return response()->download(
             Storage::disk('public')->path($file->file_path),
             $this->buildPublishedDownloadFileName($dokumen)
         );
     }
 
+    // Helper ini mencari file publish yang paling layak diunduh pemohon.
     protected function resolvePublishedFile(Dokumen $dokumen): ?DokumenFile
     {
         // Setelah published, file final diutamakan. Preview verifikasi dipakai sebagai fallback aman.
@@ -134,6 +147,7 @@ class PemohonSuratController extends Controller
         return null;
     }
 
+    // Helper ini membangun nama file unduhan agar tidak bergantung pada nama file di storage.
     protected function buildPublishedDownloadFileName(Dokumen $dokumen): string
     {
         // Nama unduhan dipisahkan dari nama file storage agar pemohon selalu menerima nama file yang rapi dan konsisten.

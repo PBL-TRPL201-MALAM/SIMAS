@@ -1,5 +1,6 @@
 @include('template.header', ['pageTitle' => 'Dashboard', 'modalVariant' => 'pemohon'])
 @include('template.pemohon-sidebar', ['activePage' => 'dashboard'])
+    <!-- Dashboard Pemohon menerima $stats, $latestDocuments, dan $recentActivities dari DashboardControllerpemohon. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -37,6 +38,7 @@
           </div>
 
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- $stats berisi hasil count dokumen pemohon berdasarkan status, disiapkan oleh controller. -->
             <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
               <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
                 <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -87,7 +89,9 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-50">
+                    <!-- forelse menampilkan daftar dokumen jika ada, dan empty state jika koleksi kosong. -->
                     @forelse ($latestDocuments as $dokumen)
+                      <!-- Blok php ini hanya menyiapkan label tampilan dari data relasi suratBiasa/suratKeputusan. -->
                       @php
                         $judulDokumen = $dokumen->jenis_dokumen === 'SURAT_KEPUTUSAN'
                             ? ($dokumen->suratKeputusan?->judul_sk ?: $dokumen->suratKeputusan?->tentang ?: '-')
@@ -126,6 +130,7 @@
                 <h3 class="text-sm font-semibold text-slate-800">Aktivitas Terbaru</h3>
               </div>
               <div class="px-5 py-4 space-y-4">
+                <!-- $recentActivities berisi riwayat dokumen terbaru milik pemohon yang dikirim dari controller. -->
                 @forelse ($recentActivities as $activity)
                   @php
                     $judulAktivitas = $activity->dokumen?->jenis_dokumen === 'SURAT_KEPUTUSAN'

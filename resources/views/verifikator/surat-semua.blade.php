@@ -1,5 +1,6 @@
 @include('template.header', ['pageTitle' => 'Semua Surat', 'modalVariant' => 'none'])
 @include('template.verifikator-sidebar', ['activePage' => 'surat-semua'])
+    <!-- View ini menerima $suratSemua dari VerifikatorSuratControllersemua, berisi semua surat yang pernah ditugaskan ke verifikator. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -37,7 +38,9 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
+                  <!-- forelse menampilkan rekap surat; jika tidak ada, tabel tetap menampilkan empty state. -->
                   @forelse ($suratSemua as $item)
+                    <!-- Blok php mengubah status verifikasi menjadi class badge agar status mudah dibaca. -->
                     @php
                       $statusClass = match ($item->status_verifikasi) {
                           'MENUNGGU' => 'text-blue-600 bg-blue-50',
@@ -63,6 +66,7 @@
                       </td>
                       <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->dokumen->created_at)->format('d M Y') }}</p></td>
                       <td class="px-5 py-3.5">
+                        <!-- Tombol berubah menjadi Verifikasi jika status masih MENUNGGU, selain itu menjadi Lihat. -->
                         <a href="{{ route('verifikator.surat.detail', $item->dokumen) }}" class="inline-flex items-center text-[11px] font-semibold {{ $item->status_verifikasi === 'MENUNGGU' ? 'text-white bg-blue-600 hover:bg-blue-700' : 'text-slate-600 bg-slate-100 hover:bg-slate-200' }} px-2.5 py-1 rounded-lg transition-all duration-200">
                           {{ $item->status_verifikasi === 'MENUNGGU' ? 'Verifikasi' : 'Lihat' }}
                         </a>

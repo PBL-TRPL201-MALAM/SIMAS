@@ -51,10 +51,11 @@
   <body class="bg-white antialiased overflow-hidden h-screen">
 
     <div class="flex h-screen w-full">
+      <!-- View Auth ini berdiri sendiri, tidak memakai layout dashboard karena user belum login dan belum punya role. -->
 
-      {{-- ================================================================
+      <!-- ================================================================
            PANEL KIRI — FORM LOGIN
-      ================================================================ --}}
+      ================================================================ -->
       <div class="relative flex flex-col justify-center w-full lg:w-1/2 px-8 sm:px-16 xl:px-24 bg-white overflow-hidden">
 
         <div class="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-blue-50/60 blur-3xl pointer-events-none"></div>
@@ -62,19 +63,20 @@
 
         <div class="relative w-full max-w-sm mx-auto">
 
-          {{-- Logo --}}
+          <!-- Logo -->
           <a href="{{ route('home') }}" class="inline-flex items-center gap-2.5 mb-10 group">
             <img src="{{ asset('images/logo.png') }}" alt="Logo SIMAS" class="h-8 w-auto object-contain" />
             <span class="text-base font-bold tracking-tight text-slate-900">SIMAS</span>
           </a>
 
-          {{-- Heading --}}
+          <!-- Heading -->
           <div class="mb-8">
             <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Selamat datang kembali!</h1>
             <p class="mt-1.5 text-sm text-slate-400 font-light">Masuk untuk mengakses sistem administrasi Polibatam.</p>
           </div>
 
-          {{-- Alert Error --}}
+          <!-- Alert Error -->
+          <!-- session('status') dikirim lewat redirect, misalnya setelah logout berhasil. -->
           @if (session('status'))
             <div class="flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 mb-6">
               <svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -84,6 +86,7 @@
             </div>
           @endif
 
+          <!-- $errors otomatis tersedia setelah validasi login gagal di AuthController. -->
           @if ($errors->any())
             <div class="flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3 mb-6">
               <svg class="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -93,11 +96,14 @@
             </div>
           @endif
 
-          {{-- Form Login --}}
+          <!-- Form Login -->
+          <!-- Form ini mengirim data login ke route login.attempt menggunakan method POST. -->
           <form action="{{ route('login.attempt') }}" method="POST" class="space-y-5">
+            <!-- csrf wajib di Laravel untuk melindungi form dari serangan CSRF. -->
             @csrf
 
-            {{-- Email / Username --}}
+            <!-- Email / Username -->
+            <!-- Input login menerima email atau username; old('login') mengisi ulang nilai jika validasi gagal. -->
             <div class="space-y-1.5">
               <label for="login" class="block text-xs font-semibold text-slate-700 tracking-wide">Email atau Username</label>
               <div class="relative">
@@ -113,7 +119,8 @@
               <p id="login-error" class="hidden text-[11px] text-red-500 font-medium mt-1"></p>
             </div>
 
-            {{-- Password --}}
+            <!-- Password -->
+            <!-- Input password dikirim ke controller dan dibandingkan dengan hash password user. -->
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label for="password" class="block text-xs font-semibold text-slate-700 tracking-wide">Kata Sandi</label>
@@ -144,6 +151,7 @@
             </div>
 
             <div class="flex items-center justify-between">
+              <!-- Remember me mengirim nilai remember agar session login bisa dibuat lebih lama jika dipilih. -->
               <label for="remember" class="inline-flex items-center gap-2 text-xs text-slate-500 font-medium">
                 <input id="remember" name="remember" type="checkbox" value="1" {{ old('remember') ? 'checked' : '' }}
                   class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
@@ -151,7 +159,7 @@
               </label>
             </div>
 
-            {{-- Submit --}}
+            <!-- Submit -->
             <button id="submit-btn" type="submit"
               class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-blue-200/60 hover:shadow-blue-300/70 hover:from-blue-700 hover:to-blue-600 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none transition-all duration-300 mt-2">
               <span id="btn-text">Masuk ke SIMAS</span>
@@ -163,7 +171,8 @@
 
           </form>
 
-          {{-- Akun Demo --}}
+          <!-- Akun Demo -->
+          <!-- Akun demo membantu proses belajar/testing manual; login tetap diproses melalui form normal di atas. -->
           <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-[11px] text-slate-500 leading-relaxed">
               <p class="mb-2 font-semibold text-slate-700">Akun Demo</p>
 
@@ -182,12 +191,13 @@
       </div>
 
 
-      {{-- ================================================================
+      <!-- ================================================================
            PANEL KANAN — BRANDING + CAROUSEL
-      ================================================================ --}}
+      ================================================================ -->
+      <!-- Panel kanan hanya untuk tampilan branding/carousel dan tidak mengirim data ke controller. -->
       <div class="hidden lg:flex relative w-1/2 flex-col justify-between overflow-hidden p-14">
 
-        {{-- Background --}}
+        <!-- Background -->
         <div class="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-sky-400"></div>
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#ffffff07_1px,transparent_1px),linear-gradient(to_bottom,#ffffff07_1px,transparent_1px)] bg-[size:40px_40px]"></div>
         <div class="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
@@ -195,7 +205,7 @@
 
         <div class="relative flex flex-col justify-between h-full">
 
-          {{-- Tagline atas --}}
+          <!-- Tagline atas -->
           <div>
             <h2 class="text-4xl font-extrabold text-white leading-[1.15] tracking-tight">
               Administrasi<br />
@@ -207,23 +217,23 @@
             </p>
           </div>
 
-          {{-- ── CAROUSEL ── --}}
+          <!-- ── CAROUSEL ── -->
           <div class="flex flex-col gap-4">
 
-            {{-- Slide area --}}
+            <!-- Slide area -->
             <div class="overflow-hidden rounded-2xl shadow-xl shadow-blue-900/30 ring-1 ring-white/20"
               id="login-carousel-container">
               <div class="login-carousel-track" id="login-carousel-track">
 
-                {{-- SLIDE 1 --}}
+                <!-- SLIDE 1 -->
                 <div class="login-carousel-slide">
                   <div class="relative w-full aspect-video overflow-hidden">
-                    {{--
+                    <!--
                       Ganti dengan:
-                      <img src="{{ asset('images/carousel/r1.png') }}"
+                      <img src="{ { asset('images/carousel/r1.png') } }"
                            alt="Dashboard SIMAS"
                            class="w-full h-full object-cover object-center" />
-                    --}}
+                    -->
                     <img src="{{ asset('images/carousel/c1.png') }}"
                          alt="Dashboard SIMAS"
                          class="w-full h-full object-cover object-center" />
@@ -231,7 +241,7 @@
                   </div>
                 </div>
 
-                {{-- SLIDE 2 --}}
+                <!-- SLIDE 2 -->
                 <div class="login-carousel-slide">
                   <div class="relative w-full aspect-video overflow-hidden">
                     <img src="{{ asset('images/carousel/c2.png') }}"
@@ -241,7 +251,7 @@
                   </div>
                 </div>
 
-                {{-- SLIDE 3 --}}
+                <!-- SLIDE 3 -->
                 <div class="login-carousel-slide">
                   <div class="relative w-full aspect-video overflow-hidden">
                     <img src="{{ asset('images/carousel/c3.png') }}"
@@ -254,10 +264,10 @@
               </div>
             </div>
 
-            {{-- Caption + Dots --}}
+            <!-- Caption + Dots -->
             <div class="flex flex-col items-center gap-3">
 
-              {{-- Caption --}}
+              <!-- Caption -->
               <div class="relative h-12 w-full text-center overflow-hidden">
 
                 <div class="login-caption absolute inset-0 flex flex-col items-center justify-center" data-login-slide="0">
@@ -277,7 +287,7 @@
 
               </div>
 
-              {{-- Dots --}}
+              <!-- Dots -->
               <div class="flex items-center gap-2" id="login-carousel-dots">
                 <button type="button" data-login-dot="0"
                   class="login-dot active h-1.5 w-5 rounded-full bg-white/90 transition-all duration-300"></button>
@@ -290,7 +300,7 @@
             </div>
           </div>
 
-          {{-- Quote bawah --}}
+          <!-- Quote bawah -->
           <div class="border-t border-white/10 pt-6">
             <p class="text-xs text-white/40 font-light leading-relaxed">
               Sistem ini dikembangkan sebagai bagian dari program Project-Based Learning Politeknik Negeri Batam untuk meningkatkan tata kelola administrasi institusi.

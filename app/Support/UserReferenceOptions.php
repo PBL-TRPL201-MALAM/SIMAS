@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+// Helper ini menyimpan daftar referensi statis untuk user dan surat.
+// Controller dan validasi memanggil helper yang sama agar pilihan di UI tidak berbeda dengan aturan backend.
 class UserReferenceOptions
 {
     // Helper ini menjadi sumber tunggal pilihan referensi agar dropdown, validasi, dan enum database tetap sejalan.
@@ -10,6 +12,7 @@ class UserReferenceOptions
      */
     public static function roles(): array
     {
+        // Daftar role ini dipakai oleh validasi user dan pembagian akses route.
         return ['SUPER_ADMIN', 'ADMIN_TU', 'PEMOHON', 'VERIFIKATOR'];
     }
 
@@ -18,6 +21,7 @@ class UserReferenceOptions
      */
     public static function jabatans(): array
     {
+        // Jabatan dipakai pada data profil user dan filter calon penandatangan.
         return [
             'Direktur',
             'Wakil Direktur I',
@@ -36,6 +40,7 @@ class UserReferenceOptions
      */
     public static function unitKerjas(): array
     {
+        // Unit kerja menjadi pilihan standar agar penulisan unit tidak berbeda-beda antar user.
         return [
             'Direktorat',
             'Akademik',
@@ -60,6 +65,7 @@ class UserReferenceOptions
      */
     public static function jenisSuratBiasa(): array
     {
+        // Jenis surat biasa dipakai pada metadata surat yang dilengkapi Admin/TU.
         return [
             'Surat Undangan',
             'Surat Tugas',

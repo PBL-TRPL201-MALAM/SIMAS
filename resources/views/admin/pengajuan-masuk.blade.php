@@ -1,9 +1,10 @@
 @include('template.header', ['pageTitle' => 'Pengajuan Masuk'])
 @include('template.admin-sidebar')
 
+    <!-- View ini menerima $pengajuan dari AdminSuratMasukController dan menampilkan surat biasa yang baru masuk. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
-      {{-- Topbar --}}
+      <!-- Topbar -->
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -27,6 +28,7 @@
 
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h2 class="text-sm font-bold text-slate-900">Pengajuan Surat Masuk</h2>
+            <!-- Filter ini memakai data-filter-status pada baris tabel, sehingga tidak perlu request ulang ke controller. -->
             <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1">
               <button data-filter="semua" data-target="pengajuan" class="filter-btn rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white bg-blue-600 transition-all duration-200">Semua</button>
               <button data-filter="diajukan" data-target="pengajuan" class="filter-btn rounded-lg px-3 py-1.5 text-[11px] font-medium text-slate-500 hover:bg-slate-50 transition-all duration-200">Diajukan</button>
@@ -49,8 +51,11 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50" id="tbody-pengajuan">
+                  <!-- forelse membuat tabel tetap informatif jika belum ada pengajuan berstatus diajukan. -->
                   @forelse($pengajuan ?? [] as $item)
+                  <!-- $draftFile adalah file DOCX pertama dari relasi dokumenFiles yang sudah diload controller. -->
                   @php($draftFile = $item->dokumenFiles->first())
+                  <!-- Atribut data-* dipakai modal admin untuk menampilkan detail pengajuan tanpa membuka halaman baru. -->
                   <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row"
                     data-dokumen-id="{{ $item->dokumen_id }}"
                     data-filter-status="{{ strtolower($item->status_dokumen) }}"
@@ -65,6 +70,7 @@
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-500 max-w-[220px]">{{ \Illuminate\Support\Str::limit($item->suratBiasa?->ringkasan_isi ?? '-', 80) }}</p></td>
                     <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->created_at)->format('d M Y') }}</p></td>
                     <td class="px-5 py-3.5">
+                      <!-- if mengecek apakah draft DOCX tersedia sebelum menampilkan nama file. -->
                       @if($draftFile)
                         <p class="text-[11px] text-slate-600 max-w-[160px] truncate">{{ $draftFile->file_name }}</p>
                       @else
@@ -72,6 +78,7 @@
                       @endif
                     </td>
                     <td class="px-5 py-3.5">
+                      <!-- if status dokumen menentukan badge tampilan antara Diajukan dan status lain. -->
                       @if(strtolower($item->status_dokumen) === 'diajukan')
                         <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-blue-500"></span>Diajukan</span>
                       @else
@@ -79,11 +86,13 @@
                       @endif
                     </td>
                     <td class="px-5 py-3.5 flex items-center gap-2">
+                      <!-- Tombol Detail membawa URL unduh DOCX ke modal jika file draft tersedia. -->
                       <button type="button"
                         class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200"
                         data-download-url="{{ $draftFile ? route('admin.pengajuan-masuk.download-docx', $item->dokumen_id) : '' }}">
                         Detail
                       </button>
+                      <!-- Tombol Proses hanya muncul untuk dokumen yang masih diajukan agar Admin/TU memulai wizard proses surat. -->
                       @if(strtolower($item->status_dokumen) === 'diajukan')
                       <a href="{{ route('admin.proses-surat', ['dokumen' => $item->dokumen_id]) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses Surat</a>
                       @endif

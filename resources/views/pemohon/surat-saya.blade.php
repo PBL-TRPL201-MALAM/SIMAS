@@ -1,5 +1,6 @@
 @include('template.header', ['pageTitle' => 'Surat Saya', 'modalVariant' => 'pemohon'])
 @include('template.pemohon-sidebar', ['activePage' => 'surat-saya'])
+    <!-- View ini menerima $suratSaya dari PemohonSuratControllerindex, berisi surat biasa milik user login. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -19,6 +20,7 @@
       </header>
       <main class="flex-1 overflow-y-auto p-6">
         <div id="page-surat-saya" class="page-content space-y-4">
+          <!-- Flash message ini berasal dari redirect setelah pengajuan/unduh berhasil atau gagal. -->
           @if (session('status'))
             <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-700">
               {{ session('status') }}
@@ -33,6 +35,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h2 class="text-sm font-bold text-slate-900">Surat Saya</h2>
             <div class="flex items-center gap-2 flex-wrap">
+              <!-- Tombol filter bekerja di sisi frontend melalui data-status pada setiap baris surat. -->
               <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1">
                 <button data-filter="semua" data-target="surat" class="filter-btn active-filter rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white bg-blue-600 transition-all duration-200">Semua</button>
                 <button data-filter="diproses" data-target="surat" class="filter-btn rounded-lg px-3 py-1.5 text-[11px] font-medium text-slate-500 hover:bg-slate-50 transition-all duration-200">Diproses</button>
@@ -58,13 +61,17 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50" id="tbody-surat">
+                  <!-- forelse memastikan tabel tetap punya empty state saat pemohon belum pernah mengajukan surat. -->
                   @forelse ($suratSaya as $dokumen)
+                    <!-- Blok php menyiapkan status filter dan label tampilan dari status_dokumen. -->
                     @php
                       $statusFilter = $dokumen->status_dokumen === 'PUBLISHED'
                           ? 'published'
                           : (in_array($dokumen->status_dokumen, ['DITOLAK', 'PERLU_REVISI'], true) ? 'ditolak' : 'diproses');
                       $statusLabel = str_replace('_', ' ', $dokumen->status_dokumen);
                     @endphp
+                    <!-- Atribut data-* ini dibaca JavaScript untuk mengisi modal detail tanpa query tambahan. -->
+                    <!-- URL download hanya diisi jika status sudah PUBLISHED, sehingga tombol modal bisa disembunyikan untuk status lain. -->
                     <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row"
                         data-status="{{ $statusFilter }}"
                         data-jenis="Surat Biasa"
@@ -89,6 +96,7 @@
                 </tbody>
               </table>
             </div>
+            <!-- Empty state ini juga dipakai saat filter frontend menyembunyikan semua baris yang tidak cocok. -->
             <div id="surat-empty" class="{{ $suratSaya->isEmpty() ? 'flex' : 'hidden' }} flex-col items-center justify-center py-16 text-center">
               <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-3">
                 <svg class="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>

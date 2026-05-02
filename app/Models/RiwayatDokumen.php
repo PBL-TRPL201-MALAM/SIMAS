@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// Model RiwayatDokumen adalah audit trail untuk perubahan status atau aksi penting pada dokumen.
+// Jika di CodeIgniter biasanya ditulis manual lewat query log, di Laravel ini dibungkus sebagai model Eloquent.
 class RiwayatDokumen extends Model
 {
     use HasFactory;
@@ -15,6 +17,7 @@ class RiwayatDokumen extends Model
 
     protected $primaryKey = 'riwayat_id';
 
+    // Fillable ini berisi informasi aksi, perubahan status, catatan, dan user yang menjalankan aksi.
     protected $fillable = [
         'dokumen_id',
         'aksi',

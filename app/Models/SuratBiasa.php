@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// Model SuratBiasa menyimpan metadata dan isi ringkas khusus untuk dokumen jenis SURAT_BIASA.
+// Dokumen induk tetap ada di model Dokumen, sedangkan nomor, hal, sifat, dan penandatangan ada di model ini.
 class SuratBiasa extends Model
 {
     use HasFactory;
@@ -15,6 +17,7 @@ class SuratBiasa extends Model
 
     protected $primaryKey = 'surat_biasa_id';
 
+    // Fillable ini membuat controller bisa mengisi metadata surat secara mass assignment dengan aman.
     protected $fillable = [
         'dokumen_id',
         'jenis_surat',
@@ -35,6 +38,7 @@ class SuratBiasa extends Model
 
     protected function casts(): array
     {
+        // Cast tanggal_surat membuat format tanggal lebih mudah dikelola saat ditampilkan di view atau PDF.
         return [
             // Tanggal surat tetap disimpan sebagai date agar mudah diformat ulang saat render PDF.
             'tanggal_surat' => 'date',

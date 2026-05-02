@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+// Model Dokumen adalah induk utama alur surat di SIMAS.
+// Semua jenis surat menyimpan status globalnya di tabel ini, lalu detailnya disambungkan lewat relasi Eloquent.
 class Dokumen extends Model
 {
     use HasFactory;
@@ -17,6 +19,7 @@ class Dokumen extends Model
 
     protected $primaryKey = 'dokumen_id';
 
+    // Kolom fillable ini adalah data yang boleh diisi lewat mass assignment saat pengajuan, proses, dan publish.
     protected $fillable = [
         'jenis_dokumen',
         'pemohon_id',
@@ -28,6 +31,7 @@ class Dokumen extends Model
 
     protected function casts(): array
     {
+        // Cast membantu Laravel otomatis mengubah nilai database menjadi objek tanggal Carbon.
         return [
             // Waktu publish dipisahkan agar mudah membedakan kapan dokumen dibuat dan kapan resmi diterbitkan.
             'published_at' => 'datetime',
@@ -40,6 +44,7 @@ class Dokumen extends Model
         return $this->belongsTo(User::class, 'pemohon_id', 'user_id');
     }
 
+    // Relasi one-to-many: satu dokumen dapat memiliki banyak versi file sepanjang prosesnya.
     public function dokumenFiles(): HasMany
     {
         return $this->hasMany(DokumenFile::class, 'dokumen_id', 'dokumen_id');
@@ -51,11 +56,13 @@ class Dokumen extends Model
         return $this->hasOne(SuratBiasa::class, 'dokumen_id', 'dokumen_id');
     }
 
+    // Relasi one-to-one untuk detail Surat Keputusan ketika jenis dokumen adalah SURAT_KEPUTUSAN.
     public function suratKeputusan(): HasOne
     {
         return $this->hasOne(SuratKeputusan::class, 'dokumen_id', 'dokumen_id');
     }
 
+    // Relasi one-to-many: satu dokumen melewati beberapa level verifikasi.
     public function verifikasi(): HasMany
     {
         return $this->hasMany(Verifikasi::class, 'dokumen_id', 'dokumen_id');

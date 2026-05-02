@@ -1,6 +1,7 @@
 @include('template.header', ['pageTitle' => 'Dashboard Super Admin'])
 @include('template.super-admin-sidebar')
 
+    <!-- Dashboard Super Admin menerima $stats, $roleDistribution, dan $recentActivities dari DashboardControllersuperAdmin. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -34,6 +35,7 @@
           </div>
 
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- $stats adalah ringkasan global sistem: total user, total dokumen, published, dan pending. -->
             <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/70 transition-all duration-300">
               <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -82,7 +84,9 @@
                 <a href="{{ route('super-admin.log-aktivitas') }}" class="text-[11px] font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200">Buka log</a>
               </div>
               <div class="divide-y divide-slate-100">
+                <!-- forelse menampilkan aktivitas terbaru atau empty state jika log belum ada. -->
                 @forelse ($recentActivities as $activity)
+                  <!-- Blok php menentukan judul dokumen dari relasi surat biasa/SK sebelum ditampilkan. -->
                   @php
                     $judul = $activity->dokumen?->jenis_dokumen === 'SURAT_KEPUTUSAN'
                         ? ($activity->dokumen?->suratKeputusan?->judul_sk ?: $activity->dokumen?->suratKeputusan?->tentang ?: 'Dokumen')
@@ -113,6 +117,7 @@
                 <p class="text-[11px] text-slate-400 font-light mt-0.5">Komposisi user aktif dalam sistem</p>
               </div>
               <div class="space-y-3">
+                <!-- $roleDistribution berisi label, total, dan persentase user per role untuk progress bar. -->
                 @foreach ($roleDistribution as $item)
                   <div>
                     <div class="flex items-center justify-between text-xs mb-1">
