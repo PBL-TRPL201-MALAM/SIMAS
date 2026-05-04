@@ -24,6 +24,18 @@
 
       <main class="flex-1 overflow-y-auto p-6">
         <div class="space-y-4">
+          <!-- Flash message ini menampilkan hasil publish atau error saat pembuatan PDF final QR gagal. -->
+          @if (session('status'))
+            <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-700">
+              {{ session('status') }}
+            </div>
+          @endif
+
+          @if (session('error'))
+            <div class="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
+              {{ session('error') }}
+            </div>
+          @endif
 
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-bold text-slate-900">Semua Surat Biasa</h2>

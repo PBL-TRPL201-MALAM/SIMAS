@@ -15,6 +15,7 @@ class PosisiElemenDokumen extends Model
     // Koordinat di tabel ini menjadi dasar penempelan nomor surat, tanggal, dan QR/TTE ke PDF hasil generate.
     protected $table = 'posisi_elemen_dokumen';
 
+    // Primary key custom dipakai agar Eloquent mengenali posisi_id sebagai identitas koordinat elemen.
     protected $primaryKey = 'posisi_id';
 
     // Fillable berisi koordinat relatif dari kanvas preview yang aman diisi melalui endpoint storePosisiElemen.

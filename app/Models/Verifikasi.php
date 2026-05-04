@@ -15,6 +15,7 @@ class Verifikasi extends Model
     // Satu baris verifikasi mewakili satu tahap approval pada dokumen, termasuk tahap penandatangan final.
     protected $table = 'verifikasi';
 
+    // Primary key custom membuat route/model Eloquent memakai verifikasi_id sebagai identitas baris verifikasi.
     protected $primaryKey = 'verifikasi_id';
 
     // Fillable ini dipakai saat Admin/TU membangun ulang flow verifikasi bertingkat.

@@ -15,6 +15,7 @@ class DokumenFile extends Model
     // Semua versi file pada satu dokumen dicatat di model ini, mulai dari draft pemohon sampai PDF final hasil publish.
     protected $table = 'dokumen_file';
 
+    // Primary key custom mengikuti nama kolom file_id pada tabel dokumen_file.
     protected $primaryKey = 'file_id';
 
     // Fillable menentukan metadata file yang boleh disimpan dari controller/service.

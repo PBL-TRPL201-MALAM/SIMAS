@@ -15,6 +15,7 @@ class RiwayatDokumen extends Model
     // Model ini dipakai sebagai jejak audit untuk menjelaskan perubahan status dokumen sepanjang alurnya.
     protected $table = 'riwayat_dokumen';
 
+    // Primary key custom sesuai struktur tabel riwayat_dokumen di database SIMAS.
     protected $primaryKey = 'riwayat_id';
 
     // Fillable ini berisi informasi aksi, perubahan status, catatan, dan user yang menjalankan aksi.

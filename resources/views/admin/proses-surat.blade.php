@@ -1,7 +1,7 @@
 @include('template.header', ['pageTitle' => 'Proses Surat'])
 @include('template.admin-sidebar')
 
-    <!-- View ini menerima $dokumen dan data pendukung dari AdminProsesSuratControllershow untuk wizard proses surat. -->
+    <!-- View ini menerima $dokumen dan data pendukung dari AdminProsesSuratController::show untuk wizard proses surat. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
 
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
@@ -186,8 +186,9 @@
                 <div class="space-y-4 mt-4">
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Isi / Ringkasan</label>
-                    <textarea name="isi_ringkasan" rows="4" readonly
-                      class="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm text-slate-700 font-light outline-none resize-none cursor-not-allowed">{{ $ringkasanSurat }}</textarea>
+                    <!-- Ringkasan dapat direvisi Admin/TU sebagai hasil pemeriksaan sebelum metadata disimpan. -->
+                    <textarea name="isi_ringkasan" rows="4"
+                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('isi_ringkasan', $ringkasanSurat) }}</textarea>
                   </div>
 
                   <div class="space-y-1.5">
@@ -224,6 +225,7 @@
               data-save-url="{{ route('admin.proses-surat.posisi-elemen', $dokumen) }}"
               data-preview-url="{{ $previewPdfUrl }}"
               data-preview-name="{{ $previewPdfName ?? '' }}"
+              data-page-count="{{ $previewPdfPageCount ?? 1 }}"
               data-existing-positions='@json($existingPositions)'
             >
               <div class="rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3">
@@ -261,9 +263,16 @@
                       <p class="text-xs font-semibold text-slate-700">Halaman Preview</p>
                       <p class="text-[11px] text-slate-400 font-light mt-0.5">Jika elemen ada di halaman lain, ubah halaman lalu klik Tampilkan.</p>
                     </div>
+                    <!-- Jumlah halaman berasal dari controller; JavaScript memakai nilai ini untuk membatasi navigasi PDF multi-page. -->
                     <div class="flex items-center gap-3">
-                      <input id="pdf-page-input" type="number" min="1" value="1"
+                      <button id="pdf-page-prev" type="button" class="shrink-0 rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-medium text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all duration-200">
+                        Prev
+                      </button>
+                      <input id="pdf-page-input" type="number" min="1" max="{{ $previewPdfPageCount ?? 1 }}" value="1"
                         class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100" />
+                      <button id="pdf-page-next" type="button" class="shrink-0 rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-medium text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all duration-200">
+                        Next
+                      </button>
                       <button id="pdf-page-apply" type="button" class="shrink-0 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-medium text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-all duration-200">
                         Tampilkan
                       </button>

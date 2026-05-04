@@ -15,6 +15,7 @@ class SuratBiasa extends Model
     // Tabel ini menyimpan detail isi surat biasa yang melengkapi dokumen induk pada sistem.
     protected $table = 'surat_biasa';
 
+    // Primary key custom dipakai karena tabel surat_biasa tidak memakai kolom id bawaan Laravel.
     protected $primaryKey = 'surat_biasa_id';
 
     // Fillable ini membuat controller bisa mengisi metadata surat secara mass assignment dengan aman.

@@ -58,6 +58,7 @@ class UserController extends Controller
         ]);
     }
 
+    // Method ini menerima request form tambah user dan menyimpan akun baru ke tabel users.
     public function store(Request $request): RedirectResponse
     {
         // Validasi request melindungi tabel users dari email/username duplikat dan pilihan role yang tidak dikenal.

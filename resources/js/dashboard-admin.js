@@ -303,6 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const pdfMarkerLayer = document.getElementById('pdf-marker-layer');
     const pdfPageInput = document.getElementById('pdf-page-input');
     const pdfPageApply = document.getElementById('pdf-page-apply');
+    const pdfPagePrev = document.getElementById('pdf-page-prev');
+    const pdfPageNext = document.getElementById('pdf-page-next');
     const activeElementLabel = document.getElementById('aktif-elemen-label');
     const setElementButtons = Array.from(document.querySelectorAll('.btn-set-elemen'));
     const pdfZoomOut = document.getElementById('pdf-zoom-out');
@@ -344,6 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const startStep = Math.max(1, Math.min(3, Number(posisiConfig.dataset.startStep || 1)));
     const existingPreviewUrl = posisiConfig.dataset.previewUrl || '';
     const existingPreviewName = posisiConfig.dataset.previewName || 'PDF hasil pemeriksaan';
+    // Jumlah halaman dikirim dari Laravel agar preview posisi bisa berpindah halaman pada PDF multi-page.
+    let pdfPageCount = Math.max(1, Number(posisiConfig.dataset.pageCount || pdfPageInput?.max || 1));
     let existingPositions = {};
 
     try {
@@ -352,9 +356,30 @@ document.addEventListener('DOMContentLoaded', () => {
       existingPositions = {};
     }
 
-    const savedPositions = { ...existingPositions };
+    // Jika PDF sulit dihitung tetapi posisi lama sudah punya halaman > 1, UI tetap membuka jumlah halaman minimal sesuai data tersimpan.
+    const maxStoredPage = Object.values(existingPositions).reduce((maxPage, posisi) => {
+      return Math.max(maxPage, Number(posisi?.halaman || 1));
+    }, 1);
+    pdfPageCount = Math.max(pdfPageCount, maxStoredPage);
+
+    const clampPage = (page) => Math.max(1, Math.min(pdfPageCount, Math.round(Number(page) || 1)));
+    const normalizePosition = (posisi, elemen) => ({
+      ...(posisi || {}),
+      elemen: posisi?.elemen || elemen,
+      // Data lama yang belum menyimpan halaman dianggap halaman 1 agar tetap kompatibel.
+      halaman: clampPage(posisi?.halaman || 1),
+      posisi_x: Number(posisi?.posisi_x || 0),
+      posisi_y: Number(posisi?.posisi_y || 0),
+      lebar: posisi?.lebar !== null && posisi?.lebar !== undefined ? Number(posisi.lebar) : null,
+      tinggi: posisi?.tinggi !== null && posisi?.tinggi !== undefined ? Number(posisi.tinggi) : null,
+    });
+
+    const savedPositions = Object.entries(existingPositions).reduce((positions, [elemen, posisi]) => {
+      positions[elemen] = normalizePosition(posisi, elemen);
+      return positions;
+    }, {});
     let activeElement = null;
-    let currentPage = Math.max(1, Number(pdfPageInput?.value || 1));
+    let currentPage = clampPage(pdfPageInput?.value || 1);
     let currentPreviewUrl = existingPreviewUrl;
     let zoomLevel = 1;
     let dragState = null;
@@ -372,7 +397,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updatePageBadge = () => {
       if (pdfPreviewPageBadge) {
-        pdfPreviewPageBadge.textContent = `Halaman ${currentPage}`;
+        pdfPreviewPageBadge.textContent = `Halaman ${currentPage} dari ${pdfPageCount}`;
+      }
+    };
+
+    const updatePageControls = () => {
+      if (pdfPageInput) {
+        pdfPageInput.min = '1';
+        pdfPageInput.max = String(pdfPageCount);
+        pdfPageInput.value = String(currentPage);
+      }
+
+      if (pdfPagePrev) {
+        pdfPagePrev.disabled = currentPage <= 1;
+        pdfPagePrev.classList.toggle('opacity-50', currentPage <= 1);
+        pdfPagePrev.classList.toggle('cursor-not-allowed', currentPage <= 1);
+      }
+
+      if (pdfPageNext) {
+        pdfPageNext.disabled = currentPage >= pdfPageCount;
+        pdfPageNext.classList.toggle('opacity-50', currentPage >= pdfPageCount);
+        pdfPageNext.classList.toggle('cursor-not-allowed', currentPage >= pdfPageCount);
       }
     };
 
@@ -404,7 +449,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getPreviewUrlForPage = () => {
       if (!currentPreviewUrl) return '';
-      return `${currentPreviewUrl}#page=${currentPage}&toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
+      const [urlWithoutFragment] = currentPreviewUrl.split('#');
+      return `${urlWithoutFragment}#page=${currentPage}&toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
     };
 
     const updatePreviewLayout = () => {
@@ -563,7 +609,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     updateProcessPreview = ({ reloadFrame = true } = {}) => {
+      currentPage = clampPage(currentPage);
       updatePageBadge();
+      updatePageControls();
       updatePreviewLayout();
 
       if (!currentPreviewUrl) {
@@ -577,7 +625,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (reloadFrame) {
-        pdfPreviewFrame?.setAttribute('src', getPreviewUrlForPage());
+        const targetUrl = getPreviewUrlForPage();
+        if (pdfPreviewFrame) {
+          // Iframe PDF kadang mengabaikan perubahan hash #page; reset singkat memastikan halaman aktif benar-benar dimuat.
+          pdfPreviewFrame.setAttribute('src', 'about:blank');
+          window.requestAnimationFrame(() => pdfPreviewFrame.setAttribute('src', targetUrl));
+        }
       }
 
       pdfPreviewStage?.classList.remove('hidden');
@@ -586,6 +639,11 @@ document.addEventListener('DOMContentLoaded', () => {
         pdfPreviewCaption.textContent = 'Scroll vertikal di area preview jika perlu, lalu klik area PDF untuk menyimpan posisi elemen aktif.';
       }
       renderMarkers();
+    };
+
+    const setCurrentPage = (page) => {
+      currentPage = clampPage(page);
+      updateProcessPreview();
     };
 
     const setActiveElement = (elemen) => {
@@ -625,10 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     pdfPageApply?.addEventListener('click', () => {
-      const requestedPage = Math.max(1, Number(pdfPageInput?.value || 1));
-      currentPage = requestedPage;
-      if (pdfPageInput) pdfPageInput.value = requestedPage;
-      updateProcessPreview();
+      setCurrentPage(pdfPageInput?.value || 1);
     });
 
     pdfPageInput?.addEventListener('keydown', (event) => {
@@ -636,6 +691,9 @@ document.addEventListener('DOMContentLoaded', () => {
       event.preventDefault();
       pdfPageApply?.click();
     });
+
+    pdfPagePrev?.addEventListener('click', () => setCurrentPage(currentPage - 1));
+    pdfPageNext?.addEventListener('click', () => setCurrentPage(currentPage + 1));
 
     pdfZoomOut?.addEventListener('click', () => setZoom(zoomLevel - ZOOM_STEP));
     pdfZoomIn?.addEventListener('click', () => setZoom(zoomLevel + ZOOM_STEP));
@@ -661,6 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const scaledX = Math.max(0, event.clientX - rect.left);
       const scaledY = Math.max(0, event.clientY - rect.top);
       const nextPosition = clampPosition(activeElement, scaledX / zoomLevel, scaledY / zoomLevel);
+      const preset = markerPresets[activeElement] || { label: 'Elemen' };
 
       try {
         const saved = await savePosition({
@@ -672,7 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
           tinggi: getElementDimensions(activeElement).height,
         });
 
-        savedPositions[activeElement] = saved;
+        savedPositions[activeElement] = normalizePosition(saved, activeElement);
         syncFieldValues();
         updateStatusText();
         renderMarkers();
@@ -736,7 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
           tinggi: dimensions.height,
         });
 
-        savedPositions[elemen] = saved;
+        savedPositions[elemen] = normalizePosition(saved, elemen);
         syncFieldValues();
         updateStatusText();
         renderMarkers();

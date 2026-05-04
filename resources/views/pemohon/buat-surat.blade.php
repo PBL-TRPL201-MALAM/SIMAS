@@ -45,7 +45,7 @@
                 <p class="text-xs text-slate-400 font-light mt-0.5">Siapkan draft surat dalam format DOCX lalu unggah ke sistem.</p>
               </div>
               <div class="px-6 py-6 space-y-5">
-                <!-- Error validasi dari PemohonSuratControllerstore muncul di sini setelah redirect back. -->
+                <!-- Error validasi dari PemohonSuratController::store muncul di sini setelah redirect back. -->
                 @if ($errors->any())
                   <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
                     {{ $errors->first() }}
@@ -92,7 +92,7 @@
             </div>
 
             <div id="surat-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
-              <!-- Step 2 berisi form utama; action route pemohon.surat.store diproses oleh PemohonSuratControllerstore. -->
+              <!-- Step 2 berisi form utama; action route pemohon.surat.store diproses oleh PemohonSuratController::store. -->
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 2 - Data Surat</h2>
                 <p class="text-xs text-slate-400 font-light mt-0.5">Lengkapi informasi awal surat yang akan diajukan.</p>

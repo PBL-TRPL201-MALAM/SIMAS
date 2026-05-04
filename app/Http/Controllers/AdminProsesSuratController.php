@@ -59,12 +59,16 @@ class AdminProsesSuratController extends Controller
         $previewFile = $dokumen->dokumenFiles
             ->first(fn (DokumenFile $file) => in_array($file->file_type, ['HASIL_PEMERIKSAAN_PDF', 'PDF_REVIEW'], true));
 
+        // Jumlah halaman PDF dikirim ke Blade agar UI Admin/TU bisa memilih halaman 1, 2, dan seterusnya saat mengatur posisi.
+        $previewPdfPageCount = $this->countPdfPages($previewFile);
+
         // Posisi elemen dipetakan per nama elemen agar frontend mudah mengisi ulang koordinat yang pernah disimpan.
         $existingPositions = $dokumen->posisiElemenDokumen
             ->mapWithKeys(fn (PosisiElemenDokumen $posisi) => [
                 $posisi->elemen => [
                     'elemen' => $posisi->elemen,
-                    'halaman' => (int) $posisi->halaman,
+                    // Data lama tetap aman: jika halaman kosong/0, Laravel menganggapnya halaman 1.
+                    'halaman' => max(1, (int) ($posisi->halaman ?: 1)),
                     'posisi_x' => (float) $posisi->posisi_x,
                     'posisi_y' => (float) $posisi->posisi_y,
                     'lebar' => $posisi->lebar !== null ? (float) $posisi->lebar : null,
@@ -113,6 +117,7 @@ class AdminProsesSuratController extends Controller
                 ? route('admin.proses-surat.preview-pdf', $dokumen)
                 : null,
             'previewPdfName' => $previewFile?->file_name,
+            'previewPdfPageCount' => $previewPdfPageCount,
             'existingPositions' => $existingPositions,
             'verifikators' => $verifikators,
             // Penandatangan tetap berasal dari role verifikator, tetapi disaring ke jabatan pejabat yang berwenang.
@@ -124,6 +129,22 @@ class AdminProsesSuratController extends Controller
         ]);
     }
 
+    // Helper ini menghitung jumlah halaman PDF dari object /Page.
+    // Nilai ini hanya untuk navigasi preview Admin/TU; jika struktur PDF tidak terbaca, default 1 menjaga PDF lama tetap bisa diproses.
+    private function countPdfPages(?DokumenFile $previewFile): int
+    {
+        if (! $previewFile || ! Storage::disk('public')->exists($previewFile->file_path)) {
+            return 1;
+        }
+
+        $pdfContent = Storage::disk('public')->get($previewFile->file_path);
+
+        preg_match_all('/\/Type\s*\/Page\b/', $pdfContent, $matches);
+
+        return max(1, count($matches[0] ?? []));
+    }
+
+    // Method ini memproses step 1 wizard Admin/TU: upload PDF hasil pemeriksaan dan lengkapi metadata resmi surat.
     public function storeDraft(Request $request, Dokumen $dokumen): RedirectResponse
     {
         abort_unless($dokumen->jenis_dokumen === 'SURAT_BIASA', 404);
@@ -154,11 +175,13 @@ class AdminProsesSuratController extends Controller
             'sifat_surat' => ['required', 'string', 'max:100'],
             'nomor_surat' => ['required', 'string', 'max:100'],
             'tanggal_surat' => ['required', 'date'],
+            'isi_ringkasan' => ['required', 'string'],
             'catatan_tambahan' => ['nullable', 'string'],
         ], [
             'hasil_pemeriksaan_pdf.required' => 'PDF hasil pemeriksaan wajib diunggah.',
             'hasil_pemeriksaan_pdf.mimetypes' => 'File hasil pemeriksaan harus berformat PDF.',
             'hasil_pemeriksaan_pdf.max' => 'Ukuran PDF maksimal 10 MB.',
+            'isi_ringkasan.required' => 'Isi/Ringkasan surat wajib diisi.',
         ]);
 
         $user = $request->user();
@@ -200,6 +223,8 @@ class AdminProsesSuratController extends Controller
                 'penandatangan' => $penandatangan->nama,
                 'jenis_surat' => $validated['jenis_surat'],
                 'sifat_surat' => $validated['sifat_surat'],
+                // Ringkasan dapat direvisi Admin/TU sebagai hasil pemeriksaan sebelum dokumen masuk verifikasi.
+                'ringkasan_isi' => $validated['isi_ringkasan'],
                 'lampiran' => $suratBiasa->lampiran,
                 'keterangan_tambahan' => $validated['catatan_tambahan'] ?? null,
                 'catatan_admin' => $validated['catatan_tambahan'] ?? null,
@@ -249,6 +274,7 @@ class AdminProsesSuratController extends Controller
         abort_unless($dokumen->jenis_dokumen === 'SURAT_BIASA', 404);
 
         // Posisi elemen disimpan dalam koordinat relatif preview supaya bisa dipakai ulang saat generate PDF.
+        // Field halaman ikut disimpan agar PDF multi-page tahu elemen ini ditempel di halaman aktif yang diklik admin.
         // JsonResponse dipakai karena frontend hanya perlu menyimpan koordinat tanpa reload halaman.
         $validated = $request->validate([
             'elemen' => ['required', 'in:nomor_surat,tanggal_surat,tte'],

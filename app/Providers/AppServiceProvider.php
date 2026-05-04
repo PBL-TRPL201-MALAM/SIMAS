@@ -9,6 +9,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Saat APP_URL memakai ngrok, link publik/QR perlu dipaksa HTTPS agar bisa dibuka aman dari luar jaringan lokal.
+        if (str_contains(config('app.url'), 'ngrok')) {
+            URL::forceScheme('https');
+        }
+
+        // View composer mengirim data sidebar otomatis setiap view sidebar dirender, tanpa harus diulang di tiap controller.
         View::composer('template.pemohon-sidebar', function ($view): void {
             $user = Auth::user();
 

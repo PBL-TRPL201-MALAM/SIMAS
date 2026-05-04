@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Dokumen;
 use App\Models\DokumenFile;
+use App\Services\PreviewVerifikasiPdfGenerator;
 use App\Support\SuratPdfDownloadName;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,12 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 // Di sini Admin/TU bisa melihat preview final, mengunduh PDF, dan mem-publish dokumen yang sudah selesai diverifikasi.
 class AdminSemuaSuratController extends Controller
 {
+    // Service PDF di-inject agar proses publish bisa membuat PDF final tanpa menaruh detail manipulasi PDF di controller.
+    public function __construct(
+        protected PreviewVerifikasiPdfGenerator $previewVerifikasiPdfGenerator
+    ) {
+    }
+
     // Method ini mengambil semua surat biasa beserta pemohon, file, dan riwayat verifikasinya untuk halaman arsip.
     public function index(): View
     {
@@ -86,29 +93,50 @@ class AdminSemuaSuratController extends Controller
 
         $sourcePdf = $this->resolvePublishSourcePdf($dokumen);
         $finalPdfPayload = null;
+        $verificationToken = $this->resolveVerificationToken($dokumen);
 
-        if ($sourcePdf && Storage::disk('public')->exists($sourcePdf->file_path)) {
-            // Final PDF diambil dari preview verifikasi terbaru agar isi publish sama dengan yang sudah dilihat verifikator.
-            $extension = pathinfo($sourcePdf->file_name, PATHINFO_EXTENSION) ?: 'pdf';
-            $finalFileName = pathinfo($sourcePdf->file_name, PATHINFO_FILENAME) . '-final.' . $extension;
-            $finalFilePath = 'dokumen/final/' . $dokumen->dokumen_id . '/' . $finalFileName;
-
-            Storage::disk('public')->makeDirectory(dirname($finalFilePath));
-            Storage::disk('public')->copy($sourcePdf->file_path, $finalFilePath);
-
-            $finalPdfPayload = [
-                'file_name' => $finalFileName,
-                'file_path' => $finalFilePath,
-            ];
+        if (! $sourcePdf || ! Storage::disk('public')->exists($sourcePdf->file_path)) {
+            return redirect()
+                ->route('admin.semua-surat')
+                ->with('error', 'File PDF sumber belum tersedia untuk dipublish.');
         }
 
+        // URL QR dibangun dari APP_URL/config app.url, bukan dari host request atau alamat yang di-hardcode.
+        $validationUrl = rtrim((string) config('app.url'), '/') . route('verifikasi.public', $verificationToken, false);
+        $extension = pathinfo($sourcePdf->file_name, PATHINFO_EXTENSION) ?: 'pdf';
+        $finalFileName = pathinfo($sourcePdf->file_name, PATHINFO_FILENAME) . '-final.' . $extension;
+        $finalFilePath = 'dokumen/final/' . $dokumen->dokumen_id . '/' . $finalFileName;
+
+        Storage::disk('public')->makeDirectory(dirname($finalFilePath));
+
+        try {
+            // FINAL_PDF digenerate ulang dari PDF hasil pemeriksaan agar QR dummy preview diganti QR validasi asli.
+            $this->previewVerifikasiPdfGenerator->generateFinal(
+                $dokumen,
+                $sourcePdf->file_path,
+                $validationUrl,
+                $finalFilePath
+            );
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return redirect()
+                ->route('admin.semua-surat')
+                ->with('error', 'PDF final dengan QR validasi belum berhasil dibuat. Silakan cek file PDF dan posisi elemen.');
+        }
+
+        $finalPdfPayload = [
+            'file_name' => $finalFileName,
+            'file_path' => $finalFilePath,
+        ];
+
         // Transaction dipakai agar update status dokumen dan pencatatan file FINAL_PDF terjadi sebagai satu kesatuan.
-        DB::transaction(function () use ($dokumen, $finalPdfPayload): void {
-            // Token verifikasi disiapkan saat publish agar nanti bisa dipakai untuk QR/validasi publik.
+        DB::transaction(function () use ($dokumen, $finalPdfPayload, $verificationToken): void {
+            // Token verifikasi disimpan saat publish dan tidak digenerate ulang jika dokumen sudah memilikinya.
             $dokumen->update([
                 'status_dokumen' => 'PUBLISHED',
                 'published_at' => now(),
-                'verification_token' => $dokumen->verification_token ?: Str::random(40),
+                'verification_token' => $verificationToken,
                 'file_final_path' => $finalPdfPayload['file_path'] ?? $dokumen->file_final_path,
             ]);
 
@@ -135,6 +163,20 @@ class AdminSemuaSuratController extends Controller
             ->with('status', 'Dokumen berhasil dipublish.');
     }
 
+    // Helper ini memastikan token QR unik, tetapi mempertahankan token lama jika dokumen sudah pernah memilikinya.
+    protected function resolveVerificationToken(Dokumen $dokumen): string
+    {
+        if (filled($dokumen->verification_token)) {
+            return $dokumen->verification_token;
+        }
+
+        do {
+            $token = Str::random(40);
+        } while (Dokumen::query()->where('verification_token', $token)->exists());
+
+        return $token;
+    }
+
     // Helper ini memilih file terbaik untuk dipreview atau diunduh dari kumpulan file dokumen.
     protected function resolvePreviewablePdf(Dokumen $dokumen): ?DokumenFile
     {
@@ -156,10 +198,12 @@ class AdminSemuaSuratController extends Controller
     // Helper ini memilih sumber PDF yang akan disalin menjadi file final saat publish.
     protected function resolvePublishSourcePdf(Dokumen $dokumen): ?DokumenFile
     {
-        // Preview verifikasi diprioritaskan karena sudah berisi nomor surat, tanggal, QR/TTE, dan daftar verifikator yang setuju.
-        foreach (['PREVIEW_VERIFIKASI_PDF', 'HASIL_PEMERIKSAAN_PDF'] as $fileType) {
-            $file = $dokumen->dokumenFiles
-                ->first(fn (DokumenFile $item) => $item->file_type === $fileType);
+        // FINAL_PDF dibuat dari PDF hasil pemeriksaan agar overlay nomor, tanggal, verifikator, dan QR asli tidak dobel.
+        foreach (['HASIL_PEMERIKSAAN_PDF', 'PREVIEW_VERIFIKASI_PDF'] as $fileType) {
+            $file = $dokumen->dokumenFiles()
+                ->where('file_type', $fileType)
+                ->latest('file_id')
+                ->first();
 
             if ($file) {
                 return $file;

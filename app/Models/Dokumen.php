@@ -17,6 +17,7 @@ class Dokumen extends Model
     // Tabel dokumen adalah induk utama seluruh alur surat, dari pengajuan awal sampai publish final.
     protected $table = 'dokumen';
 
+    // Primary key custom mengikuti struktur database SIMAS, sehingga Eloquent tidak mencari kolom default id.
     protected $primaryKey = 'dokumen_id';
 
     // Kolom fillable ini adalah data yang boleh diisi lewat mass assignment saat pengajuan, proses, dan publish.

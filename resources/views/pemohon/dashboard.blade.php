@@ -1,6 +1,6 @@
 @include('template.header', ['pageTitle' => 'Dashboard', 'modalVariant' => 'pemohon'])
 @include('template.pemohon-sidebar', ['activePage' => 'dashboard'])
-    <!-- Dashboard Pemohon menerima $stats, $latestDocuments, dan $recentActivities dari DashboardControllerpemohon. -->
+    <!-- Dashboard Pemohon menerima $stats, $latestDocuments, dan $recentActivities dari DashboardController::pemohon. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">

@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminProsesSuratController;
 use App\Http\Controllers\AdminSemuaSuratController;
 use App\Http\Controllers\AdminSuratMasukController;
 use App\Http\Controllers\PemohonSuratController;
+use App\Http\Controllers\PublicDokumenVerificationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifikatorSuratController;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('home');
 })->name('home');
+
+// Route publik validasi dokumen dibuka tanpa middleware auth agar QR pada PDF bisa dipindai dari HP/laptop siapa pun.
+// Token pada URL dicocokkan dengan kolom verification_token dokumen yang sudah PUBLISHED.
+Route::get('/verifikasi/{token}', [PublicDokumenVerificationController::class, 'show'])
+    ->name('verifikasi.public');
 
 // Route guest hanya boleh diakses sebelum user login.
 // Middleware guest adalah kebalikan dari auth: user yang sudah login akan diarahkan keluar dari halaman login.
@@ -203,6 +209,3 @@ Route::middleware(['auth', 'role:SUPER_ADMIN'])->prefix('super-admin')->name('su
         return $controller->edit(auth()->user());
     })->name('profil');
 });
-
-// Catatan: route verifikasi publik berbasis token/QR belum dibuka di file ini.
-// Jika nanti fitur validasi publik ditambahkan, route tersebut sebaiknya dipisah dari group auth karena diakses tanpa login.
