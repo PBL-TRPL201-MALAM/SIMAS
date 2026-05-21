@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Dokumen;
 use App\Models\DokumenFile;
-use App\Services\PreviewVerifikasiPdfGenerator;
+use App\Services\FinalSuratBiasaPdfGenerator;
 use App\Support\SuratPdfDownloadName;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -13,13 +13,13 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-// Controller ini menangani halaman arsip semua surat biasa untuk Admin/TU.
-// Di sini Admin/TU bisa melihat preview final, mengunduh PDF, dan mem-publish dokumen yang sudah selesai diverifikasi.
+// Controller ini menangani halaman arsip semua surat biasa untuk Admin Surat.
+// Di sini Admin Surat bisa melihat preview final, mengunduh PDF, dan mem-publish dokumen yang sudah selesai diverifikasi.
 class AdminSemuaSuratController extends Controller
 {
     // Service PDF di-inject agar proses publish bisa membuat PDF final tanpa menaruh detail manipulasi PDF di controller.
     public function __construct(
-        protected PreviewVerifikasiPdfGenerator $previewVerifikasiPdfGenerator
+        protected FinalSuratBiasaPdfGenerator $finalSuratBiasaPdfGenerator
     ) {
     }
 
@@ -32,10 +32,15 @@ class AdminSemuaSuratController extends Controller
                 'pemohon',
                 'suratBiasa',
                 'dokumenFiles' => fn ($query) => $query->latest('file_id'),
+                'posisiElemenDokumen',
                 'verifikasi' => fn ($query) => $query
                     ->with('verifikator')
                     ->orderByDesc('verified_at')
                     ->orderByDesc('verifikasi_id'),
+                'riwayatDokumen' => fn ($query) => $query
+                    ->with('actor')
+                    ->orderByDesc('created_at')
+                    ->orderByDesc('riwayat_id'),
             ])
             ->where('jenis_dokumen', 'SURAT_BIASA')
             ->latest('created_at')
@@ -52,7 +57,7 @@ class AdminSemuaSuratController extends Controller
         // Route model binding mengisi $dokumen; guard ini memastikan route hanya dipakai untuk surat biasa.
         abort_unless($dokumen->jenis_dokumen === 'SURAT_BIASA', 404);
 
-        // File previewable dipilih dari prioritas final, preview verifikasi, lalu PDF hasil pemeriksaan.
+        // File previewable dipilih dari prioritas final, preview verifikasi, lalu PDF sumber proses.
         $file = $this->resolvePreviewablePdf($dokumen);
         abort_unless($file && Storage::disk('public')->exists($file->file_path), 404);
 
@@ -66,7 +71,7 @@ class AdminSemuaSuratController extends Controller
         );
     }
 
-    // Method ini mengunduh PDF final/preview dengan nama file yang rapi untuk Admin/TU.
+    // Method ini mengunduh PDF final/preview dengan nama file yang rapi untuk Admin Surat.
     public function downloadFinal(Dokumen $dokumen): BinaryFileResponse
     {
         abort_unless($dokumen->jenis_dokumen === 'SURAT_BIASA', 404);
@@ -78,6 +83,47 @@ class AdminSemuaSuratController extends Controller
         return response()->download(
             Storage::disk('public')->path($file->file_path),
             SuratPdfDownloadName::forDokumen($dokumen)
+        );
+    }
+
+    // Method ini mengunduh lampiran pendukung tanpa menjadikannya sumber preview atau publish surat.
+    public function downloadLampiran(DokumenFile $file): BinaryFileResponse
+    {
+        $file->loadMissing('dokumen');
+
+        abort_unless(
+            $file->file_type === 'LAMPIRAN' && $file->dokumen?->jenis_dokumen === 'SURAT_BIASA',
+            404
+        );
+
+        abort_unless(Storage::disk('public')->exists($file->file_path), 404);
+
+        return response()->download(
+            Storage::disk('public')->path($file->file_path),
+            $file->file_name
+        );
+    }
+
+    // Method ini membuka lampiran pendukung tertentu secara inline tanpa menjadikannya sumber preview/verifikasi surat.
+    public function previewLampiran(DokumenFile $file): BinaryFileResponse
+    {
+        $file->loadMissing('dokumen');
+
+        abort_unless(
+            $file->file_type === 'LAMPIRAN'
+                && $file->dokumen?->jenis_dokumen === 'SURAT_BIASA'
+                && $file->isPreviewableLampiran(),
+            404
+        );
+
+        abort_unless(Storage::disk('public')->exists($file->file_path), 404);
+
+        return response()->file(
+            Storage::disk('public')->path($file->file_path),
+            [
+                'Content-Type' => $file->lampiranPreviewContentType() ?? 'application/octet-stream',
+                'Content-Disposition' => 'inline; filename="' . addslashes($file->file_name) . '"',
+            ]
         );
     }
 
@@ -110,8 +156,8 @@ class AdminSemuaSuratController extends Controller
         Storage::disk('public')->makeDirectory(dirname($finalFilePath));
 
         try {
-            // FINAL_PDF digenerate ulang dari PDF hasil pemeriksaan agar QR dummy preview diganti QR validasi asli.
-            $this->previewVerifikasiPdfGenerator->generateFinal(
+            // FINAL_PDF digenerate ulang dari PDF sumber pemohon/proses agar QR dummy preview diganti QR validasi asli.
+            $this->finalSuratBiasaPdfGenerator->generateFinal(
                 $dokumen,
                 $sourcePdf->file_path,
                 $validationUrl,
@@ -157,7 +203,7 @@ class AdminSemuaSuratController extends Controller
             }
         });
 
-        // Setelah publish selesai, Admin/TU dikembalikan ke arsip semua surat dengan pesan sukses.
+        // Setelah publish selesai, Admin Surat dikembalikan ke arsip semua surat dengan pesan sukses.
         return redirect()
             ->route('admin.semua-surat')
             ->with('status', 'Dokumen berhasil dipublish.');
@@ -180,8 +226,8 @@ class AdminSemuaSuratController extends Controller
     // Helper ini memilih file terbaik untuk dipreview atau diunduh dari kumpulan file dokumen.
     protected function resolvePreviewablePdf(Dokumen $dokumen): ?DokumenFile
     {
-        // Urutan prioritas menjaga agar file FINAL_PDF dipakai jika sudah tersedia, lalu fallback ke preview/proses.
-        foreach (['FINAL_PDF', 'PREVIEW_VERIFIKASI_PDF', 'HASIL_PEMERIKSAAN_PDF'] as $fileType) {
+        // Urutan prioritas menjaga agar file FINAL_PDF dipakai jika sudah tersedia, lalu fallback ke preview/DRAFT_PDF.
+        foreach (['FINAL_PDF', 'PREVIEW_VERIFIKASI_PDF', 'DRAFT_PDF'] as $fileType) {
             $file = $dokumen->dokumenFiles()
                 ->where('file_type', $fileType)
                 ->latest('file_id')
@@ -198,8 +244,8 @@ class AdminSemuaSuratController extends Controller
     // Helper ini memilih sumber PDF yang akan disalin menjadi file final saat publish.
     protected function resolvePublishSourcePdf(Dokumen $dokumen): ?DokumenFile
     {
-        // FINAL_PDF dibuat dari PDF hasil pemeriksaan agar overlay nomor, tanggal, verifikator, dan QR asli tidak dobel.
-        foreach (['HASIL_PEMERIKSAAN_PDF', 'PREVIEW_VERIFIKASI_PDF'] as $fileType) {
+        // FINAL_PDF dibuat dari DRAFT_PDF agar overlay nomor, tanggal, verifikator, dan QR asli tidak dobel.
+        foreach (['DRAFT_PDF'] as $fileType) {
             $file = $dokumen->dokumenFiles()
                 ->where('file_type', $fileType)
                 ->latest('file_id')

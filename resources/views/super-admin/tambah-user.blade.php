@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'Tambah User'])
-@include('template.super-admin-sidebar')
+@include('template.layouts.header', ['pageTitle' => 'Tambah User'])
+@include('template.sidebar.super-admin')
 
     <!-- View tambah user menerima $roles, $jabatans, dan $unitKerjas dari UserController::create. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -116,7 +116,7 @@
               <!-- Panel kanan ini bersifat bantuan baca, tidak mengirim data ke controller. -->
               <h3 class="text-sm font-semibold text-slate-800">Role yang tersedia</h3>
               <ul class="mt-4 space-y-2 text-xs text-slate-500 font-light">
-                <li><strong class="text-slate-700">ADMIN_TU</strong> untuk proses dan publikasi dokumen.</li>
+                <li><strong class="text-slate-700">ADMIN_SURAT</strong> untuk proses dan publikasi dokumen.</li>
                 <li><strong class="text-slate-700">PEMOHON</strong> untuk membuat dan memantau pengajuan.</li>
                 <li><strong class="text-slate-700">VERIFIKATOR</strong> untuk validasi dan keputusan dokumen.</li>
                 <li><strong class="text-slate-700">SUPER_ADMIN</strong> untuk kontrol penuh user dan monitoring.</li>
@@ -149,5 +149,5 @@
       </main>
     </div>
 
-@include('template.footer')
+@include('template.layouts.footer')
 

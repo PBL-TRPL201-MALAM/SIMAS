@@ -47,7 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalClose = document.getElementById('modal-close');
   const modalCloseBtn = document.getElementById('modal-close-btn');
   const modalProsesBtn = document.getElementById('modal-proses-btn');
-  const modalDownloadBtn = document.getElementById('modal-download-docx');
+  const modalPreviewBtn = document.getElementById('modal-preview-pdf');
+  const modalAdminRevisionWrap = document.getElementById('modal-admin-revision-wrap');
+  const modalAdminRevisionSource = document.getElementById('modal-admin-revision-source');
+  const modalAdminRevisionNote = document.getElementById('modal-admin-revision-note');
   let activeRowData = null;
   let localPreviewUrl = null;
 
@@ -70,22 +73,44 @@ document.addEventListener('DOMContentLoaded', () => {
     setText('modal-status', data.status);
     setText('modal-ringkasan', data.ringkasan);
 
-    if (modalProsesBtn) {
-      const label = (data.jenis || '').toLowerCase() === 'sk' ? 'Proses SK' : 'Proses Surat';
-      const textNode = Array.from(modalProsesBtn.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
-      if (textNode) {
-        textNode.textContent = ` ${label}`;
+    const revisionNote = (data.revisionNote || '').trim();
+    if (modalAdminRevisionWrap && modalAdminRevisionNote) {
+      if (revisionNote) {
+        if (modalAdminRevisionSource) {
+          modalAdminRevisionSource.textContent = data.revisionNoteSource || 'Catatan Revisi';
+        }
+        modalAdminRevisionNote.textContent = revisionNote;
+        modalAdminRevisionWrap.classList.remove('hidden');
       } else {
-        modalProsesBtn.append(` ${label}`);
+        modalAdminRevisionWrap.classList.add('hidden');
+        if (modalAdminRevisionSource) modalAdminRevisionSource.textContent = '';
+        modalAdminRevisionNote.textContent = '';
       }
     }
 
-    if (modalDownloadBtn) {
-      const hasDownload = Boolean(data.downloadUrl);
-      modalDownloadBtn.disabled = !hasDownload;
-      modalDownloadBtn.classList.toggle('opacity-50', !hasDownload);
-      modalDownloadBtn.classList.toggle('cursor-not-allowed', !hasDownload);
-      modalDownloadBtn.dataset.downloadUrl = data.downloadUrl || '';
+    if (modalProsesBtn) {
+      const allowProcess = data.allowProcess !== 'false';
+      modalProsesBtn.classList.toggle('hidden', !allowProcess);
+
+      if (allowProcess) {
+        const label = (data.jenis || '').toLowerCase() === 'sk' ? 'Proses SK' : 'Proses Surat';
+        const textNode = Array.from(modalProsesBtn.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+        if (textNode) {
+          textNode.textContent = ` ${label}`;
+        } else {
+          modalProsesBtn.append(` ${label}`);
+        }
+      } else {
+        modalProsesBtn.removeAttribute('data-active-url');
+      }
+    }
+
+    if (modalPreviewBtn) {
+      const hasPreview = Boolean(data.previewUrl);
+      modalPreviewBtn.disabled = !hasPreview;
+      modalPreviewBtn.classList.toggle('opacity-50', !hasPreview);
+      modalPreviewBtn.classList.toggle('cursor-not-allowed', !hasPreview);
+      modalPreviewBtn.dataset.previewUrl = data.previewUrl || '';
     }
 
     modalOverlay?.classList.remove('hidden');
@@ -98,19 +123,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (event.target === modalOverlay) closeModal();
   });
 
-  modalDownloadBtn?.addEventListener('click', () => {
-    const downloadUrl = modalDownloadBtn.dataset.downloadUrl || activeRowData?.downloadUrl;
-    if (!downloadUrl) {
-      showToast('File DOCX tidak tersedia untuk pengajuan ini.', 'error');
+  modalPreviewBtn?.addEventListener('click', () => {
+    const previewUrl = modalPreviewBtn.dataset.previewUrl || activeRowData?.previewUrl;
+    if (!previewUrl) {
+      showToast('File PDF tidak tersedia untuk pengajuan ini.', 'error');
       return;
     }
 
-    showToast('File DOCX sedang diunduh...', 'info');
-    window.location.href = downloadUrl;
+    showToast('Preview PDF dibuka.', 'info');
+    window.open(previewUrl, '_blank', 'noopener');
   });
 
   modalProsesBtn?.addEventListener('click', () => {
     if (!activeRowData) return;
+    if (activeRowData.allowProcess === 'false') {
+      showToast('Dokumen sedang menunggu perbaikan dari pemohon.', 'info');
+      return;
+    }
 
     const isSk = (activeRowData.jenis || '').toLowerCase() === 'sk';
     const baseUrl = isSk ? modalProsesBtn.dataset.routeSk : modalProsesBtn.dataset.routeSurat;
@@ -128,6 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (event) => {
     const detailBtn = event.target.closest('.btn-detail');
     if (detailBtn) {
+      // Modal admin hanya diproses pada halaman yang memang memiliki tombol proses/preview admin.
+      if (!modalProsesBtn && !modalPreviewBtn) return;
+
       const row = detailBtn.closest('tr');
       if (!row) return;
       openModal({
@@ -137,8 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
         pemohon: row.dataset.pemohon,
         tanggal: row.dataset.tanggal,
         status: row.dataset.status,
+        statusCode: row.dataset.statusCode,
         ringkasan: row.dataset.ringkasan,
-        downloadUrl: detailBtn.dataset.downloadUrl,
+        revisionNoteSource: row.dataset.revisionNoteSource,
+        revisionNote: row.dataset.revisionNote,
+        allowProcess: row.dataset.allowProcess,
+        previewUrl: detailBtn.dataset.previewUrl || detailBtn.dataset.downloadUrl,
       });
       return;
     }
@@ -194,14 +230,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  const pdfInput = document.getElementById('pdf-file-input');
+  const pdfInput = null;
   const pdfDropZone = document.getElementById('pdf-drop-zone');
   const pdfPreview = document.getElementById('pdf-file-preview');
   const pdfFileName = document.getElementById('pdf-file-name');
   const pdfFileSource = document.getElementById('pdf-file-source');
   const pdfFileRemove = document.getElementById('pdf-file-remove');
 
-  const setPdfFile = (file, sourceLabel = 'PDF lokal') => {
+  const setPdfFile = (file, sourceLabel = 'PDF Pemohon') => {
     if (!file) return false;
     if (!file.name.toLowerCase().endsWith('.pdf')) {
       showToast('Hanya file PDF yang diperbolehkan.', 'error');
@@ -289,6 +325,100 @@ document.addEventListener('DOMContentLoaded', () => {
     setStepState(circles, labels, stepIndex + 1);
   };
 
+  const createVerifierDropdownGuard = ({ selectNames, finalSelector, duplicateMessage, finalMessage }) => {
+    const selects = selectNames
+      .map((name) => document.querySelector(`select[name="${name}"]`))
+      .filter(Boolean);
+
+    if (!selects.length) return null;
+
+    const finalInput = finalSelector ? document.querySelector(finalSelector) : null;
+    const getFinalValue = () => finalInput?.value || '';
+
+    const normalizeSelectedValues = () => {
+      const usedByEarlierLevel = new Set([getFinalValue()].filter(Boolean));
+
+      selects.forEach((select) => {
+        const value = select.value;
+        if (!value) return;
+
+        if (usedByEarlierLevel.has(value)) {
+          // Jika penandatangan final atau level sebelumnya sudah memakai user ini,
+          // pilihan level berjalan dikosongkan agar satu user hanya muncul sekali.
+          select.value = '';
+          return;
+        }
+
+        usedByEarlierLevel.add(value);
+      });
+    };
+
+    const refreshOptions = () => {
+      normalizeSelectedValues();
+
+      const finalValue = getFinalValue();
+      const valuesBySelect = selects.map((select) => select.value);
+
+      selects.forEach((select, selectIndex) => {
+        Array.from(select.options).forEach((option) => {
+          if (!option.value) {
+            option.disabled = false;
+            option.hidden = false;
+            return;
+          }
+
+          const usedByAnotherLevel = valuesBySelect.some((value, valueIndex) => (
+            valueIndex !== selectIndex && value === option.value
+          ));
+          const unavailable = option.value === finalValue || usedByAnotherLevel;
+
+          // Opsi yang sudah dipakai di level lain atau sebagai penandatangan final
+          // disembunyikan sekaligus dinonaktifkan supaya tidak bisa dipilih ulang.
+          option.disabled = unavailable;
+          option.hidden = unavailable;
+        });
+      });
+    };
+
+    const validate = () => {
+      refreshOptions();
+
+      const finalValue = getFinalValue();
+      const verifierValues = selects.map((select) => select.value).filter(Boolean);
+
+      if (finalValue && verifierValues.includes(finalValue)) {
+        showToast(finalMessage, 'error');
+        return false;
+      }
+
+      if (new Set(verifierValues).size !== verifierValues.length) {
+        showToast(duplicateMessage, 'error');
+        return false;
+      }
+
+      return true;
+    };
+
+    selects.forEach((select) => select.addEventListener('change', refreshOptions));
+    refreshOptions();
+
+    return { refresh: refreshOptions, validate };
+  };
+
+  const suratVerifierDropdowns = createVerifierDropdownGuard({
+    selectNames: ['verifikator_1', 'verifikator_2', 'verifikator_3'],
+    finalSelector: '#proses-verifikasi-form [name="penandatangan_final"]',
+    duplicateMessage: 'Verifikator tidak boleh dipilih lebih dari satu level.',
+    finalMessage: 'Penandatangan final tidak boleh dipilih lagi sebagai verifikator.',
+  });
+
+  const skVerifierDropdowns = createVerifierDropdownGuard({
+    selectNames: ['sk_verifikator_1', 'sk_verifikator_2', 'sk_verifikator_3'],
+    finalSelector: '#sk-proses-form [name="penandatangan_final"]',
+    duplicateMessage: 'Verifikator tidak boleh dipilih lebih dari satu level.',
+    finalMessage: 'Penandatangan final tidak boleh dipilih lagi sebagai verifikator.',
+  });
+
   const posisiConfig = document.getElementById('posisi-elemen-config');
   let updateProcessPreview = () => {};
 
@@ -345,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveUrl = posisiConfig.dataset.saveUrl || '';
     const startStep = Math.max(1, Math.min(3, Number(posisiConfig.dataset.startStep || 1)));
     const existingPreviewUrl = posisiConfig.dataset.previewUrl || '';
-    const existingPreviewName = posisiConfig.dataset.previewName || 'PDF hasil pemeriksaan';
+    const existingPreviewName = posisiConfig.dataset.previewName || 'PDF pemohon';
     // Jumlah halaman dikirim dari Laravel agar preview posisi bisa berpindah halaman pada PDF multi-page.
     let pdfPageCount = Math.max(1, Number(posisiConfig.dataset.pageCount || pdfPageInput?.max || 1));
     let existingPositions = {};
@@ -618,7 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pdfPreviewStage?.classList.add('hidden');
         pdfPreviewEmpty?.classList.remove('hidden');
         if (pdfPreviewCaption) {
-          pdfPreviewCaption.textContent = 'Unggah PDF di langkah 1 untuk mulai mengatur posisi elemen.';
+          pdfPreviewCaption.textContent = 'PDF pemohon belum tersedia untuk mengatur posisi elemen.';
         }
         renderMarkers();
         return;
@@ -706,7 +836,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (!currentPreviewUrl) {
-        showToast('Upload PDF terlebih dahulu sebelum mengatur posisi elemen.', 'error');
+        showToast('PDF pemohon belum tersedia sebelum mengatur posisi elemen.', 'error');
         return;
       }
 
@@ -817,7 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const initializeExistingPreview = () => {
       if (!existingPreviewUrl) return;
       if (pdfFileName) pdfFileName.textContent = existingPreviewName;
-      if (pdfFileSource) pdfFileSource.textContent = 'Tersedia di server';
+      if (pdfFileSource) pdfFileSource.textContent = 'PDF Pemohon';
       pdfPreview?.classList.remove('hidden');
     };
 
@@ -872,8 +1002,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.getElementById('proses-next-1')?.addEventListener('click', () => {
-    if (posisiConfig && !((pdfInput?.files?.length || 0) > 0 || posisiConfig.dataset.previewUrl)) {
-      showToast('Upload PDF terlebih dahulu sebelum lanjut ke pengaturan posisi.', 'error');
+    if (posisiConfig && !posisiConfig.dataset.previewUrl) {
+      showToast('PDF pemohon belum tersedia sebelum lanjut ke pengaturan posisi.', 'error');
       return;
     }
 
@@ -884,6 +1014,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('proses-back-1')?.addEventListener('click', () => showWizardStep(prosesSteps, prosesCircles, prosesLabels, 0));
   document.getElementById('proses-next-2')?.addEventListener('click', () => showWizardStep(prosesSteps, prosesCircles, prosesLabels, 2));
   document.getElementById('proses-back-2')?.addEventListener('click', () => showWizardStep(prosesSteps, prosesCircles, prosesLabels, 1));
+  document.getElementById('proses-verifikasi-form')?.addEventListener('submit', (event) => {
+    if (suratVerifierDropdowns && !suratVerifierDropdowns.validate()) {
+      event.preventDefault();
+    }
+  });
   document.getElementById('proses-submit')?.addEventListener('click', () => {
     const submitButton = document.getElementById('proses-submit');
     if (submitButton?.type === 'submit') return;
@@ -893,47 +1028,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnTambahDasar = document.getElementById('btn-tambah-dasar');
   const formTambahDasar = document.getElementById('form-tambah-dasar');
   const btnBatalDasar = document.getElementById('btn-batal-dasar');
-  const btnSimpanDasar = document.getElementById('btn-simpan-dasar');
-  const inputNamaDasar = document.getElementById('input-nama-dasar');
-  const inputTentangDasar = document.getElementById('input-tentang-dasar');
-  const tbodyDasar = document.getElementById('tbody-dasar-hukum');
-  let dasarCounter = 3;
 
   btnTambahDasar?.addEventListener('click', () => formTambahDasar?.classList.remove('hidden'));
   btnBatalDasar?.addEventListener('click', () => {
     formTambahDasar?.classList.add('hidden');
-    if (inputNamaDasar) inputNamaDasar.value = '';
-    if (inputTentangDasar) inputTentangDasar.value = '';
-  });
-  btnSimpanDasar?.addEventListener('click', () => {
-    const nama = inputNamaDasar?.value.trim();
-    const tentang = inputTentangDasar?.value.trim();
-    if (!nama || !tentang || !tbodyDasar) {
-      showToast('Nama peraturan dan keterangan tidak boleh kosong.', 'error');
-      return;
-    }
-
-    dasarCounter += 1;
-    const row = document.createElement('tr');
-    row.className = 'hover:bg-slate-50/40 transition-colors duration-150';
-    row.innerHTML = `
-      <td class="px-5 py-3.5"><p class="text-xs text-slate-400 font-light">${dasarCounter}</p></td>
-      <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800">${nama}</p></td>
-      <td class="px-5 py-3.5"><p class="text-xs text-slate-500 font-light">${tentang}</p></td>
-      <td class="px-5 py-3.5"><button type="button" class="btn-hapus-dasar text-[11px] font-medium text-slate-400 hover:text-red-500 transition-colors duration-200">Hapus</button></td>
-    `;
-    tbodyDasar.appendChild(row);
-    formTambahDasar?.classList.add('hidden');
-    if (inputNamaDasar) inputNamaDasar.value = '';
-    if (inputTentangDasar) inputTentangDasar.value = '';
-    showToast('Dasar hukum berhasil ditambahkan!', 'success');
-  });
-
-  document.addEventListener('click', (event) => {
-    const hapusBtn = event.target.closest('.btn-hapus-dasar');
-    if (!hapusBtn) return;
-    hapusBtn.closest('tr')?.remove();
-    showToast('Dasar hukum berhasil dihapus.', 'info');
   });
 
   const skSteps = [
@@ -951,10 +1049,40 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sk-proses-label-2'),
     document.getElementById('sk-proses-label-3'),
   ];
+  const skForm = document.getElementById('sk-proses-form');
 
-  document.getElementById('sk-proses-next-1')?.addEventListener('click', () => showWizardStep(skSteps, skCircles, skLabels, 1));
+  if (skForm) {
+    const initialSkStep = Math.max(1, Math.min(3, Number(skForm.dataset.initialStep || 1)));
+    showWizardStep(skSteps, skCircles, skLabels, initialSkStep - 1);
+    skForm.addEventListener('submit', (event) => {
+      if (event.submitter?.id !== 'sk-proses-submit') return;
+
+      if (skVerifierDropdowns && !skVerifierDropdowns.validate()) {
+        event.preventDefault();
+      }
+    });
+  }
+
+  document.getElementById('sk-proses-next-1')?.addEventListener('click', (event) => {
+    const nomorSk = document.querySelector('[name="nomor_sk"]')?.value?.trim();
+    const tanggalSk = document.querySelector('[name="tanggal_sk"]')?.value?.trim();
+    const penandatangan = document.querySelector('[name="penandatangan_id"]')?.value;
+
+    // Metadata SK wajib lengkap; tombol ini submit ke endpoint metadata sebelum wizard membuka step verifikator.
+    if (!nomorSk || !tanggalSk || !penandatangan) {
+      if (event.currentTarget?.type === 'submit') event.preventDefault();
+      showToast('Lengkapi nomor SK, tanggal SK, dan penandatangan terlebih dahulu.', 'error');
+      return;
+    }
+
+    if (event.currentTarget?.type === 'submit') return;
+
+    showWizardStep(skSteps, skCircles, skLabels, 1);
+  });
   document.getElementById('sk-proses-back-1')?.addEventListener('click', () => showWizardStep(skSteps, skCircles, skLabels, 0));
   document.getElementById('sk-proses-next-2')?.addEventListener('click', () => {
+    if (skVerifierDropdowns && !skVerifierDropdowns.validate()) return;
+
     const setKonfirmasi = (id, value) => {
       const el = document.getElementById(id);
       if (el) el.textContent = value || '-';
@@ -962,15 +1090,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const judul = document.getElementById('sk-review-judul')?.textContent?.trim();
     const pemohon = document.querySelector('#sk-proses-judul-info')?.textContent?.split(' - ')[1]?.trim();
-    const jalur = document.querySelector('input[name="jalur_verifikasi_sk"]:checked')?.value || '1';
-    const jalurLabel = { '1': 'Level 1', '2': 'Level 1 -> Level 2', '3': 'Level 1 -> Level 2 -> Level 3' }[jalur];
-    const v1 = document.querySelector('[name="sk_verifikator_1"]')?.value || '-';
-    const v2 = document.querySelector('[name="sk_verifikator_2"]')?.value;
-    const v3 = document.querySelector('[name="sk_verifikator_3"]')?.value;
+    const selectedOptionText = (selector) => {
+      const select = document.querySelector(selector);
+      if (!select?.value) return '';
+      return select?.selectedOptions?.[0]?.textContent?.trim() || '';
+    };
+    const selectedValue = (selector) => document.querySelector(selector)?.value || '';
+    const v1 = selectedOptionText('[name="sk_verifikator_1"]');
+    const v2 = selectedOptionText('[name="sk_verifikator_2"]');
+    const v3 = selectedOptionText('[name="sk_verifikator_3"]');
+    const verifierValues = [
+      selectedValue('[name="sk_verifikator_1"]'),
+      selectedValue('[name="sk_verifikator_2"]'),
+      selectedValue('[name="sk_verifikator_3"]'),
+    ].filter(Boolean);
+    const penandatanganFinalValue = selectedValue('[name="penandatangan_final"]');
     const catatan = document.getElementById('sk-catatan-admin')?.value.trim();
+    const nomorSk = document.querySelector('[name="nomor_sk"]')?.value?.trim();
+    const tanggalSk = document.querySelector('[name="tanggal_sk"]')?.value?.trim();
+    const penandatangan = document.getElementById('sk-penandatangan-final-label')?.dataset.label || selectedOptionText('[name="penandatangan_id"]');
+
+    // Validasi ringan di browser agar Admin Surat langsung tahu jika level wajib atau duplikasi belum sesuai.
+    if (!v1) {
+      showToast('Pilih Verifikator Level 1 terlebih dahulu.', 'error');
+      return;
+    }
+
+    if (new Set(verifierValues).size !== verifierValues.length) {
+      showToast('Verifikator tidak boleh dipilih lebih dari satu level.', 'error');
+      return;
+    }
+
+    if (penandatanganFinalValue && verifierValues.includes(penandatanganFinalValue)) {
+      showToast('Penandatangan final tidak boleh dipilih lagi sebagai verifikator.', 'error');
+      return;
+    }
+
+    const verifierLabels = [
+      v1,
+      ...(v2 ? [v2] : []),
+      ...(v3 ? [v3] : []),
+    ];
+    const finalLevel = verifierLabels.length + 1;
+    const jalurLabel = [
+      ...verifierLabels.map((_, index) => `Level ${index + 1}`),
+      `Level ${finalLevel} (Penandatangan Final)`,
+    ].join(' -> ');
 
     setKonfirmasi('sk-konfirmasi-judul', judul);
     setKonfirmasi('sk-konfirmasi-pemohon', pemohon);
+    setKonfirmasi('sk-konfirmasi-nomor', nomorSk);
+    setKonfirmasi('sk-konfirmasi-tanggal', tanggalSk);
+    setKonfirmasi('sk-konfirmasi-penandatangan', penandatangan);
     setKonfirmasi('sk-konfirmasi-jalur', jalurLabel);
 
     const verifikatorWrap = document.getElementById('sk-konfirmasi-verifikator');
@@ -979,6 +1150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `Level 1: ${v1}`,
         ...(v2 ? [`Level 2: ${v2}`] : []),
         ...(v3 ? [`Level 3: ${v3}`] : []),
+        `Level ${finalLevel}: ${penandatangan} (Penandatangan Final)`,
       ];
       verifikatorWrap.innerHTML = list.map((item) => `<p class="text-xs font-medium text-slate-700">${item}</p>`).join('');
     }
@@ -996,14 +1168,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('sk-proses-back-2')?.addEventListener('click', () => showWizardStep(skSteps, skCircles, skLabels, 1));
   document.getElementById('sk-proses-submit')?.addEventListener('click', () => {
+    const submitButton = document.getElementById('sk-proses-submit');
+    if (submitButton?.type === 'submit') return;
     showToast('SK berhasil dikirim ke verifikator!', 'success');
   });
-  document.getElementById('sk-proses-tolak-btn')?.addEventListener('click', () => {
+  document.getElementById('sk-proses-tolak-btn')?.addEventListener('click', (event) => {
+    const submitButton = document.getElementById('sk-proses-tolak-btn');
     const catatan = document.getElementById('sk-catatan-admin')?.value.trim();
     if (!catatan) {
+      if (submitButton?.type === 'submit') event.preventDefault();
       showToast('Isi catatan revisi terlebih dahulu.', 'error');
       return;
     }
+    if (submitButton?.type === 'submit') return;
     showToast('SK dikembalikan ke pemohon untuk revisi.', 'info');
   });
 });

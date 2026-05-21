@@ -1,7 +1,8 @@
-@include('template.header', ['pageTitle' => 'Dashboard'])
-@include('template.admin-sidebar')
+@include('template.layouts.header', ['pageTitle' => 'Dashboard'])
+@include('admin.partials.detail-modal')
+@include('template.sidebar.admin')
 
-    <!-- Dashboard Admin/TU menerima $stats dan $latestIncoming dari DashboardController::admin. -->
+    <!-- Dashboard Admin Surat menerima $stats dan $latestIncoming dari DashboardController::admin. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -11,7 +12,7 @@
         </button>
         <div>
           <h1 class="text-sm font-bold text-slate-900">Dashboard</h1>
-          <p class="text-[11px] text-slate-400 font-light">Selamat datang, Admin/TU</p>
+          <p class="text-[11px] text-slate-400 font-light">Selamat datang, Admin Surat</p>
         </div>
         <button type="button" data-page="profil"
           class="nav-link w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200">
@@ -25,7 +26,7 @@
         <div class="space-y-6">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 class="text-base font-bold text-slate-900">Halo, Admin/TU!</h2>
+              <h2 class="text-base font-bold text-slate-900">Halo, Admin Surat!</h2>
               <p class="text-xs text-slate-400 font-light mt-0.5">Ada <strong class="text-blue-600">{{ $stats['pengajuan_masuk'] }} pengajuan</strong> yang menunggu diproses hari ini.</p>
             </div>
             <a href="{{ route('admin.pengajuan-masuk') }}" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition-all duration-200">
@@ -95,7 +96,7 @@
                           ? ($item->suratKeputusan?->tentang ?: '-')
                           : ($item->suratBiasa?->ringkasan_isi ?: '-');
                     @endphp
-                    <!-- Data detail ini dibaca modal admin di template.header saat tombol Detail ditekan. -->
+                    <!-- Data detail ini dibaca modal admin lokal saat tombol Detail ditekan. -->
                     <tr class="hover:bg-slate-50/40 transition-colors duration-150 doc-row"
                       data-dokumen-id="{{ $item->dokumen_id }}"
                       data-jenis="{{ $isSk ? 'SK' : 'Surat Biasa' }}"
@@ -110,7 +111,7 @@
                       <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->created_at)->format('d M Y') }}</p></td>
                       <td class="px-5 py-3.5 flex items-center gap-2">
                         <button type="button" class="btn-detail text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</button>
-                        <!-- Tombol Proses mengarahkan Admin/TU ke wizard proses surat atau SK sesuai jenis dokumen. -->
+                        <!-- Tombol Proses mengarahkan Admin Surat ke wizard proses surat atau SK sesuai jenis dokumen. -->
                         <a href="{{ $isSk ? route('admin.proses-sk', ['dokumen' => $item->dokumen_id]) : route('admin.proses-surat', ['dokumen' => $item->dokumen_id, 'step' => 1]) }}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Proses</a>
                       </td>
                     </tr>
@@ -127,4 +128,4 @@
       </main>
     </div>
 
-@include('template.footer')
+@include('template.layouts.footer')

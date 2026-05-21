@@ -80,7 +80,7 @@ class AuthController extends Controller
         // Satu pintu redirect dipakai ulang agar mapping role ke dashboard tetap konsisten di seluruh alur auth.
         return match ($user->role) {
             'SUPER_ADMIN' => 'super-admin.dashboard',
-            'ADMIN_TU' => 'admin.dashboard',
+            'ADMIN_SURAT' => 'admin.dashboard',
             'PEMOHON' => 'pemohon.dashboard',
             'VERIFIKATOR' => 'verifikator.dashboard',
             default => 'home',

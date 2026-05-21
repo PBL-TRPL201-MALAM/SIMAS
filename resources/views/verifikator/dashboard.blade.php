@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'Dashboard', 'modalVariant' => 'none'])
-@include('template.verifikator-sidebar', ['activePage' => 'dashboard'])
+@include('template.layouts.header', ['pageTitle' => 'Dashboard'])
+@include('template.sidebar.verifikator', ['activePage' => 'dashboard'])
     <!-- Dashboard Verifikator menerima $stats dan $latestPending dari DashboardController::verifikator. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
@@ -116,4 +116,4 @@
         </div>
       </main>
     </div>
-@include('template.footer')
+@include('template.layouts.footer')

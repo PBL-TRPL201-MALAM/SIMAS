@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('dasar_hukum', function (Blueprint $table) {
             $table->id('dasar_hukum_id');
-            $table->string('jenis_peraturan', 100);
-            $table->string('nomor_peraturan', 100)->nullable();
-            $table->string('tahun_peraturan', 10)->nullable();
-            $table->text('judul_peraturan');
+            // Struktur master dibuat sederhana agar Admin cukup mengisi teks dasar hukum yang siap dipakai pada bagian Mengingat SK.
+            $table->string('judul_hukum');
+            $table->text('keterangan')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

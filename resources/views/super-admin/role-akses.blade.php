@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'Role & Akses'])
-@include('template.super-admin-sidebar')
+@include('template.layouts.header', ['pageTitle' => 'Role & Akses'])
+@include('template.sidebar.super-admin')
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
@@ -36,7 +36,7 @@
                     <td class="px-5 py-4 text-slate-500">Akses penuh tingkat sistem</td>
                   </tr>
                   <tr>
-                    <td class="px-5 py-4 font-semibold text-slate-800">ADMIN_TU</td>
+                    <td class="px-5 py-4 font-semibold text-slate-800">ADMIN_SURAT</td>
                     <td class="px-5 py-4 text-slate-600">Proses surat, SK, master dasar hukum</td>
                     <td class="px-5 py-4 text-slate-500">Operasional dokumen</td>
                   </tr>
@@ -64,7 +64,7 @@
                   <p class="text-xs text-slate-500 font-light mt-1">Tambah user, edit user, aktif/nonaktif akun, ubah role, monitoring semua dokumen, dan lihat log aktivitas.</p>
                 </div>
                 <div class="rounded-xl border border-slate-100 p-4">
-                  <p class="text-xs font-semibold text-slate-700">ADMIN_TU</p>
+                  <p class="text-xs font-semibold text-slate-700">ADMIN_SURAT</p>
                   <p class="text-xs text-slate-500 font-light mt-1">Memproses dokumen sebelum dikirim ke verifikator dan mengelola dasar hukum.</p>
                 </div>
                 <div class="rounded-xl border border-slate-100 p-4">
@@ -87,5 +87,5 @@
       </main>
     </div>
 
-@include('template.footer')
+@include('template.layouts.footer')
 

@@ -50,10 +50,10 @@ class DashboardController extends Controller
         ]);
     }
 
-    // Method ini menampilkan dashboard Admin/TU untuk memantau antrean pengajuan dan status dokumen.
+    // Method ini menampilkan dashboard Admin Surat untuk memantau antrean pengajuan dan status dokumen.
     public function admin(): View
     {
-        // Dashboard Admin/TU menonjolkan antrean kerja paling depan, yaitu dokumen yang baru diajukan pemohon.
+        // Dashboard Admin Surat menonjolkan antrean kerja paling depan, yaitu dokumen yang baru diajukan pemohon.
         $incomingQuery = Dokumen::query()
             ->where('status_dokumen', 'DIAJUKAN');
 
@@ -118,7 +118,7 @@ class DashboardController extends Controller
 
         $roleDistribution = collect([
             'PEMOHON' => 'Pemohon',
-            'ADMIN_TU' => 'Admin / TU',
+            'ADMIN_SURAT' => 'Admin Surat',
             'VERIFIKATOR' => 'Verifikator',
             'SUPER_ADMIN' => 'Super Admin',
         ])->map(function (string $label, string $role) use ($userCounts) {

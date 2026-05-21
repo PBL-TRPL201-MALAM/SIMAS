@@ -31,6 +31,7 @@ return new class extends Migration
             ])->nullable();
             $table->string('nomor_surat', 100)->nullable();
             $table->date('tanggal_surat')->nullable();
+            $table->string('penandatangan', 150)->nullable();
             $table->string('hal', 255)->nullable();
             $table->text('ringkasan_isi')->nullable();
             $table->string('sifat_surat', 100)->nullable();
@@ -39,6 +40,8 @@ return new class extends Migration
             $table->text('tembusan')->nullable();
             $table->text('keterangan_tambahan')->nullable();
             $table->text('catatan_admin')->nullable();
+            $table->string('unit_kerja', 150)->nullable();
+            $table->text('catatan')->nullable();
             $table->timestamps();
         });
     }

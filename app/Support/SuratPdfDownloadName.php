@@ -6,7 +6,7 @@ use App\Models\Dokumen;
 use Illuminate\Support\Str;
 
 // Helper ini khusus membentuk nama file PDF saat user/admin mengunduh surat.
-// Dengan helper terpisah, aturan nama file konsisten di Pemohon, Admin/TU, dan Verifikator.
+// Dengan helper terpisah, aturan nama file konsisten di Pemohon, Admin Surat, dan Verifikator.
 class SuratPdfDownloadName
 {
     // Helper ini memisahkan nama file unduhan dari nama file storage agar hasil download selalu rapi untuk pengguna.

@@ -64,98 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // ================================================================
-  // MODAL DETAIL DOKUMEN
-  // ================================================================
-  const modalOverlay    = document.getElementById('modal-overlay');
-  const modalClose      = document.getElementById('modal-close');
-  const modalCloseBtn   = document.getElementById('modal-close-btn');
-  const modalDownload   = document.getElementById('modal-download-btn');
-  let activeDownloadUrl = '';
-
-  const openModal = (data) => {
-    if (!modalOverlay) return;
-    document.getElementById('modal-jenis').textContent    = data.jenis || '—';
-    document.getElementById('modal-perihal').textContent  = data.perihal || '—';
-    document.getElementById('modal-tanggal').textContent  = data.tanggal || '—';
-    document.getElementById('modal-nomor').textContent    = data.nomor || '—';
-    document.getElementById('modal-keterangan').textContent = data.keterangan || '—';
-
-    // Status badge
-    const statusEl = document.getElementById('modal-status');
-    const statusMap = {
-      diproses:  { text: 'Diproses',  cls: 'text-blue-600' },
-      published: { text: 'Published', cls: 'text-slate-600' },
-      ditolak:   { text: 'Ditolak',   cls: 'text-slate-500' },
-    };
-    const s = statusMap[data.status] || { text: data.status, cls: 'text-slate-600' };
-    statusEl.textContent = s.text;
-    statusEl.className = `text-xs font-semibold ${s.cls}`;
-
-    // Tampilkan tombol unduh hanya jika Published
-    if (modalDownload) {
-      activeDownloadUrl = data.downloadUrl || '';
-      modalDownload.dataset.downloadUrl = activeDownloadUrl;
-      if (data.status === 'published' && activeDownloadUrl) {
-        modalDownload.classList.remove('hidden');
-      } else {
-        modalDownload.classList.add('hidden');
-      }
-    }
-
-    modalOverlay.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  };
-
-  const closeModal = () => {
-    modalOverlay?.classList.add('hidden');
-    document.body.style.overflow = '';
-  };
-
-  modalClose?.addEventListener('click', closeModal);
-  modalCloseBtn?.addEventListener('click', closeModal);
-  modalOverlay?.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) closeModal();
-  });
-
-  // Tombol unduh (simulasi — sambungkan ke route download saat backend siap)
-  modalDownload?.addEventListener('click', () => {
-    const downloadUrl = modalDownload.dataset.downloadUrl || activeDownloadUrl;
-    if (!downloadUrl) {
-      showToast('File dokumen belum tersedia untuk diunduh.', 'error');
-      return;
-    }
-
-    closeModal();
-    showToast('Dokumen sedang diunduh...', 'info');
-    window.location.href = downloadUrl;
-  });
-
-  // Delegasi event: tombol "Lihat Detail" di semua tabel
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.btn-detail');
-    if (!btn) return;
-    const row = btn.closest('tr');
-    if (!row) return;
-    openModal({
-      jenis      : row.dataset.jenis,
-      perihal    : row.dataset.perihal,
-      tanggal    : row.dataset.tanggal,
-      nomor      : row.dataset.nomor,
-      keterangan : row.dataset.keterangan,
-      status     : row.dataset.status,
-      downloadUrl: row.dataset.downloadUrl,
-    });
-  });
-
-  // Delegasi event: tombol "Unduh" inline di tabel
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.btn-download');
-    if (!btn) return;
-    showToast('Dokumen sedang diunduh...', 'info');
-  });
-
-
-  // ================================================================
   // FILTER STATUS (Surat Saya & SK Saya)
   // ================================================================
   document.addEventListener('click', (e) => {
@@ -297,8 +205,18 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const setSuratFile = (file) => {
-    if (!file || !file.name.toLowerCase().endsWith('.docx')) {
-      showToast('Hanya file DOCX yang diperbolehkan.', 'error');
+    if (!file || !file.name.toLowerCase().endsWith('.pdf')) {
+      showToast('Hanya file PDF yang diperbolehkan.', 'error');
+      if (suratFileInput) suratFileInput.value = '';
+      suratFilePreview?.classList.add('hidden');
+      if (suratNextBtn) suratNextBtn.disabled = true;
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('Ukuran file PDF maksimal 10 MB.', 'error');
+      if (suratFileInput) suratFileInput.value = '';
+      suratFilePreview?.classList.add('hidden');
+      if (suratNextBtn) suratNextBtn.disabled = true;
       return;
     }
     if (suratFileName) suratFileName.textContent = file.name;
@@ -455,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   skSubmit?.addEventListener('click', () => {
+    if (skSubmit?.type === 'submit') return;
     showToast('Pengajuan SK berhasil diajukan!', 'success');
     setTimeout(() => switchPage('sk-saya'), 800);
   });
@@ -470,5 +389,339 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-});
+  // ================================================================
+  // FORM SK DINAMIS
+  // ================================================================
+  (() => {
+    const form = document.getElementById('sk-form');
+    if (!form) return;
 
+    const step1 = document.getElementById('sk-step-1');
+    const step2 = document.getElementById('sk-step-2');
+    const step3 = document.getElementById('sk-step-3');
+    const circles = [
+      document.getElementById('sk-circle-1'),
+      document.getElementById('sk-circle-2'),
+      document.getElementById('sk-circle-3'),
+    ];
+    const labels = [
+      document.getElementById('sk-label-1'),
+      document.getElementById('sk-label-2'),
+      document.getElementById('sk-label-3'),
+    ];
+    const diktumLabels = ['KESATU', 'KEDUA', 'KETIGA', 'KEEMPAT', 'KELIMA', 'KEENAM', 'KETUJUH', 'KEDELAPAN', 'KESEMBILAN', 'KESEPULUH'];
+    const dasarHukumModal = document.getElementById('sk-dasar-hukum-modal');
+    const dasarHukumSearch = document.getElementById('sk-dasar-search');
+    const dasarHukumModalList = document.getElementById('sk-dasar-modal-list');
+    const dasarHukumEmptySearch = document.getElementById('sk-dasar-empty-search');
+    const dasarHukumOptions = Array.from(document.querySelectorAll('.sk-dasar-option'));
+    const mengingatList = document.getElementById('sk-mengingat-list');
+    const mengingatEmpty = document.getElementById('sk-mengingat-empty');
+    const mengingatHiddenInputs = document.getElementById('sk-mengingat-hidden-inputs');
+    let selectedDasarHukum = [];
+
+    const alphaLabel = (index) => {
+      let label = '';
+      let number = index;
+
+      do {
+        label = String.fromCharCode(97 + (number % 26)) + label;
+        number = Math.floor(number / 26) - 1;
+      } while (number >= 0);
+
+      return `${label}.`;
+    };
+
+    const diktumLabel = (index) => diktumLabels[index] || `KE-${index + 1}`;
+
+    const setSkFormStep = (step) => {
+      [step1, step2, step3].forEach((panel, index) => panel?.classList.toggle('hidden', index !== step - 1));
+      circles.forEach((circle, index) => {
+        const span = circle?.querySelector('span');
+        const active = index < step;
+        if (!circle || !span) return;
+
+        circle.className = active
+          ? 'w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0'
+          : 'w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center shrink-0';
+        span.className = active
+          ? 'text-[11px] font-bold text-white'
+          : 'text-[11px] font-bold text-slate-400';
+      });
+      labels.forEach((label, index) => {
+        if (!label) return;
+        label.className = index < step ? 'text-xs font-semibold text-blue-600' : 'text-xs font-medium text-slate-400';
+      });
+    };
+
+    const resetRowFields = (row) => {
+      row.querySelectorAll('input, textarea, select').forEach((field) => {
+        if (field.tagName === 'SELECT') {
+          field.selectedIndex = 0;
+        } else {
+          field.value = '';
+        }
+      });
+    };
+
+    const updateRows = (listSelector, rowSelector, labelSelector, removeSelector, labeler) => {
+      const rows = document.querySelectorAll(`${listSelector} ${rowSelector}`);
+      rows.forEach((row, index) => {
+        const label = row.querySelector(labelSelector);
+        const removeBtn = row.querySelector(removeSelector);
+
+        if (label) label.textContent = labeler(index);
+        removeBtn?.classList.toggle('hidden', rows.length <= 1);
+      });
+    };
+
+    const updateMenimbangRows = () => updateRows('#sk-menimbang-list', '.sk-menimbang-row', '.sk-menimbang-label', '.sk-remove-menimbang', alphaLabel);
+    const updateDiktumRows = () => updateRows('#sk-diktum-list', '.sk-diktum-row', '.sk-diktum-label', '.sk-remove-diktum', diktumLabel);
+
+    const cloneRow = (listSelector, rowSelector, updateFn) => {
+      const list = document.querySelector(listSelector);
+      const firstRow = list?.querySelector(rowSelector);
+      if (!list || !firstRow) return;
+
+      const clone = firstRow.cloneNode(true);
+      resetRowFields(clone);
+      list.appendChild(clone);
+      updateFn();
+    };
+
+    const removeRow = (button, rowSelector, updateFn) => {
+      const row = button.closest(rowSelector);
+      const list = row?.parentElement;
+      if (!row || !list || list.querySelectorAll(rowSelector).length <= 1) return;
+
+      row.remove();
+      updateFn();
+    };
+
+    const collectTextRows = (selector) => Array.from(document.querySelectorAll(selector))
+      .map((field) => field.value.trim())
+      .filter(Boolean);
+
+    const renderReviewList = (id, items, labeler, emptyText) => {
+      const list = document.getElementById(id);
+      if (!list) return;
+
+      list.innerHTML = '';
+
+      if (items.length === 0) {
+        const emptyItem = document.createElement('li');
+        emptyItem.className = 'text-xs text-slate-400 font-light';
+        emptyItem.textContent = emptyText;
+        list.appendChild(emptyItem);
+        return;
+      }
+
+      items.forEach((item, index) => {
+        const row = document.createElement('li');
+        row.className = 'flex items-start gap-2 text-xs text-slate-600 font-light';
+
+        const label = document.createElement('span');
+        label.className = id === 'review-memutuskan'
+          ? 'w-24 shrink-0 font-semibold text-slate-500'
+          : 'min-w-[54px] shrink-0 font-semibold text-slate-500';
+        label.textContent = labeler(index);
+
+        const text = document.createElement('span');
+        text.className = 'leading-relaxed';
+        text.textContent = item;
+
+        row.append(label, text);
+        list.appendChild(row);
+      });
+    };
+
+    const selectedDasarIds = () => new Set(selectedDasarHukum.map((item) => String(item.id)));
+
+    const filterDasarHukumOptions = () => {
+      const keyword = (dasarHukumSearch?.value || '').trim().toLowerCase();
+      let visibleCount = 0;
+
+      dasarHukumOptions.forEach((row) => {
+        const matches = keyword === '' || (row.dataset.dasarLabel || '').toLowerCase().includes(keyword);
+        row.classList.toggle('hidden', !matches);
+        if (matches) visibleCount++;
+      });
+
+      dasarHukumEmptySearch?.classList.toggle('hidden', visibleCount > 0 || dasarHukumOptions.length === 0);
+    };
+
+    const updateDasarHukumModalOptions = () => {
+      const selectedIds = selectedDasarIds();
+
+      dasarHukumOptions.forEach((row) => {
+        const isSelected = selectedIds.has(String(row.dataset.dasarId));
+        const button = row.querySelector('.sk-pilih-dasar');
+
+        row.classList.toggle('opacity-60', isSelected);
+        if (button) {
+          button.disabled = isSelected;
+          button.textContent = isSelected ? 'Dipilih' : 'Pilih';
+        }
+      });
+
+      filterDasarHukumOptions();
+    };
+
+    const syncMengingatList = () => {
+      if (!mengingatList || !mengingatHiddenInputs) return;
+
+      mengingatList.querySelectorAll('.sk-mengingat-row').forEach((row) => row.remove());
+      mengingatHiddenInputs.innerHTML = '';
+      mengingatEmpty?.classList.toggle('hidden', selectedDasarHukum.length > 0);
+
+      selectedDasarHukum.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'sk-mengingat-row flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3';
+
+        const number = document.createElement('span');
+        number.className = 'w-7 shrink-0 pt-0.5 text-xs font-semibold text-blue-600';
+        number.textContent = `${index + 1}.`;
+
+        const label = document.createElement('p');
+        label.className = 'min-w-0 flex-1 text-xs font-medium leading-relaxed text-slate-700';
+        label.textContent = item.label;
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.dataset.dasarId = item.id;
+        removeButton.className = 'sk-remove-mengingat shrink-0 rounded-lg border border-red-100 bg-red-50 px-2.5 py-1.5 text-[10px] font-semibold text-red-600 hover:bg-red-100 transition-all duration-200';
+        removeButton.textContent = 'Hapus';
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        // Nama field mengikuti kebutuhan form; controller SK menormalkan nilainya sebelum validasi.
+        input.name = 'dasar_hukum_id[]';
+        input.value = item.id;
+
+        row.append(number, label, removeButton);
+        mengingatList.appendChild(row);
+        mengingatHiddenInputs.appendChild(input);
+      });
+
+      updateDasarHukumModalOptions();
+    };
+
+    const openDasarHukumModal = () => {
+      if (!dasarHukumModal) return;
+
+      // Modal selalu dibuka dengan pencarian kosong agar user melihat semua dasar hukum aktif terlebih dahulu.
+      if (dasarHukumSearch) dasarHukumSearch.value = '';
+      updateDasarHukumModalOptions();
+      dasarHukumModal.classList.remove('hidden');
+      dasarHukumModal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      dasarHukumSearch?.focus();
+    };
+
+    const closeDasarHukumModal = () => {
+      if (!dasarHukumModal) return;
+
+      dasarHukumModal.classList.add('hidden');
+      dasarHukumModal.classList.remove('flex');
+      document.body.style.overflow = '';
+    };
+
+    const addDasarHukum = (id, label) => {
+      if (!id || !label) return;
+
+      if (selectedDasarIds().has(String(id))) {
+        showToast('Dasar hukum tersebut sudah dipilih.', 'info');
+        return;
+      }
+
+      // Urutan array mengikuti urutan push ke selectedDasarHukum, lalu dirender ulang ke hidden input.
+      selectedDasarHukum.push({ id: String(id), label });
+      syncMengingatList();
+      closeDasarHukumModal();
+    };
+
+    const removeDasarHukum = (id) => {
+      selectedDasarHukum = selectedDasarHukum.filter((item) => String(item.id) !== String(id));
+      syncMengingatList();
+    };
+
+    const collectSelectedMengingatRows = () => selectedDasarHukum.map((item) => `${item.label};`);
+
+    updateMenimbangRows();
+    updateDiktumRows();
+    syncMengingatList();
+
+    document.getElementById('sk-add-menimbang')?.addEventListener('click', () => cloneRow('#sk-menimbang-list', '.sk-menimbang-row', updateMenimbangRows));
+    document.getElementById('sk-add-mengingat')?.addEventListener('click', openDasarHukumModal);
+    document.getElementById('sk-add-diktum')?.addEventListener('click', () => cloneRow('#sk-diktum-list', '.sk-diktum-row', updateDiktumRows));
+
+    form.addEventListener('click', (event) => {
+      const menimbangRemove = event.target.closest('.sk-remove-menimbang');
+      if (menimbangRemove) {
+        removeRow(menimbangRemove, '.sk-menimbang-row', updateMenimbangRows);
+        return;
+      }
+
+      const mengingatRemove = event.target.closest('.sk-remove-mengingat');
+      if (mengingatRemove) {
+        removeDasarHukum(mengingatRemove.dataset.dasarId);
+        return;
+      }
+
+      const diktumRemove = event.target.closest('.sk-remove-diktum');
+      if (diktumRemove) {
+        removeRow(diktumRemove, '.sk-diktum-row', updateDiktumRows);
+      }
+    });
+
+    document.getElementById('sk-dasar-modal-close')?.addEventListener('click', closeDasarHukumModal);
+    dasarHukumModal?.addEventListener('click', (event) => {
+      if (event.target === dasarHukumModal) closeDasarHukumModal();
+    });
+    dasarHukumSearch?.addEventListener('input', filterDasarHukumOptions);
+    dasarHukumModalList?.addEventListener('click', (event) => {
+      const button = event.target.closest('.sk-pilih-dasar');
+      if (!button) return;
+
+      const row = button.closest('.sk-dasar-option');
+      addDasarHukum(row?.dataset.dasarId, row?.dataset.dasarLabel);
+    });
+
+    document.getElementById('sk-proto-next-1')?.addEventListener('click', () => {
+      setSkFormStep(2);
+    });
+
+    document.getElementById('sk-proto-back-1')?.addEventListener('click', () => {
+      setSkFormStep(1);
+    });
+
+    document.getElementById('sk-proto-next-2')?.addEventListener('click', () => {
+      const set = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value || '-';
+      };
+
+      set('review-judul', document.getElementById('sk-judul')?.value.trim());
+      set('review-tentang', document.getElementById('sk-tentang')?.value.trim());
+      set('review-menetapkan', document.getElementById('sk-menetapkan')?.value.trim());
+      renderReviewList('review-menimbang', collectTextRows('.sk-menimbang-input'), alphaLabel, 'Belum ada butir menimbang.');
+      renderReviewList('review-mengingat', collectSelectedMengingatRows(), (index) => `${index + 1}.`, 'Belum ada dasar hukum dipilih.');
+      renderReviewList('review-memutuskan', collectTextRows('.sk-diktum-input'), diktumLabel, 'Belum ada diktum keputusan.');
+      setSkFormStep(3);
+    });
+
+    document.getElementById('sk-proto-back-2')?.addEventListener('click', () => {
+      setSkFormStep(2);
+    });
+
+    form.addEventListener('submit', () => {
+      const submitButton = document.getElementById('sk-proto-submit-btn');
+      if (!submitButton) return;
+
+      // Saat form benar-benar dikirim, tombol dikunci agar pemohon tidak mengirim pengajuan SK dua kali.
+      submitButton.disabled = true;
+      submitButton.classList.add('opacity-70', 'cursor-not-allowed');
+    });
+  })();
+
+});

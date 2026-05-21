@@ -13,7 +13,7 @@ class UserReferenceOptions
     public static function roles(): array
     {
         // Daftar role ini dipakai oleh validasi user dan pembagian akses route.
-        return ['SUPER_ADMIN', 'ADMIN_TU', 'PEMOHON', 'VERIFIKATOR'];
+        return ['SUPER_ADMIN', 'ADMIN_SURAT', 'PEMOHON', 'VERIFIKATOR'];
     }
 
     /**
@@ -65,7 +65,7 @@ class UserReferenceOptions
      */
     public static function jenisSuratBiasa(): array
     {
-        // Jenis surat biasa dipakai pada metadata surat yang dilengkapi Admin/TU.
+        // Jenis surat biasa dipakai pada metadata surat yang dilengkapi Admin Surat.
         return [
             'Surat Undangan',
             'Surat Tugas',

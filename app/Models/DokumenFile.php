@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 // Model DokumenFile mencatat semua file yang berhubungan dengan dokumen.
-// Pendekatan ini menjaga riwayat file tetap lengkap: draft DOCX, PDF hasil pemeriksaan, preview verifikasi, sampai PDF final.
+// Pendekatan ini menjaga riwayat file tetap lengkap: draft PDF pemohon, preview verifikasi, sampai PDF final.
 class DokumenFile extends Model
 {
     use HasFactory;
@@ -47,5 +47,32 @@ class DokumenFile extends Model
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by', 'user_id');
+    }
+
+    // Ekstensi lampiran dibaca dari nama asli file, lalu fallback ke path storage jika nama file tidak tersedia.
+    public function lampiranExtension(): string
+    {
+        return strtolower(pathinfo($this->file_name ?: $this->file_path, PATHINFO_EXTENSION));
+    }
+
+    // Lampiran yang boleh dibuka lewat tombol Lihat hanya PDF dan gambar yang bisa dirender langsung oleh browser.
+    public function isPreviewableLampiran(): bool
+    {
+        if ($this->file_type !== 'LAMPIRAN') {
+            return false;
+        }
+
+        return in_array($this->lampiranExtension(), ['pdf', 'jpg', 'jpeg', 'png'], true);
+    }
+
+    // Content-Type inline disesuaikan dengan tipe lampiran agar tab baru menampilkan file, bukan memaksa unduhan.
+    public function lampiranPreviewContentType(): ?string
+    {
+        return match ($this->lampiranExtension()) {
+            'pdf' => 'application/pdf',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            default => null,
+        };
     }
 }

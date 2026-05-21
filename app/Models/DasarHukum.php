@@ -18,10 +18,8 @@ class DasarHukum extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'jenis_peraturan',
-        'nomor_peraturan',
-        'tahun_peraturan',
-        'judul_peraturan',
+        'judul_hukum',
+        'keterangan',
         'is_active',
     ];
 
@@ -30,6 +28,12 @@ class DasarHukum extends Model
         return [
             'is_active' => 'boolean',
         ];
+    }
+
+    // Label ini dipakai di bagian Mengingat SK agar formatnya seragam di form, review admin, dan verifikator.
+    public function labelMengingat(): string
+    {
+        return trim(collect([$this->judul_hukum, $this->keterangan])->filter()->implode(' '));
     }
 
     public function skDasarHukum(): HasMany

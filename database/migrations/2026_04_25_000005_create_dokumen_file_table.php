@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('dokumen_file', function (Blueprint $table) {
             $table->id('file_id');
             $table->foreignId('dokumen_id')->constrained('dokumen', 'dokumen_id')->cascadeOnDelete();
-            $table->enum('file_type', ['DRAFT_DOCX', 'PDF_REVIEW', 'PDF_FINAL', 'LAMPIRAN']);
+            $table->enum('file_type', ['DRAFT_PDF', 'PREVIEW_VERIFIKASI_PDF', 'FINAL_PDF', 'LAMPIRAN']);
             $table->string('file_name', 255);
             $table->text('file_path');
             $table->foreignId('uploaded_by')->nullable()->constrained('users', 'user_id')->nullOnDelete();

@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id('dokumen_id');
             $table->enum('jenis_dokumen', ['SURAT_BIASA', 'SURAT_KEPUTUSAN']);
             $table->foreignId('pemohon_id')->constrained('users', 'user_id')->restrictOnDelete();
+            $table->foreignId('penandatangan_id')
+                ->nullable()
+                ->constrained('users', 'user_id')
+                ->nullOnDelete();
             $table->enum('status_dokumen', [
                 'DIAJUKAN',
                 'DIPROSES',

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 // Model PosisiElemenDokumen menyimpan koordinat elemen yang ditempelkan ke PDF.
-// Data ini diisi dari UI Admin/TU lalu dipakai service generator untuk menaruh nomor surat, tanggal, dan QR/TTE.
+// Data ini diisi dari UI Admin Surat lalu dipakai service generator untuk menaruh nomor surat, tanggal, dan QR/TTE.
 class PosisiElemenDokumen extends Model
 {
     use HasFactory;
@@ -42,7 +42,7 @@ class PosisiElemenDokumen extends Model
         ];
     }
 
-    // Posisi elemen selalu menempel ke satu dokumen yang sedang diproses oleh Admin/TU.
+    // Posisi elemen selalu menempel ke satu dokumen yang sedang diproses oleh Admin Surat.
     public function dokumen(): BelongsTo
     {
         return $this->belongsTo(Dokumen::class, 'dokumen_id', 'dokumen_id');

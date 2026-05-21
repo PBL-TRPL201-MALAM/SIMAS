@@ -16,15 +16,17 @@ class PublicDokumenVerificationController extends Controller
         $dokumen = Dokumen::query()
             ->with([
                 'pemohon',
+                'penandatangan',
                 'suratBiasa',
+                'suratKeputusan',
                 'verifikasi.verifikator',
             ])
             ->where('verification_token', $token)
             ->first();
 
-        // Validasi publik saat ini hanya untuk Surat Biasa yang sudah resmi dipublish.
+        // Validasi publik berlaku untuk Surat Biasa dan SK selama dokumen sudah resmi PUBLISHED.
         $isValid = $dokumen
-            && $dokumen->jenis_dokumen === 'SURAT_BIASA'
+            && in_array($dokumen->jenis_dokumen, ['SURAT_BIASA', 'SURAT_KEPUTUSAN'], true)
             && $dokumen->status_dokumen === 'PUBLISHED';
 
         $verifiedBy = collect();

@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'Proses Surat'])
-@include('template.admin-sidebar')
+@include('template.layouts.header', ['pageTitle' => 'Proses Surat'])
+@include('template.sidebar.admin')
 
     <!-- View ini menerima $dokumen dan data pendukung dari AdminProsesSuratController::show untuk wizard proses surat. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -12,7 +12,7 @@
         </button>
         <div>
           <h1 class="text-sm font-bold text-slate-900">Proses Surat</h1>
-          <p class="text-[11px] text-slate-400 font-light">Upload PDF, metadata & verifikasi</p>
+          <p class="text-[11px] text-slate-400 font-light">Cek PDF, metadata & verifikasi</p>
         </div>
         <button type="button"
           class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200">
@@ -33,6 +33,8 @@
             $unitKerjaAdmin = auth()->user()?->unit_kerja ?: '-';
             $initialStep = $initialStep ?? 1;
             $selectedVerifikators = $selectedVerifikators ?? collect();
+            $lampiranFiles = $dokumen->dokumenFiles->where('file_type', 'LAMPIRAN');
+            $pemohon = $dokumen->pemohon;
           @endphp
 
           <!-- Error validasi dari step metadata atau step verifikasi ditampilkan di bagian atas wizard. -->
@@ -47,10 +49,16 @@
             </div>
           @endif
 
-          <!-- Flash status berasal dari redirect setelah metadata/PDF berhasil disimpan. -->
+          <!-- Flash status/error berasal dari redirect setelah metadata atau validasi PDF sumber diproses. -->
           @if (session('status'))
             <div class="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
               <p class="text-[11px] font-semibold text-emerald-700">{{ session('status') }}</p>
+            </div>
+          @endif
+
+          @if (session('error'))
+            <div class="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3">
+              <p class="text-[11px] font-semibold text-red-700">{{ session('error') }}</p>
             </div>
           @endif
 
@@ -67,7 +75,7 @@
           <div class="flex items-center mb-6">
             <div class="flex items-center gap-2">
               <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="proses-circle-1"><span class="text-[11px] font-bold text-white">1</span></div>
-              <span class="text-xs font-semibold text-blue-600" id="proses-label-1">Upload & Metadata</span>
+              <span class="text-xs font-semibold text-blue-600" id="proses-label-1">PDF & Metadata</span>
             </div>
             <div class="flex-1 h-px bg-slate-200 mx-3"></div>
             <div class="flex items-center gap-2">
@@ -81,38 +89,86 @@
             </div>
           </div>
 
-          <!-- Form step 1 mengirim PDF hasil pemeriksaan dan metadata surat ke route admin.proses-surat.store. -->
-          <form id="proses-metadata-form" action="{{ route('admin.proses-surat.store', $dokumen) }}" method="POST" enctype="multipart/form-data" class="contents">
-            <!-- csrf wajib untuk request POST dan enctype dibutuhkan karena form mengunggah file PDF. -->
+          <!-- Form step 1 mengirim metadata surat; PDF sumber sudah berasal dari DRAFT_PDF Pemohon. -->
+          <form id="proses-metadata-form" action="{{ route('admin.proses-surat.store', $dokumen) }}" method="POST" class="contents">
+            <!-- csrf wajib untuk request POST yang menyimpan metadata proses surat. -->
             @csrf
             <input type="hidden" id="proses-start-step" value="{{ $initialStep }}">
           <div id="proses-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <!-- Step 1 melengkapi metadata resmi surat sebelum dokumen masuk ke tahap posisi elemen dan verifikasi. -->
             <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-              <h2 class="text-sm font-bold text-slate-900">Langkah 1 - Upload PDF & Data Surat</h2>
-              <p class="text-xs text-slate-400 font-light mt-0.5">Unggah PDF hasil pemeriksaan lalu lengkapi metadata inti surat.</p>
+              <h2 class="text-sm font-bold text-slate-900">Langkah 1 - Cek PDF & Data Surat</h2>
+              <p class="text-xs text-slate-400 font-light mt-0.5">Gunakan PDF yang diunggah Pemohon lalu lengkapi metadata inti surat.</p>
             </div>
             <div class="px-6 py-6 space-y-5">
 
-              <div class="space-y-1.5">
-                <label class="block text-xs font-semibold text-slate-700 tracking-wide">Unggah Draf PDF <span class="text-blue-400">*</span></label>
-                <div id="pdf-drop-zone" class="relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-6 py-8 hover:border-blue-300 hover:bg-blue-50/30 transition-all duration-200 cursor-pointer">
-                  <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+              <div class="rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3">
+                <div class="grid gap-3 lg:grid-cols-[1.1fr,0.9fr]">
+                  <div>
+                    <p class="text-[11px] font-semibold text-blue-700">Informasi Pemohon</p>
+                    <!-- Data pemohon ditampilkan langsung dari relasi dokumen->pemohon agar Admin Surat bisa mengecek konteks pengajuan tanpa pindah halaman. -->
+                    <div class="mt-2 grid gap-2 sm:grid-cols-2">
+                      <div class="rounded-lg bg-white/80 px-3 py-2">
+                        <p class="text-[10px] font-semibold uppercase tracking-wider text-blue-400">Nama Pemohon</p>
+                        <p class="mt-0.5 text-[11px] font-medium text-slate-700">{{ $pemohon?->nama ?? '-' }}</p>
+                      </div>
+                      <div class="rounded-lg bg-white/80 px-3 py-2">
+                        <p class="text-[10px] font-semibold uppercase tracking-wider text-blue-400">Unit Kerja</p>
+                        <p class="mt-0.5 text-[11px] font-medium text-slate-700">{{ $pemohon?->unit_kerja ?: '-' }}</p>
+                      </div>
+                      <div class="rounded-lg bg-white/80 px-3 py-2">
+                        <p class="text-[10px] font-semibold uppercase tracking-wider text-blue-400">NIP/NIK</p>
+                        <p class="mt-0.5 text-[11px] font-medium text-slate-700">{{ $pemohon?->nip_nik ?: '-' }}</p>
+                      </div>
+                      <div class="rounded-lg bg-white/80 px-3 py-2">
+                        <p class="text-[10px] font-semibold uppercase tracking-wider text-blue-400">Tanggal Pengajuan</p>
+                        <p class="mt-0.5 text-[11px] font-medium text-slate-700">{{ optional($dokumen->created_at)->format('d M Y H:i') ?? '-' }}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div class="text-center">
-                    <p class="text-xs font-semibold text-slate-700">Klik atau seret file PDF ke sini</p>
-                    <p class="text-[11px] text-slate-400 font-light mt-0.5">Format: PDF - Maks. 10 MB</p>
+
+                  <div class="min-w-0">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div class="min-w-0">
+                        <p class="text-[11px] font-semibold text-blue-700">PDF Pemohon</p>
+                        <p class="text-[11px] text-blue-600 font-light truncate">{{ $previewPdfName ?: 'PDF draft belum tersedia' }}</p>
+                        <!-- DRAFT_PDF tetap menjadi sumber proses berikutnya, tetapi preview utama tidak lagi ditanam di step 1. -->
+                        <p class="mt-1 text-[10px] text-blue-500 font-light">File ini dipakai sebagai sumber pengaturan posisi, verifikasi, dan publish.</p>
+                      </div>
+                      @if ($previewPdfUrl)
+                        <a href="{{ $previewPdfUrl }}" target="_blank" rel="noopener"
+                          class="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-white/80 px-3 py-1.5 text-[11px] font-semibold text-blue-600 hover:bg-blue-50 transition-all duration-200">
+                          Buka di Tab
+                        </a>
+                      @else
+                        <span class="inline-flex items-center justify-center rounded-lg bg-slate-100 px-3 py-1.5 text-[11px] font-semibold text-slate-400">
+                          PDF belum ada
+                        </span>
+                      @endif
+                    </div>
                   </div>
-                  <input id="pdf-file-input" name="hasil_pemeriksaan_pdf" type="file" accept=".pdf,application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 </div>
-                <div id="pdf-file-preview" class="hidden flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-2.5">
-                  <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  <p id="pdf-file-name" class="text-[11px] font-medium text-blue-700 truncate"></p>
-                  <p id="pdf-file-source" class="text-[10px] text-blue-500 font-light shrink-0"></p>
-                  <button id="pdf-file-remove" type="button" class="ml-auto text-slate-400 hover:text-slate-600 shrink-0 transition-colors duration-200">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
+
+                <div class="mt-4 border-t border-blue-100 pt-3">
+                  <p class="text-[11px] font-semibold text-blue-700">Lampiran Pendukung</p>
+                  @if ($lampiranFiles->isNotEmpty())
+                    <div class="mt-2 flex flex-wrap gap-2">
+                      @foreach ($lampiranFiles as $lampiran)
+                        <div class="inline-flex max-w-[360px] items-center gap-2 rounded-lg border border-blue-100 bg-white/80 px-3 py-1.5 text-[11px] font-medium text-blue-600">
+                          <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.586-6.586a4 4 0 10-5.657-5.657l-6.586 6.586a6 6 0 108.485 8.485L20.5 13" /></svg>
+                          <span class="min-w-0 flex-1 truncate">{{ $lampiran->file_name }}</span>
+                          <span class="ml-auto inline-flex shrink-0 items-center gap-1">
+                            @if ($lampiran->isPreviewableLampiran())
+                              <a href="{{ route('admin.lampiran.preview', $lampiran) }}" target="_blank" rel="noopener" class="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-600 hover:bg-blue-100 transition-all duration-200">Lihat</a>
+                            @endif
+                            <a href="{{ route('admin.lampiran.download', $lampiran) }}" class="rounded-md bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-100 transition-all duration-200">Unduh</a>
+                          </span>
+                        </div>
+                      @endforeach
+                    </div>
+                  @else
+                    <p class="mt-1 text-[11px] text-blue-500 font-light">Tidak ada lampiran pendukung dari Pemohon.</p>
+                  @endif
                 </div>
               </div>
 
@@ -186,7 +242,7 @@
                 <div class="space-y-4 mt-4">
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Isi / Ringkasan</label>
-                    <!-- Ringkasan dapat direvisi Admin/TU sebagai hasil pemeriksaan sebelum metadata disimpan. -->
+                    <!-- Ringkasan dapat direvisi Admin Surat sebagai hasil pengecekan sebelum metadata disimpan. -->
                     <textarea name="isi_ringkasan" rows="4"
                       class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('isi_ringkasan', $ringkasanSurat) }}</textarea>
                   </div>
@@ -199,10 +255,27 @@
                 </div>
               </div>
 
-              <div class="flex justify-end pt-2">
-                <button id="proses-save-step-1" type="submit"
+              <div class="rounded-xl border border-amber-100 bg-amber-50/60 p-4">
+                <div class="mb-3">
+                  <p class="text-xs font-semibold text-amber-700">Minta Revisi ke Pemohon</p>
+                  <p class="mt-0.5 text-[11px] text-amber-600 font-light">Gunakan jika ada typo, salah isi, salah file, atau PDF perlu diperbaiki sebelum proses posisi/verifikasi.</p>
+                </div>
+                <div class="space-y-1.5">
+                  <label class="block text-xs font-semibold text-amber-700 tracking-wide">Catatan Revisi</label>
+                  <!-- Catatan ini wajib saat Admin Surat mengembalikan dokumen ke Pemohon dari step 1. -->
+                  <textarea name="catatan_revisi" rows="3" placeholder="Tuliskan bagian yang perlu diperbaiki oleh Pemohon..."
+                    class="w-full rounded-xl border border-amber-200 bg-white/80 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-100 resize-none">{{ old('catatan_revisi') }}</textarea>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+                <button id="proses-revisi-step-1" type="submit" name="aksi" value="minta_revisi" formnovalidate
+                  class="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-200 bg-white px-5 py-2.5 text-sm font-semibold text-amber-700 hover:bg-amber-50 transition-all duration-200">
+                  Kembalikan ke Pemohon
+                </button>
+                <button id="proses-save-step-1" type="submit" name="aksi" value="simpan_metadata"
                   class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-                  Simpan PDF & Metadata
+                  Simpan Metadata
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </button>
               </div>
@@ -301,14 +374,14 @@
                   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <p class="text-xs font-semibold text-slate-700">Preview PDF</p>
-                      <p id="pdf-preview-caption" class="text-[11px] text-slate-400 font-light mt-0.5">Unggah PDF di langkah 1 untuk mulai mengatur posisi elemen.</p>
+                      <p id="pdf-preview-caption" class="text-[11px] text-slate-400 font-light mt-0.5">PDF pemohon menjadi dasar untuk mengatur posisi elemen.</p>
                     </div>
                     <span id="pdf-preview-page-badge" class="inline-flex items-center justify-center rounded-full bg-blue-50 px-3 py-1 text-[10px] font-semibold text-blue-600">Halaman 1</span>
                   </div>
 
                   <div id="pdf-preview-empty" class="rounded-xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
                     <p class="text-xs font-semibold text-slate-600">Preview PDF belum tersedia</p>
-                    <p class="text-[11px] text-slate-400 font-light mt-1">Pilih file PDF pada langkah pertama, lalu lanjutkan ke langkah ini.</p>
+                    <p class="text-[11px] text-slate-400 font-light mt-1">PDF dari Pemohon belum dapat dimuat untuk dokumen ini.</p>
                   </div>
 
                   <div id="pdf-preview-stage" class="hidden rounded-xl border border-slate-200 bg-white overflow-hidden">
@@ -425,7 +498,7 @@
 
               <div class="space-y-3">
                 <p class="text-xs font-semibold text-slate-700">Pilih Verifikator</p>
-                <!-- penandatangan_final dikirim hidden karena nilainya dipilih pada metadata step 1. -->
+                <!-- Hidden ini hanya menjaga tampilan/validasi browser; controller tetap memakai dokumen.penandatangan_id sebagai sumber final. -->
                 <input type="hidden" name="penandatangan_final" value="{{ $selectedPenandatanganId }}">
 
                 <div class="space-y-1.5">
@@ -499,4 +572,4 @@
       </main>
     </div>
 
-@include('template.footer')
+@include('template.layouts.footer')

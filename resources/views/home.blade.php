@@ -7,12 +7,12 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-      * { font-family: 'Poppins', sans-serif; }
+      * { font-family: 'Inter', sans-serif; }
     .carousel-track {
   display: flex;
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);

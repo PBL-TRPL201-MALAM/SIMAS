@@ -15,7 +15,7 @@ class RoleMiddleware
     /**
      * Handle an incoming request.
      */
-    // $roles berasal dari parameter route seperti role:ADMIN_TU atau role:SUPER_ADMIN.
+    // $roles berasal dari parameter route seperti role:ADMIN_SURAT atau role:SUPER_ADMIN.
     public function handle(Request $request, Closure $next, string ...$roles): Response|RedirectResponse
     {
         $user = Auth::user();
@@ -51,7 +51,7 @@ class RoleMiddleware
         // Redirect fallback selalu dikembalikan ke dashboard role masing-masing supaya user tidak nyasar ke area lain.
         return match ($user->role) {
             'SUPER_ADMIN' => 'super-admin.dashboard',
-            'ADMIN_TU' => 'admin.dashboard',
+            'ADMIN_SURAT' => 'admin.dashboard',
             'PEMOHON' => 'pemohon.dashboard',
             'VERIFIKATOR' => 'verifikator.dashboard',
             default => 'home',

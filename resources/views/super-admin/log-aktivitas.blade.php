@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'Log Aktivitas'])
-@include('template.super-admin-sidebar')
+@include('template.layouts.header', ['pageTitle' => 'Log Aktivitas'])
+@include('template.sidebar.super-admin')
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
@@ -37,5 +37,5 @@
       </main>
     </div>
 
-@include('template.footer')
+@include('template.layouts.footer')
 

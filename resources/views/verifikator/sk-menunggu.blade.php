@@ -1,5 +1,16 @@
-@include('template.header', ['pageTitle' => 'SK Menunggu Verifikasi', 'modalVariant' => 'none'])
-@include('template.verifikator-sidebar', ['activePage' => 'sk-menunggu'])
+@include('template.layouts.header', ['pageTitle' => 'Perlu Verifikasi SK'])
+@include('template.sidebar.verifikator', ['activePage' => 'sk-menunggu'])
+@php
+  $skMenunggu = $skMenunggu ?? collect();
+  $activeStatus = $activeStatus ?? 'menunggu';
+  $statusCounts = $statusCounts ?? ['menunggu' => 0, 'disetujui' => 0, 'ditolak' => 0];
+  $statusTabs = [
+      'menunggu' => 'Menunggu',
+      'disetujui' => 'Disetujui',
+      'ditolak' => 'Ditolak',
+  ];
+  $activeStatusLabel = $statusTabs[$activeStatus] ?? 'Menunggu';
+@endphp
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -8,8 +19,8 @@
           </svg>
         </button>
         <div>
-          <h1 class="text-sm font-bold text-slate-900">SK Menunggu Verifikasi</h1>
-          <p class="text-[11px] text-slate-400 font-light">Daftar surat keputusan yang menunggu verifikasi.</p>
+          <h1 class="text-sm font-bold text-slate-900">Perlu Verifikasi SK</h1>
+          <p class="text-[11px] text-slate-400 font-light">Daftar surat keputusan yang menjadi tugas verifikasi Anda.</p>
         </div>
         <a href="{{ route('verifikator.profil') }}" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
@@ -26,8 +37,24 @@
           @endif
 
           <div class="flex items-center justify-between">
-            <h2 class="text-sm font-bold text-slate-900">SK Menunggu Verifikasi</h2>
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">SK {{ $activeStatusLabel }}</h2>
+              <p class="mt-0.5 text-[11px] font-light text-slate-400">Status dipilih dari tab halaman, bukan dari menu sidebar.</p>
+            </div>
             <span class="text-[11px] font-medium text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">{{ $skMenunggu->count() }} dokumen</span>
+          </div>
+
+          <div class="inline-flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-white p-1">
+            @foreach ($statusTabs as $statusKey => $statusLabel)
+              @php
+                $isActiveTab = $activeStatus === $statusKey;
+              @endphp
+              <a href="{{ route('verifikator.sk-menunggu', $statusKey === 'menunggu' ? [] : ['status' => $statusKey]) }}"
+                 class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-[11px] transition-all duration-200 {{ $isActiveTab ? 'bg-blue-600 text-white font-semibold shadow-sm shadow-blue-100' : 'text-slate-500 font-medium hover:bg-slate-50 hover:text-slate-700' }}">
+                <span>{{ $statusLabel }}</span>
+                <span class="rounded-full px-1.5 py-0.5 text-[10px] {{ $isActiveTab ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }}">{{ $statusCounts[$statusKey] ?? 0 }}</span>
+              </a>
+            @endforeach
           </div>
 
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
@@ -37,6 +64,7 @@
                   <tr class="bg-slate-50/60 border-b border-slate-100">
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Judul SK</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Pemohon</th>
+                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Status Verifikasi</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Level Saya</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Tanggal</th>
                     <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Aksi</th>
@@ -44,26 +72,45 @@
                 </thead>
                 <tbody class="divide-y divide-slate-50">
                   @forelse ($skMenunggu as $item)
-                    @php($pdfFile = $item->dokumen->dokumenFiles->first())
+                    @php
+                      $dokumen = data_get($item, 'dokumen');
+                      $suratKeputusan = $dokumen?->suratKeputusan;
+                      $status = strtoupper((string) (data_get($item, 'status_verifikasi') ?? data_get($item, 'status') ?? 'MENUNGGU'));
+                      $statusClassMap = [
+                          'DISETUJUI' => 'text-emerald-600 bg-emerald-50',
+                          'DITOLAK' => 'text-red-600 bg-red-50',
+                          'MENUNGGU' => 'text-blue-600 bg-blue-50',
+                      ];
+                      $statusLabelMap = [
+                          'DISETUJUI' => 'Disetujui',
+                          'DITOLAK' => 'Ditolak',
+                          'MENUNGGU' => 'Menunggu',
+                      ];
+                      $statusClass = $statusClassMap[$status] ?? 'text-slate-600 bg-slate-100';
+                      $statusLabel = $statusLabelMap[$status] ?? ucwords(strtolower(str_replace('_', ' ', $status)));
+                    @endphp
                     <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                      <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[220px]">{{ $item->dokumen->suratKeputusan?->judul_sk ?? $item->dokumen->suratKeputusan?->tentang ?? '-' }}</p></td>
-                      <td class="px-5 py-3.5"><p class="text-xs text-slate-600">{{ $item->dokumen->pemohon?->nama ?? '-' }}</p></td>
-                      <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level {{ $item->level }}</span></td>
-                      <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->dokumen->created_at)->format('d M Y') }}</p></td>
+                      <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[220px]">{{ $suratKeputusan?->judul_sk ?? $suratKeputusan?->tentang ?? '-' }}</p></td>
+                      <td class="px-5 py-3.5"><p class="text-xs text-slate-600">{{ $dokumen?->pemohon?->nama ?? '-' }}</p></td>
+                      <td class="px-5 py-3.5">
+                        {{-- Status ini berasal dari baris verifikasi milik user login, bukan status global dokumen. --}}
+                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold {{ $statusClass }}">{{ $statusLabel }}</span>
+                      </td>
+                      <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level {{ data_get($item, 'level', '-') }}</span></td>
+                      <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($dokumen?->created_at)->format('d M Y') }}</p></td>
                       <td class="px-5 py-3.5">
                         <div class="flex flex-wrap items-center gap-2">
-                          <a href="{{ route('verifikator.sk.detail', $item->dokumen) }}" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Detail</a>
-                          @if ($pdfFile)
-                            <a href="{{ route('verifikator.sk.unduh-pdf', $item->dokumen) }}" class="text-[11px] font-medium text-slate-500 hover:text-slate-700 transition-colors duration-200">Unduh PDF</a>
+                          @if ($dokumen)
+                            <a href="{{ route('verifikator.sk.detail', $dokumen) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Detail</a>
+                          @else
+                            <span class="inline-flex items-center text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg">Detail tidak tersedia</span>
                           @endif
-                          <a href="{{ route('verifikator.sk.detail', ['dokumen' => $item->dokumen, 'aksi' => 'setuju']) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Setujui</a>
-                          <a href="{{ route('verifikator.sk.detail', ['dokumen' => $item->dokumen, 'aksi' => 'tolak']) }}" class="inline-flex items-center text-[11px] font-semibold text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg transition-all duration-200">Tolak</a>
                         </div>
                       </td>
                     </tr>
                   @empty
                     <tr>
-                      <td colspan="5" class="px-5 py-8 text-center text-xs text-slate-400">Belum ada SK yang menunggu verifikasi Anda.</td>
+                      <td colspan="6" class="px-5 py-8 text-center text-xs text-slate-400">Belum ada SK dengan status {{ strtolower($activeStatusLabel) }}.</td>
                     </tr>
                   @endforelse
                 </tbody>
@@ -73,4 +120,4 @@
         </div>
       </main>
     </div>
-@include('template.footer')
+@include('template.layouts.footer')

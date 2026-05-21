@@ -1,6 +1,10 @@
-@include('template.header', ['pageTitle' => 'Buat Surat Baru', 'modalVariant' => 'pemohon'])
-@include('template.pemohon-sidebar', ['activePage' => 'buat-surat'])
-    <!-- View ini menampilkan wizard Pemohon untuk mengunggah draft DOCX dan mengisi data awal surat biasa. -->
+@include('template.layouts.header', ['pageTitle' => $pageTitle ?? 'Buat Surat Baru'])
+@include('template.sidebar.pemohon', ['activePage' => 'buat-surat'])
+    <!-- View ini menampilkan wizard Pemohon untuk mengunggah draft PDF dan mengisi data awal surat biasa. -->
+    @php($jenisSuratOptions = $jenisSuratOptions ?? [])
+    @php($dokumen = $dokumen ?? null)
+    @php($suratBiasa = $dokumen?->suratBiasa)
+    @php($existingLampiranFiles = $existingLampiranFiles ?? collect())
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -9,8 +13,8 @@
           </svg>
         </button>
         <div>
-          <h1 class="text-sm font-bold text-slate-900">Buat Surat Baru</h1>
-          <p class="text-[11px] text-slate-400 font-light">Upload draft dan lengkapi data surat.</p>
+          <h1 class="text-sm font-bold text-slate-900">{{ $pageHeading ?? 'Buat Surat Baru' }}</h1>
+          <p class="text-[11px] text-slate-400 font-light">{{ $pageSubtitle ?? 'Upload PDF dan lengkapi data surat.' }}</p>
         </div>
         <a href="{{ route('pemohon.profil') }}" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
@@ -27,7 +31,7 @@
                 <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="surat-step2-circle-wrap">
                   <span class="text-[11px] font-bold text-white">1</span>
                 </div>
-                <span class="text-xs font-semibold text-blue-600">Upload Draft</span>
+                <span class="text-xs font-semibold text-blue-600">Upload PDF</span>
               </div>
               <div class="flex-1 h-px bg-slate-200 mx-3"></div>
               <div class="flex items-center gap-2">
@@ -39,10 +43,10 @@
             </div>
 
             <div id="surat-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
-              <!-- Step 1 hanya memilih file draft; file ini tetap dikirim bersama form di step 2 melalui atribut form="surat-biasa-form". -->
+              <!-- Step 1 hanya memilih file PDF; file ini tetap dikirim bersama form di step 2 melalui atribut form="surat-biasa-form". -->
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-                <h2 class="text-sm font-bold text-slate-900">Langkah 1 - Upload Draft Surat</h2>
-                <p class="text-xs text-slate-400 font-light mt-0.5">Siapkan draft surat dalam format DOCX lalu unggah ke sistem.</p>
+                <h2 class="text-sm font-bold text-slate-900">Langkah 1 - Upload PDF Surat</h2>
+                <p class="text-xs text-slate-400 font-light mt-0.5">Siapkan surat dalam format PDF lalu unggah versi yang akan diproses.</p>
               </div>
               <div class="px-6 py-6 space-y-5">
                 <!-- Error validasi dari PemohonSuratController::store muncul di sini setelah redirect back. -->
@@ -55,24 +59,37 @@
                 <div class="rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-3">
                   <p class="text-[11px] font-semibold text-blue-700 mb-1.5">Yang perlu disiapkan:</p>
                   <ul class="space-y-1">
-                    <li class="text-[11px] text-blue-600 font-light flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-blue-400 shrink-0"></span>Buat draft surat menggunakan Microsoft Word</li>
-                    <li class="text-[11px] text-blue-600 font-light flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-blue-400 shrink-0"></span>Simpan file dalam format <strong>.DOCX</strong></li>
+                    <li class="text-[11px] text-blue-600 font-light flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-blue-400 shrink-0"></span>Pastikan isi surat sudah sesuai sebelum diunggah</li>
+                    <li class="text-[11px] text-blue-600 font-light flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-blue-400 shrink-0"></span>Simpan file dalam format <strong>.PDF</strong></li>
                     <li class="text-[11px] text-blue-600 font-light flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-blue-400 shrink-0"></span>Ukuran file maksimal 10 MB</li>
                   </ul>
                 </div>
+                @if ($dokumen)
+                  <div class="rounded-xl border border-amber-100 bg-amber-50/60 px-4 py-3">
+                    <p class="text-[11px] font-semibold text-amber-700">Mode Perbaikan Pengajuan</p>
+                    <p class="mt-1 text-[11px] font-light text-amber-600">PDF utama wajib diunggah ulang. Data surat akan memperbarui pengajuan yang sama.</p>
+                  </div>
+                  @if (filled($revisionNote['text'] ?? null))
+                    <div class="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
+                      <p class="text-[10px] font-semibold uppercase tracking-wider text-amber-600">Catatan Revisi</p>
+                      <p class="mt-1 text-[11px] font-semibold text-amber-700">{{ $revisionNote['source'] ?? 'Catatan Revisi' }}</p>
+                      <p class="mt-1 text-[11px] font-light leading-relaxed text-amber-700 whitespace-pre-line">{{ $revisionNote['text'] }}</p>
+                    </div>
+                  @endif
+                @endif
                 <div class="space-y-1.5">
-                  <label class="block text-xs font-semibold text-slate-700 tracking-wide">File Draft Surat (DOCX) <span class="text-blue-400">*</span></label>
+                  <label class="block text-xs font-semibold text-slate-700 tracking-wide">File Draft Surat (PDF) <span class="text-blue-400">*</span></label>
                   <div id="surat-drop-zone" class="relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-6 py-10 hover:border-blue-300 hover:bg-blue-50/30 transition-all duration-200 cursor-pointer">
                     <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
                       <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                     </div>
                     <div class="text-center">
                       <p class="text-xs font-semibold text-slate-700">Klik atau seret file ke sini</p>
-                      <p class="text-[11px] text-slate-400 font-light mt-0.5">Format: DOCX · Maks. 10 MB</p>
+                      <p class="text-[11px] text-slate-400 font-light mt-0.5">Format: PDF - Maks. 10 MB</p>
                     </div>
-                    <input id="surat-file-input" name="draft_surat" form="surat-biasa-form" type="file" accept=".docx" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <input id="surat-file-input" name="draft_surat" form="surat-biasa-form" type="file" accept=".pdf,application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                   </div>
-                  <!-- Preview nama file diisi oleh JavaScript agar user tahu file DOCX mana yang akan dikirim. -->
+                  <!-- Preview nama file diisi oleh JavaScript agar user tahu file PDF mana yang akan dikirim. -->
                   <div id="surat-file-preview" class="hidden flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-2.5 mt-2">
                     <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <p id="surat-file-name" class="text-[11px] font-medium text-blue-700 truncate"></p>
@@ -97,27 +114,62 @@
                 <h2 class="text-sm font-bold text-slate-900">Langkah 2 - Data Surat</h2>
                 <p class="text-xs text-slate-400 font-light mt-0.5">Lengkapi informasi awal surat yang akan diajukan.</p>
               </div>
-              <form id="surat-biasa-form" action="{{ route('pemohon.surat.store') }}" method="POST" enctype="multipart/form-data" class="px-6 py-6 space-y-5">
-                <!-- csrf wajib untuk form POST Laravel dan enctype diperlukan karena form mengirim file DOCX. -->
+              <form id="surat-biasa-form" action="{{ $formAction ?? route('pemohon.surat.store') }}" method="POST" enctype="multipart/form-data" class="px-6 py-6 space-y-5">
+                <!-- csrf wajib untuk form POST Laravel dan enctype diperlukan karena form mengirim file PDF. -->
                 @csrf
+                @if (($formMethod ?? 'POST') !== 'POST')
+                  @method($formMethod)
+                @endif
                 <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-2.5">
                   <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                   <p id="surat-step2-filename" class="text-[11px] font-medium text-slate-600 truncate"></p>
-                  <button id="surat-back-btn" type="button" class="ml-auto text-[10px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200 shrink-0">Ganti file</button>
+                    <button id="surat-back-btn" type="button" class="ml-auto text-[10px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200 shrink-0">Ganti file</button>
+                </div>
+                <div class="space-y-1.5">
+                  <label class="block text-xs font-semibold text-slate-700 tracking-wide">Jenis Surat <span class="text-blue-400">*</span></label>
+                  <!-- Jenis surat dipilih Pemohon sejak pengajuan awal; Admin Surat masih bisa menyesuaikan saat proses. -->
+                  <select name="jenis_surat"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                    <option value="" disabled {{ old('jenis_surat', $suratBiasa?->jenis_surat) ? '' : 'selected' }}>Pilih jenis surat</option>
+                    @foreach ($jenisSuratOptions as $jenisSurat)
+                      <option value="{{ $jenisSurat }}" @selected(old('jenis_surat', $suratBiasa?->jenis_surat) === $jenisSurat)>{{ $jenisSurat }}</option>
+                    @endforeach
+                  </select>
+                  <p class="text-[10px] text-slate-400 font-light">Pilih jenis surat sesuai kebutuhan pengajuan.</p>
                 </div>
                 <div class="space-y-1.5">
                   <label class="block text-xs font-semibold text-slate-700 tracking-wide">Perihal <span class="text-blue-400">*</span></label>
                   <!-- old('perihal') menjaga input tetap terisi jika validasi gagal. -->
-                  <input type="text" name="perihal" value="{{ old('perihal') }}" placeholder="Contoh: Permohonan Izin Penelitian Lapangan"
+                  <input type="text" name="perihal" value="{{ old('perihal', $suratBiasa?->hal) }}" placeholder="Contoh: Permohonan Izin Penelitian Lapangan"
                     class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                   <p class="text-[10px] text-slate-400 font-light">Tuliskan pokok/inti dari surat yang diajukan.</p>
                 </div>
                 <div class="space-y-1.5">
                   <label class="block text-xs font-semibold text-slate-700 tracking-wide">Ringkasan Isi Surat <span class="text-blue-400">*</span></label>
-                  <!-- Ringkasan dikirim sebagai data awal surat_biasa agar Admin/TU memahami isi pengajuan sebelum memeriksa DOCX. -->
+                  <!-- Ringkasan dikirim sebagai data awal surat_biasa agar Admin Surat memahami isi pengajuan sebelum memeriksa PDF. -->
                   <textarea name="ringkasan" rows="5" placeholder="Tuliskan ringkasan isi surat secara singkat dan jelas..."
-                    class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('ringkasan') }}</textarea>
-                  <p class="text-[10px] text-slate-400 font-light">Ringkasan ini membantu Admin/TU memahami isi surat sebelum memeriksa file DOCX.</p>
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('ringkasan', $suratBiasa?->ringkasan_isi) }}</textarea>
+                  <p class="text-[10px] text-slate-400 font-light">Ringkasan ini membantu Admin Surat memahami isi surat sebelum memeriksa file PDF.</p>
+                </div>
+                <div class="space-y-1.5">
+                  <label class="block text-xs font-semibold text-slate-700 tracking-wide">Lampiran Pendukung</label>
+                  <!-- Lampiran pendukung opsional dapat lebih dari satu file dan tidak menjadi sumber preview/verifikasi/publish. -->
+                  <input type="file" name="lampiran_pendukung[]" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-600 hover:file:bg-blue-100 outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
+                  <p class="text-[10px] text-slate-400 font-light">Opsional. Boleh pilih lebih dari satu file: PDF, DOC, DOCX, JPG, JPEG, atau PNG. Maksimal 10 MB per file.</p>
+                  @if ($existingLampiranFiles->isNotEmpty())
+                    <div class="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
+                      <p class="text-[11px] font-semibold text-slate-700">Lampiran yang sudah ada</p>
+                      <div class="mt-2 flex flex-wrap gap-2">
+                        @foreach ($existingLampiranFiles as $lampiran)
+                          <span class="inline-flex max-w-[260px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-600">
+                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.586-6.586a4 4 0 10-5.657-5.657l-6.586 6.586a6 6 0 108.485 8.485L20.5 13" /></svg>
+                            <span class="truncate">{{ $lampiran->file_name }}</span>
+                          </span>
+                        @endforeach
+                      </div>
+                    </div>
+                  @endif
                 </div>
                 <div class="flex items-center justify-between pt-2">
                   <button id="surat-back-btn-2" type="button"
@@ -127,7 +179,7 @@
                   </button>
                   <button id="surat-submit-btn" type="submit"
                     class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-                    Ajukan Surat
+                    {{ $submitLabel ?? 'Ajukan Surat' }}
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                   </button>
                 </div>
@@ -138,4 +190,4 @@
         </div>
       </main>
     </div>
-@include('template.footer')
+@include('template.layouts.footer')

@@ -24,6 +24,7 @@ class Dokumen extends Model
     protected $fillable = [
         'jenis_dokumen',
         'pemohon_id',
+        'penandatangan_id',
         'status_dokumen',
         'verification_token',
         'published_at',
@@ -43,6 +44,12 @@ class Dokumen extends Model
     public function pemohon(): BelongsTo
     {
         return $this->belongsTo(User::class, 'pemohon_id', 'user_id');
+    }
+
+    // Penandatangan dipilih Admin Surat sebagai metadata utama dokumen sebelum masuk verifikasi.
+    public function penandatangan(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'penandatangan_id', 'user_id');
     }
 
     // Relasi one-to-many: satu dokumen dapat memiliki banyak versi file sepanjang prosesnya.

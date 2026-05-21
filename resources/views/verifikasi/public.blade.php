@@ -7,12 +7,12 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-      * { font-family: 'Poppins', sans-serif; }
+      * { font-family: 'Inter', sans-serif; }
     </style>
   </head>
   <body class="min-h-screen bg-slate-50 antialiased">
@@ -28,6 +28,13 @@
         </div>
 
         @if ($isValid && $dokumen)
+          @php
+            $isSk = $dokumen->jenis_dokumen === 'SURAT_KEPUTUSAN';
+            $nomorDokumen = $isSk ? $dokumen->suratKeputusan?->nomor_sk : $dokumen->suratBiasa?->nomor_surat;
+            $tanggalDokumen = $isSk ? $dokumen->suratKeputusan?->tanggal_sk : $dokumen->suratBiasa?->tanggal_surat;
+            $jenisDokumen = $isSk ? 'Surat Keputusan' : ($dokumen->suratBiasa?->jenis_surat ?: 'Surat Biasa');
+            $perihalDokumen = $isSk ? $dokumen->suratKeputusan?->tentang : $dokumen->suratBiasa?->hal;
+          @endphp
           <!-- Data dokumen valid berasal dari token QR yang cocok dengan dokumen berstatus PUBLISHED. -->
           <section class="overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm">
             <div class="border-b border-emerald-100 bg-emerald-50 px-6 py-5">
@@ -37,20 +44,20 @@
 
             <div class="divide-y divide-slate-100 px-6">
               <div class="grid gap-1 py-4 sm:grid-cols-[180px,1fr]">
-                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Nomor Surat</p>
-                <p class="text-sm font-medium text-slate-800">{{ $dokumen->suratBiasa?->nomor_surat ?: '-' }}</p>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Nomor Dokumen</p>
+                <p class="text-sm font-medium text-slate-800">{{ $nomorDokumen ?: '-' }}</p>
               </div>
               <div class="grid gap-1 py-4 sm:grid-cols-[180px,1fr]">
-                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Tanggal Surat</p>
-                <p class="text-sm font-medium text-slate-800">{{ optional($dokumen->suratBiasa?->tanggal_surat)->translatedFormat('d F Y') ?: '-' }}</p>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Tanggal Dokumen</p>
+                <p class="text-sm font-medium text-slate-800">{{ optional($tanggalDokumen)->translatedFormat('d F Y') ?: '-' }}</p>
               </div>
               <div class="grid gap-1 py-4 sm:grid-cols-[180px,1fr]">
-                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Jenis Surat</p>
-                <p class="text-sm font-medium text-slate-800">{{ $dokumen->suratBiasa?->jenis_surat ?: 'Surat Biasa' }}</p>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Jenis Dokumen</p>
+                <p class="text-sm font-medium text-slate-800">{{ $jenisDokumen }}</p>
               </div>
               <div class="grid gap-1 py-4 sm:grid-cols-[180px,1fr]">
                 <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Perihal</p>
-                <p class="text-sm font-medium text-slate-800">{{ $dokumen->suratBiasa?->hal ?: '-' }}</p>
+                <p class="text-sm font-medium text-slate-800">{{ $perihalDokumen ?: '-' }}</p>
               </div>
               <div class="grid gap-1 py-4 sm:grid-cols-[180px,1fr]">
                 <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pemohon</p>
@@ -58,7 +65,7 @@
               </div>
               <div class="grid gap-1 py-4 sm:grid-cols-[180px,1fr]">
                 <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Penandatangan</p>
-                <p class="text-sm font-medium text-slate-800">{{ $dokumen->suratBiasa?->penandatangan ?: '-' }}</p>
+                <p class="text-sm font-medium text-slate-800">{{ $dokumen->penandatangan?->nama ?: ($isSk ? '-' : ($dokumen->suratBiasa?->penandatangan ?: '-')) }}</p>
               </div>
               <div class="grid gap-1 py-4 sm:grid-cols-[180px,1fr]">
                 <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Terverifikasi oleh</p>

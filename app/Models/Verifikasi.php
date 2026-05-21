@@ -18,7 +18,7 @@ class Verifikasi extends Model
     // Primary key custom membuat route/model Eloquent memakai verifikasi_id sebagai identitas baris verifikasi.
     protected $primaryKey = 'verifikasi_id';
 
-    // Fillable ini dipakai saat Admin/TU membangun ulang flow verifikasi bertingkat.
+    // Fillable ini dipakai saat Admin Surat membangun ulang flow verifikasi bertingkat.
     protected $fillable = [
         'dokumen_id',
         'verifikator_id',

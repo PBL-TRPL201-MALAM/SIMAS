@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'Profil Admin'])
-@include('template.admin-sidebar')
+@include('template.layouts.header', ['pageTitle' => 'Profil Admin'])
+@include('template.sidebar.admin')
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
@@ -10,7 +10,7 @@
         </button>
         <div>
           <h1 class="text-sm font-bold text-slate-900">Profil Saya</h1>
-          <p class="text-[11px] text-slate-400 font-light">Informasi akun Admin / TU</p>
+          <p class="text-[11px] text-slate-400 font-light">Informasi akun Admin Surat</p>
         </div>
         <div class="w-9 h-9"></div>
       </header>
@@ -24,7 +24,7 @@
               </svg>
             </div>
             <div>
-              <h2 class="text-base font-bold text-slate-900">Admin / TU</h2>
+              <h2 class="text-base font-bold text-slate-900">Admin Surat</h2>
               <p class="text-sm text-slate-500">Halaman profil dipisah agar struktur view admin konsisten.</p>
             </div>
           </div>
@@ -32,5 +32,5 @@
       </main>
     </div>
 
-@include('template.footer')
+@include('template.layouts.footer')
 

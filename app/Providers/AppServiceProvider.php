@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // View composer mengirim data sidebar otomatis setiap view sidebar dirender, tanpa harus diulang di tiap controller.
-        View::composer('template.pemohon-sidebar', function ($view): void {
+        View::composer('template.sidebar.pemohon', function ($view): void {
             $user = Auth::user();
 
             if (! $user || $user->role !== 'PEMOHON') {
@@ -47,15 +47,15 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        View::composer('template.admin-sidebar', function ($view): void {
-            // Sidebar Admin/TU menampilkan jumlah pengajuan yang benar-benar masih menunggu diproses dari masing-masing jenis dokumen.
+        View::composer('template.sidebar.admin', function ($view): void {
+            // Sidebar Admin Surat menampilkan jumlah pengajuan yang benar-benar masih menunggu diproses dari masing-masing jenis dokumen.
             $view->with('sidebarStats', [
                 'pengajuan_surat_count' => Dokumen::query()->where('jenis_dokumen', 'SURAT_BIASA')->where('status_dokumen', 'DIAJUKAN')->count(),
                 'pengajuan_sk_count' => Dokumen::query()->where('jenis_dokumen', 'SURAT_KEPUTUSAN')->where('status_dokumen', 'DIAJUKAN')->count(),
             ]);
         });
 
-        View::composer('template.verifikator-sidebar', function ($view): void {
+        View::composer('template.sidebar.verifikator', function ($view): void {
             $user = Auth::user();
 
             if (! $user || $user->role !== 'VERIFIKATOR') {
@@ -85,7 +85,7 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        View::composer('template.super-admin-sidebar', function ($view): void {
+        View::composer('template.sidebar.super-admin', function ($view): void {
             // Sidebar Super Admin cukup memakai total user sebagai ringkasan cepat kondisi sistem.
             $view->with('sidebarStats', [
                 'user_count' => User::query()->count(),

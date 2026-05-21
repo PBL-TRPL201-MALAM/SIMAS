@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'SK Disetujui', 'modalVariant' => 'verifikator'])
-@include('template.verifikator-sidebar', ['activePage' => 'sk-disetujui'])
+@include('template.layouts.header', ['pageTitle' => 'SK Disetujui'])
+@include('template.sidebar.verifikator', ['activePage' => 'sk-disetujui'])
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
         <button id="sidebar-toggle" type="button" class="xl:hidden -m-2 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200 mr-3">
@@ -52,5 +52,4 @@
         ============================================================ -->
       </main>
     </div>
-@include('template.footer')
-
+@include('template.layouts.footer')

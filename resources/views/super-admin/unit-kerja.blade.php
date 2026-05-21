@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'Unit Kerja'])
-@include('template.super-admin-sidebar')
+@include('template.layouts.header', ['pageTitle' => 'Unit Kerja'])
+@include('template.sidebar.super-admin')
 
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header class="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-100/80 shrink-0">
@@ -48,7 +48,7 @@
               </div>
               <div class="px-5 py-4">
                 <p class="text-xs font-semibold text-slate-800">Staf Administrasi</p>
-                <p class="text-xs text-slate-500 font-light mt-1">Digunakan oleh role ADMIN_TU.</p>
+                <p class="text-xs text-slate-500 font-light mt-1">Digunakan oleh role ADMIN_SURAT.</p>
               </div>
               <div class="px-5 py-4">
                 <p class="text-xs font-semibold text-slate-800">Operator Sistem</p>
@@ -60,5 +60,5 @@
       </main>
     </div>
 
-@include('template.footer')
+@include('template.layouts.footer')
 

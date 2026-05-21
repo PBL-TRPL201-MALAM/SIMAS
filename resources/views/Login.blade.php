@@ -7,12 +7,12 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-      * { font-family: 'Poppins', sans-serif; }
+      * { font-family: 'Inter', sans-serif; }
 
       /* ── Carousel Login (panel kanan) ── */
       .login-carousel-track {
@@ -178,7 +178,7 @@
 
               <div class="space-y-1">                  
                   <p><span class="font-semibold text-slate-600">Pemohon</span> : pemohon / 12345678</p>
-                  <p><span class="font-semibold text-slate-600">Admin TU</span> : admintu / 12345678</p>
+                  <p><span class="font-semibold text-slate-600">Admin Surat</span> : adminsurat / 12345678</p>
                   <p><span class="font-semibold text-slate-600">Verifikator</span> : verifikator / 12345678</p>
                   <p><span class="font-semibold text-slate-600">Verifikator</span> : direktur / 12345678</p>
                   <p><span class="font-semibold text-slate-600">Super Admin</span> : superadmin / 12345678</p>

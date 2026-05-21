@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Dokumen;
 use App\Models\DokumenFile;
 use App\Models\PosisiElemenDokumen;
+use App\Models\RiwayatDokumen;
 use App\Models\SuratBiasa;
 use App\Models\User;
 use App\Models\Verifikasi;
-use App\Services\PreviewVerifikasiPdfGenerator;
+use App\Services\PreviewSuratBiasaPdfGenerator;
 use App\Support\UserReferenceOptions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -17,16 +18,20 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Validator as LaravelValidator;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-// Controller ini mengatur wizard proses surat oleh Admin/TU.
-// Alurnya: pilih pengajuan, simpan PDF hasil pemeriksaan, atur posisi elemen, lalu kirim ke verifikator dan penandatangan final.
+// Controller ini mengatur wizard proses surat oleh Admin Surat.
+// Alurnya: pilih pengajuan, cek PDF pemohon, lengkapi metadata, atur posisi elemen, lalu kirim ke verifikator dan penandatangan final.
 class AdminProsesSuratController extends Controller
 {
+    // DRAFT_PDF dari Pemohon menjadi satu-satunya sumber proses Surat Biasa.
+    private const PROCESS_SOURCE_PDF_TYPES = ['DRAFT_PDF'];
+
     // Service generator dimasukkan lewat dependency injection Laravel agar controller tidak membuat object service sendiri.
     public function __construct(
-        protected PreviewVerifikasiPdfGenerator $previewVerifikasiPdfGenerator
+        protected PreviewSuratBiasaPdfGenerator $previewSuratBiasaPdfGenerator
     ) {
     }
 
@@ -36,7 +41,7 @@ class AdminProsesSuratController extends Controller
         $dokumenId = $request->integer('dokumen');
 
         if (!$dokumenId) {
-            // Jika tidak ada dokumen di query string, Admin/TU dikembalikan ke daftar pengajuan untuk memilih ulang.
+            // Jika tidak ada dokumen di query string, Admin Surat dikembalikan ke daftar pengajuan untuk memilih ulang.
             return redirect()
                 ->route('admin.pengajuan-masuk')
                 ->with('error', 'Dokumen yang akan diproses belum dipilih.');
@@ -47,6 +52,7 @@ class AdminProsesSuratController extends Controller
         $dokumen = Dokumen::query()
             ->with([
                 'pemohon',
+                'penandatangan',
                 'suratBiasa',
                 'posisiElemenDokumen',
                 'verifikasi.verifikator',
@@ -55,11 +61,17 @@ class AdminProsesSuratController extends Controller
             ->where('jenis_dokumen', 'SURAT_BIASA')
             ->findOrFail($dokumenId);
 
-        // File preview dicari dari koleksi file dokumen yang sudah diload; prioritasnya PDF hasil pemeriksaan terbaru.
-        $previewFile = $dokumen->dokumenFiles
-            ->first(fn (DokumenFile $file) => in_array($file->file_type, ['HASIL_PEMERIKSAAN_PDF', 'PDF_REVIEW'], true));
+        if (in_array($dokumen->status_dokumen, ['PERLU_REVISI', 'DITOLAK'], true)) {
+            return redirect()
+                ->route('admin.semua-surat')
+                ->with('error', 'Dokumen sedang menunggu perbaikan dari pemohon dan tidak bisa diproses ulang.');
+        }
 
-        // Jumlah halaman PDF dikirim ke Blade agar UI Admin/TU bisa memilih halaman 1, 2, dan seterusnya saat mengatur posisi.
+        // File preview dicari dari koleksi file dokumen yang sudah diload; prioritasnya DRAFT_PDF dari Pemohon.
+        $previewFile = $this->resolveProcessSourcePdf($dokumen);
+        $previewFileExists = $previewFile && Storage::disk('public')->exists($previewFile->file_path);
+
+        // Jumlah halaman PDF dikirim ke Blade agar UI Admin Surat bisa memilih halaman 1, 2, dan seterusnya saat mengatur posisi.
         $previewPdfPageCount = $this->countPdfPages($previewFile);
 
         // Posisi elemen dipetakan per nama elemen agar frontend mudah mengisi ulang koordinat yang pernah disimpan.
@@ -86,14 +98,7 @@ class AdminProsesSuratController extends Controller
             ->get(['user_id', 'nama', 'jabatan', 'unit_kerja']);
 
         // Jika form kembali karena validasi gagal, pilihan lama diprioritaskan melalui old().
-        $selectedPenandatanganId = old('penanda_tangan');
-
-        if (! $selectedPenandatanganId && $dokumen->suratBiasa?->penandatangan) {
-            // Saat dokumen sudah pernah disimpan, nama penandatangan di metadata dicocokkan lagi ke user aktif.
-            $selectedPenandatanganId = $penandatangans
-                ->firstWhere('nama', $dokumen->suratBiasa->penandatangan)
-                ?->user_id;
-        }
+        $selectedPenandatanganId = old('penanda_tangan', $dokumen->penandatangan_id);
 
         // Dropdown verifikator sengaja tidak memuat penandatangan final agar tahap otorisasi akhir tetap terpisah.
         $verifikators = User::query()
@@ -112,8 +117,9 @@ class AdminProsesSuratController extends Controller
 
         return view('admin.proses-surat', [
             'dokumen' => $dokumen,
-            'initialStep' => max(1, min(3, $request->integer('step', 1))),
-            'previewPdfUrl' => $previewFile
+            'initialStep' => $this->resolveInitialStep($request->query('step', 1)),
+            // URL preview ini mengarah ke endpoint inline DRAFT_PDF agar Blade bisa menanam PDF Pemohon langsung di halaman.
+            'previewPdfUrl' => $previewFileExists
                 ? route('admin.proses-surat.preview-pdf', $dokumen)
                 : null,
             'previewPdfName' => $previewFile?->file_name,
@@ -129,8 +135,17 @@ class AdminProsesSuratController extends Controller
         ]);
     }
 
+    private function resolveInitialStep(mixed $step): int
+    {
+        if (is_string($step) && strtolower($step) === 'verifikasi') {
+            return 3;
+        }
+
+        return max(1, min(3, (int) $step));
+    }
+
     // Helper ini menghitung jumlah halaman PDF dari object /Page.
-    // Nilai ini hanya untuk navigasi preview Admin/TU; jika struktur PDF tidak terbaca, default 1 menjaga PDF lama tetap bisa diproses.
+    // Nilai ini hanya untuk navigasi preview Admin Surat; jika struktur PDF tidak terbaca, default 1 menjaga PDF lama tetap bisa diproses.
     private function countPdfPages(?DokumenFile $previewFile): int
     {
         if (! $previewFile || ! Storage::disk('public')->exists($previewFile->file_path)) {
@@ -144,26 +159,62 @@ class AdminProsesSuratController extends Controller
         return max(1, count($matches[0] ?? []));
     }
 
-    // Method ini memproses step 1 wizard Admin/TU: upload PDF hasil pemeriksaan dan lengkapi metadata resmi surat.
+    // Helper ini memilih PDF sumber proses surat biasa dari DRAFT_PDF yang diunggah Pemohon.
+    private function resolveProcessSourcePdf(Dokumen $dokumen): ?DokumenFile
+    {
+        if ($dokumen->relationLoaded('dokumenFiles')) {
+            foreach (self::PROCESS_SOURCE_PDF_TYPES as $fileType) {
+                $file = $dokumen->dokumenFiles
+                    ->where('file_type', $fileType)
+                    ->sortByDesc('file_id')
+                    ->first();
+
+                if ($file) {
+                    return $file;
+                }
+            }
+        }
+
+        foreach (self::PROCESS_SOURCE_PDF_TYPES as $fileType) {
+            $file = $dokumen->dokumenFiles()
+                ->where('file_type', $fileType)
+                ->latest('file_id')
+                ->first();
+
+            if ($file) {
+                return $file;
+            }
+        }
+
+        return null;
+    }
+
+    // Method ini memproses step 1 wizard Admin Surat: cek PDF pemohon dan lengkapi metadata resmi surat.
     public function storeDraft(Request $request, Dokumen $dokumen): RedirectResponse
     {
         abort_unless($dokumen->jenis_dokumen === 'SURAT_BIASA', 404);
 
-        // Relasi diload agar controller bisa mengecek file PDF lama dan metadata surat tanpa query manual berulang.
+        // Relasi diload agar controller bisa mengecek DRAFT_PDF pemohon dan metadata surat tanpa query manual berulang.
         $dokumen->loadMissing(['suratBiasa', 'dokumenFiles']);
 
-        $existingProcessedPdf = $dokumen->dokumenFiles
-            ->first(fn (DokumenFile $file) => in_array($file->file_type, ['HASIL_PEMERIKSAAN_PDF', 'PDF_REVIEW'], true));
+        if ($request->input('aksi') === 'minta_revisi') {
+            return $this->returnToPemohonForRevision($request, $dokumen);
+        }
 
-        // Pada tahap ini Admin/TU mengunggah PDF hasil pemeriksaan dan melengkapi metadata resmi surat.
-        // File PDF wajib hanya saat belum ada PDF proses sebelumnya, supaya admin bisa menyimpan ulang metadata tanpa upload ulang.
+        $sourcePdf = $this->resolveProcessSourcePdf($dokumen);
+
+        if (! $sourcePdf || ! Storage::disk('public')->exists($sourcePdf->file_path)) {
+            // PDF pemohon wajib ada karena Admin Surat tidak lagi mengunggah ulang PDF pada alur surat biasa baru.
+            return redirect()
+                ->route('admin.proses-surat', [
+                    'dokumen' => $dokumen->dokumen_id,
+                    'step' => 1,
+                ])
+                ->with('error', 'PDF draft dari pemohon belum tersedia. Silakan minta pemohon mengajukan ulang file PDF.');
+        }
+
+        // Pada tahap ini Admin Surat hanya melengkapi metadata; file sumber tetap DRAFT_PDF yang diunggah Pemohon.
         $validated = $request->validate([
-            'hasil_pemeriksaan_pdf' => [
-                $existingProcessedPdf ? 'nullable' : 'required',
-                'file',
-                'mimetypes:application/pdf',
-                'max:10240',
-            ],
             'penanda_tangan' => [
                 'required',
                 Rule::exists('users', 'user_id')->where(fn ($query) => $query
@@ -178,14 +229,10 @@ class AdminProsesSuratController extends Controller
             'isi_ringkasan' => ['required', 'string'],
             'catatan_tambahan' => ['nullable', 'string'],
         ], [
-            'hasil_pemeriksaan_pdf.required' => 'PDF hasil pemeriksaan wajib diunggah.',
-            'hasil_pemeriksaan_pdf.mimetypes' => 'File hasil pemeriksaan harus berformat PDF.',
-            'hasil_pemeriksaan_pdf.max' => 'Ukuran PDF maksimal 10 MB.',
             'isi_ringkasan.required' => 'Isi/Ringkasan surat wajib diisi.',
         ]);
 
         $user = $request->user();
-        $uploadedPdf = $request->file('hasil_pemeriksaan_pdf');
         // Penandatangan divalidasi lagi lewat query agar user yang dipakai benar-benar aktif dan berjabatan penandatangan.
         $penandatangan = User::query()
             ->where('user_id', $validated['penanda_tangan'])
@@ -194,22 +241,8 @@ class AdminProsesSuratController extends Controller
             ->whereIn('jabatan', UserReferenceOptions::signerJabatans())
             ->firstOrFail();
 
-        // Transaction menjaga file record, metadata surat, dan status dokumen tersimpan konsisten sebagai satu tahap proses.
-        DB::transaction(function () use ($dokumen, $validated, $user, $uploadedPdf, $penandatangan): void {
-            if ($uploadedPdf) {
-                // PDF hasil pemeriksaan disimpan terpisah dari DOCX draft pemohon agar riwayat file tetap utuh.
-                $storedPath = $uploadedPdf->store('dokumen/pdf', 'public');
-
-                DokumenFile::create([
-                    'dokumen_id' => $dokumen->dokumen_id,
-                    'file_type' => 'HASIL_PEMERIKSAAN_PDF',
-                    'file_name' => $uploadedPdf->getClientOriginalName(),
-                    'file_path' => $storedPath,
-                    'uploaded_by' => $user->user_id,
-                    'uploaded_at' => now(),
-                ]);
-            }
-
+        // Transaction menjaga metadata surat dan status dokumen tersimpan konsisten sebagai satu tahap proses.
+        DB::transaction(function () use ($dokumen, $validated, $user, $penandatangan): void {
             $suratBiasa = $dokumen->suratBiasa ?? new SuratBiasa([
                 'dokumen_id' => $dokumen->dokumen_id,
                 'hal' => $dokumen->suratBiasa?->hal,
@@ -219,45 +252,90 @@ class AdminProsesSuratController extends Controller
             $suratBiasa->fill([
                 'nomor_surat' => $validated['nomor_surat'],
                 'tanggal_surat' => $validated['tanggal_surat'],
-                // Nama penandatangan disimpan ke metadata surat agar bisa ditampilkan kembali pada preview/final PDF.
+                // Nama penandatangan tetap disalin untuk tampilan lama, sedangkan sumber utama relasi ada di dokumen.penandatangan_id.
                 'penandatangan' => $penandatangan->nama,
                 'jenis_surat' => $validated['jenis_surat'],
                 'sifat_surat' => $validated['sifat_surat'],
-                // Ringkasan dapat direvisi Admin/TU sebagai hasil pemeriksaan sebelum dokumen masuk verifikasi.
+                // Ringkasan dapat direvisi Admin Surat sebagai hasil pengecekan sebelum dokumen masuk verifikasi.
                 'ringkasan_isi' => $validated['isi_ringkasan'],
                 'lampiran' => $suratBiasa->lampiran,
                 'keterangan_tambahan' => $validated['catatan_tambahan'] ?? null,
-                'catatan_admin' => $validated['catatan_tambahan'] ?? null,
                 'unit_kerja' => $user->unit_kerja,
                 'catatan' => $validated['catatan_tambahan'] ?? null,
             ]);
             $suratBiasa->save();
 
             $dokumen->update([
-                // Setelah PDF dan metadata resmi masuk, dokumen berpindah ke status diproses sebelum masuk jalur verifikasi.
+                // Setelah metadata resmi masuk, dokumen berpindah ke status diproses sebelum masuk jalur verifikasi.
+                'penandatangan_id' => $penandatangan->user_id,
                 'status_dokumen' => 'DIPROSES',
             ]);
         });
 
-        // Setelah metadata dan PDF proses tersimpan, wizard diarahkan ke step 2 untuk mengatur posisi elemen.
+        // Setelah metadata tersimpan, wizard diarahkan ke step 2 untuk mengatur posisi elemen pada PDF pemohon.
         return redirect()
             ->route('admin.proses-surat', [
                 'dokumen' => $dokumen->dokumen_id,
                 'step' => 2,
             ])
-            ->with('status', 'PDF hasil pemeriksaan dan metadata surat berhasil disimpan.');
+            ->with('status', 'Metadata surat berhasil disimpan. PDF pemohon digunakan sebagai sumber proses.');
     }
 
-    // Method ini menampilkan PDF proses terbaru secara inline untuk preview di halaman Admin/TU.
+    // Method ini mengembalikan dokumen ke Pemohon dari step 1 sebelum dokumen masuk jalur verifikasi.
+    private function returnToPemohonForRevision(Request $request, Dokumen $dokumen): RedirectResponse
+    {
+        $validated = $request->validate([
+            'catatan_revisi' => ['required', 'string'],
+        ], [
+            'catatan_revisi.required' => 'Catatan revisi wajib diisi sebelum mengembalikan surat ke Pemohon.',
+        ]);
+
+        $catatanRevisi = trim($validated['catatan_revisi']);
+        $statusLama = $dokumen->status_dokumen;
+        $actor = $request->user();
+
+        DB::transaction(function () use ($dokumen, $catatanRevisi, $statusLama, $actor): void {
+            $suratBiasa = $dokumen->suratBiasa ?? new SuratBiasa([
+                'dokumen_id' => $dokumen->dokumen_id,
+                'hal' => $dokumen->suratBiasa?->hal,
+                'ringkasan_isi' => $dokumen->suratBiasa?->ringkasan_isi,
+            ]);
+
+            // Catatan pengembalian dari Admin Surat disimpan di surat_biasa.catatan_admin agar Pemohon melihat sumber catatan yang tepat.
+            $suratBiasa->fill([
+                'catatan_admin' => $catatanRevisi,
+            ]);
+            $suratBiasa->save();
+
+            // Dokumen berhenti di status PERLU_REVISI sehingga tidak lanjut ke pengaturan posisi atau verifikasi.
+            $dokumen->update([
+                'status_dokumen' => 'PERLU_REVISI',
+            ]);
+
+            // Riwayat dicatat tanpa membuat record verifikasi karena dokumen belum masuk tahap verifikator.
+            RiwayatDokumen::query()->create([
+                'dokumen_id' => $dokumen->dokumen_id,
+                'aksi' => 'REVISI_ADMIN_SURAT',
+                'status_lama' => $statusLama,
+                'status_baru' => 'PERLU_REVISI',
+                'catatan' => $catatanRevisi,
+                'actor_id' => $actor?->user_id,
+            ]);
+        });
+
+        return redirect()
+            ->route('admin.pengajuan-masuk')
+            ->with('status', 'Surat dikembalikan ke Pemohon untuk revisi.');
+    }
+
+    // Method ini menampilkan PDF pemohon secara inline untuk preview di halaman Admin Surat.
     public function previewPdf(Dokumen $dokumen): BinaryFileResponse
     {
         abort_unless($dokumen->jenis_dokumen === 'SURAT_BIASA', 404);
 
-        // Preview PDF yang dilihat admin selalu memakai file hasil pemeriksaan terbaru yang berhasil diunggah.
-        $previewFile = $dokumen->dokumenFiles()
-            ->whereIn('file_type', ['HASIL_PEMERIKSAAN_PDF', 'PDF_REVIEW'])
-            ->latest('file_id')
-            ->firstOrFail();
+        // Preview PDF yang dilihat Admin Surat memakai DRAFT_PDF Pemohon.
+        $previewFile = $this->resolveProcessSourcePdf($dokumen);
+        abort_unless($previewFile && Storage::disk('public')->exists($previewFile->file_path), 404);
 
         return response()->file(
             Storage::disk('public')->path($previewFile->file_path),
@@ -326,31 +404,39 @@ class AdminProsesSuratController extends Controller
             'dokumenFiles',
         ]);
 
+        if (! $dokumen->penandatangan_id) {
+            return redirect()
+                ->route('admin.proses-surat', [
+                    'dokumen' => $dokumen->dokumen_id,
+                    'step' => 1,
+                ])
+                ->with('error', 'Metadata surat belum lengkap. Silakan pilih penandatangan terlebih dahulu.');
+        }
+
+        // Nilai hidden di UI hanya untuk tampilan; controller selalu memakai metadata utama dokumen sebagai penandatangan final.
+        $request->merge([
+            'penandatangan_final' => $dokumen->penandatangan_id,
+        ]);
+
         // Verifikator level bersifat opsional, tetapi penandatangan final dari metadata selalu wajib ikut dalam flow approval.
         $rules = [
             'verifikator_1' => [
                 'nullable',
-                'different:verifikator_2',
-                'different:verifikator_3',
-                'different:penandatangan_final',
+                'integer',
                 Rule::exists('users', 'user_id')->where(fn ($query) => $query
                     ->where('role', 'VERIFIKATOR')
                     ->where('is_active', true)),
             ],
             'verifikator_2' => [
                 'nullable',
-                'different:verifikator_1',
-                'different:verifikator_3',
-                'different:penandatangan_final',
+                'integer',
                 Rule::exists('users', 'user_id')->where(fn ($query) => $query
                     ->where('role', 'VERIFIKATOR')
                     ->where('is_active', true)),
             ],
             'verifikator_3' => [
                 'nullable',
-                'different:verifikator_1',
-                'different:verifikator_2',
-                'different:penandatangan_final',
+                'integer',
                 Rule::exists('users', 'user_id')->where(fn ($query) => $query
                     ->where('role', 'VERIFIKATOR')
                     ->where('is_active', true)),
@@ -365,16 +451,19 @@ class AdminProsesSuratController extends Controller
         ];
 
         try {
-            $validated = $request->validate($rules, [
+            $validator = validator($request->all(), $rules, [
                 'penandatangan_final.required' => 'Penandatangan final wajib dipilih di metadata surat.',
-                'verifikator_2.different' => 'Verifikator Level 2 tidak boleh sama dengan level lain.',
-                'verifikator_3.different' => 'Verifikator Level 3 tidak boleh sama dengan level lain.',
-                'verifikator_1.different' => 'Verifikator Level 1 tidak boleh sama dengan level lain atau penandatangan final.',
-                'verifikator_2.different' => 'Verifikator Level 2 tidak boleh sama dengan level lain atau penandatangan final.',
-                'verifikator_3.different' => 'Verifikator Level 3 tidak boleh sama dengan level lain atau penandatangan final.',
             ]);
+
+            $this->addUniqueVerifierFlowValidation($validator, $request, [
+                'verifikator_1' => 'Verifikator Level 1',
+                'verifikator_2' => 'Verifikator Level 2',
+                'verifikator_3' => 'Verifikator Level 3',
+            ]);
+
+            $validated = $validator->validate();
         } catch (ValidationException $exception) {
-            // Jika validasi level gagal, Admin/TU dikembalikan ke step verifikasi dengan input sebelumnya tetap tersedia.
+            // Jika validasi level gagal, Admin Surat dikembalikan ke step verifikasi dengan input sebelumnya tetap tersedia.
             return redirect()
                 ->route('admin.proses-surat', [
                     'dokumen' => $dokumen->dokumen_id,
@@ -403,23 +492,20 @@ class AdminProsesSuratController extends Controller
         // Penandatangan selalu menjadi tahap terakhir agar surat baru sah setelah seluruh pemeriksa sebelumnya selesai.
         $finalFlow[] = [
             'level' => count($finalFlow) + 1,
-            'verifikator_id' => $validated['penandatangan_final'],
+            'verifikator_id' => (int) $dokumen->penandatangan_id,
         ];
 
-        // PDF sumber harus berasal dari hasil pemeriksaan karena file inilah yang akan ditempeli metadata dan tanda verifikasi.
-        $sourcePdf = $dokumen->dokumenFiles
-            ->where('file_type', 'HASIL_PEMERIKSAAN_PDF')
-            ->sortByDesc('file_id')
-            ->first();
+        // PDF sumber berasal dari DRAFT_PDF Pemohon agar Admin Surat tidak perlu upload ulang sebelum verifikasi.
+        $sourcePdf = $this->resolveProcessSourcePdf($dokumen);
 
-        if (! $sourcePdf) {
+        if (! $sourcePdf || ! Storage::disk('public')->exists($sourcePdf->file_path)) {
             // Redirect ke step verifikasi dengan pesan error karena flow approval belum bisa dibuat tanpa PDF sumber.
             return redirect()
                 ->route('admin.proses-surat', [
                     'dokumen' => $dokumen->dokumen_id,
                     'step' => 3,
                 ])
-                ->with('error', 'PDF hasil pemeriksaan belum tersedia. Silakan unggah PDF lebih dulu.');
+                ->with('error', 'PDF draft dari pemohon belum tersedia. Silakan cek pengajuan pemohon lebih dulu.');
         }
 
         if ($dokumen->posisiElemenDokumen->isEmpty()) {
@@ -432,7 +518,7 @@ class AdminProsesSuratController extends Controller
                 ->with('error', 'Posisi elemen dokumen belum diatur.');
         }
 
-        if (! $dokumen->suratBiasa?->nomor_surat || ! $dokumen->suratBiasa?->tanggal_surat) {
+        if (! $dokumen->suratBiasa?->nomor_surat || ! $dokumen->suratBiasa?->tanggal_surat || ! $dokumen->penandatangan_id) {
             // Metadata wajib lengkap sebelum masuk verifikasi agar preview yang dilihat verifikator sudah representatif.
             return redirect()
                 ->route('admin.proses-surat', [
@@ -444,7 +530,7 @@ class AdminProsesSuratController extends Controller
 
         try {
             // Preview verifikasi dibuat lebih dulu agar verifikator langsung melihat PDF yang sudah ditempeli metadata.
-            $previewPath = $this->previewVerifikasiPdfGenerator->generate($dokumen, $sourcePdf->file_path);
+            $previewPath = $this->previewSuratBiasaPdfGenerator->generate($dokumen, $sourcePdf->file_path);
         } catch (\Throwable $exception) {
             report($exception);
 
@@ -464,7 +550,7 @@ class AdminProsesSuratController extends Controller
                 ->where('dokumen_id', $dokumen->dokumen_id)
                 ->delete();
 
-            // Seluruh flow verifikasi dibangun ulang agar nomor level tetap rapi mengikuti pilihan Admin/TU terbaru.
+            // Seluruh flow verifikasi dibangun ulang agar nomor level tetap rapi mengikuti pilihan Admin Surat terbaru.
             foreach ($finalFlow as $step) {
                 Verifikasi::query()->create([
                     'dokumen_id' => $dokumen->dokumen_id,
@@ -495,9 +581,40 @@ class AdminProsesSuratController extends Controller
             );
         });
 
-        // Setelah jalur verifikasi siap, Admin/TU kembali ke pengajuan masuk untuk melanjutkan antrean kerja.
+        // Setelah jalur verifikasi siap, Admin Surat kembali ke pengajuan masuk untuk melanjutkan antrean kerja.
         return redirect()
             ->route('admin.pengajuan-masuk')
             ->with('status', 'Surat berhasil dikirim ke verifikator.');
+    }
+
+    private function addUniqueVerifierFlowValidation(LaravelValidator $validator, Request $request, array $levelLabels): void
+    {
+        $validator->after(function (LaravelValidator $validator) use ($request, $levelLabels): void {
+            $penandatanganFinal = (string) $request->input('penandatangan_final', '');
+            $selectedVerifierLevels = [];
+
+            foreach ($levelLabels as $field => $label) {
+                $value = $request->input($field);
+
+                if ($value === null || $value === '') {
+                    continue;
+                }
+
+                $verifikatorId = (string) $value;
+
+                if ($penandatanganFinal !== '' && $verifikatorId === $penandatanganFinal) {
+                    // Penandatangan final adalah tahap terakhir otomatis, jadi tidak boleh dipakai ulang sebagai verifikator pemeriksa.
+                    $validator->errors()->add($field, "{$label} tidak boleh sama dengan penandatangan final.");
+                }
+
+                if (isset($selectedVerifierLevels[$verifikatorId])) {
+                    // Setiap user hanya boleh muncul satu kali di jalur verifikasi bertingkat.
+                    $validator->errors()->add($field, "{$label} tidak boleh sama dengan {$selectedVerifierLevels[$verifikatorId]}.");
+                    continue;
+                }
+
+                $selectedVerifierLevels[$verifikatorId] = $label;
+            }
+        });
     }
 }

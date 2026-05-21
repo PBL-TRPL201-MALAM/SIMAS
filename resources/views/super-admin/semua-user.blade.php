@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'Semua User'])
-@include('template.super-admin-sidebar')
+@include('template.layouts.header', ['pageTitle' => 'Semua User'])
+@include('template.sidebar.super-admin')
 
     <!-- View ini menerima $users, $activeCount, $inactiveCount, $topRole, dan $currentStatus dari UserController::index. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -84,7 +84,7 @@
                       <td class="px-5 py-3.5"><p class="text-xs text-slate-600">{{ $user->username }}</p></td>
                       <td class="px-5 py-3.5">
                         <!-- Badge role berubah warna berdasarkan role user agar mudah dipindai oleh Super Admin. -->
-                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {{ $user->role === 'SUPER_ADMIN' ? 'text-slate-700 bg-slate-100' : ($user->role === 'ADMIN_TU' ? 'text-blue-600 bg-blue-50' : ($user->role === 'VERIFIKATOR' ? 'text-amber-600 bg-amber-50' : 'text-indigo-600 bg-indigo-50')) }}">
+                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {{ $user->role === 'SUPER_ADMIN' ? 'text-slate-700 bg-slate-100' : ($user->role === 'ADMIN_SURAT' ? 'text-blue-600 bg-blue-50' : ($user->role === 'VERIFIKATOR' ? 'text-amber-600 bg-amber-50' : 'text-indigo-600 bg-indigo-50')) }}">
                           {{ $user->role }}
                         </span>
                       </td>
@@ -127,5 +127,5 @@
       </main>
     </div>
 
-@include('template.footer')
+@include('template.layouts.footer')
 

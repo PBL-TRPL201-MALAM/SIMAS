@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'Dashboard Super Admin'])
-@include('template.super-admin-sidebar')
+@include('template.layouts.header', ['pageTitle' => 'Dashboard Super Admin'])
+@include('template.sidebar.super-admin')
 
     <!-- Dashboard Super Admin menerima $stats, $roleDistribution, dan $recentActivities dari DashboardController::superAdmin. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -143,4 +143,4 @@
       </main>
     </div>
 
-@include('template.footer')
+@include('template.layouts.footer')

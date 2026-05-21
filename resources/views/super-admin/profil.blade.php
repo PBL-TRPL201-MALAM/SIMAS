@@ -1,5 +1,5 @@
-@include('template.header', ['pageTitle' => 'Detail User'])
-@include('template.super-admin-sidebar')
+@include('template.layouts.header', ['pageTitle' => 'Detail User'])
+@include('template.sidebar.super-admin')
 
     <!-- View edit user menerima $user, $roles, $jabatans, dan $unitKerjas dari UserControlleredit. -->
     <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -184,5 +184,5 @@
       </main>
     </div>
 
-@include('template.footer')
+@include('template.layouts.footer')
 
