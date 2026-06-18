@@ -83,6 +83,7 @@ class AuthController extends Controller
             'ADMIN_SURAT' => 'admin.dashboard',
             'PEMOHON' => 'pemohon.dashboard',
             'VERIFIKATOR' => 'verifikator.dashboard',
+            'PENANDATANGAN' => 'verifikator.dashboard',
             default => 'home',
         };
     }

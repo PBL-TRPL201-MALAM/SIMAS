@@ -113,7 +113,7 @@ class VerifikatorSuratController extends Controller
 
         // response()->download mengirim file sebagai attachment dengan nama unduhan resmi SIMAS.
         return response()->download(
-            Storage::disk('public')->path($pdfFile->file_path),
+            Storage::disk('local')->path($pdfFile->file_path),
             SuratPdfDownloadName::forDokumen($dokumen)
         );
     }
@@ -133,10 +133,10 @@ class VerifikatorSuratController extends Controller
 
         $this->ensureAssignedToVerifikator($request, $dokumen);
 
-        abort_unless(Storage::disk('public')->exists($file->file_path), 404);
+        abort_unless(Storage::disk('local')->exists($file->file_path), 404);
 
         return response()->download(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             $file->file_name
         );
     }
@@ -157,10 +157,10 @@ class VerifikatorSuratController extends Controller
 
         $this->ensureAssignedToVerifikator($request, $dokumen);
 
-        abort_unless(Storage::disk('public')->exists($file->file_path), 404);
+        abort_unless(Storage::disk('local')->exists($file->file_path), 404);
 
         return response()->file(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             [
                 'Content-Type' => $file->lampiranPreviewContentType() ?? 'application/octet-stream',
                 'Content-Disposition' => 'inline; filename="' . addslashes($file->file_name) . '"',
@@ -174,9 +174,9 @@ class VerifikatorSuratController extends Controller
         $pdfFile = $this->resolvePdfFileForDokumen($dokumen);
         abort_unless($pdfFile, 404);
 
-        abort_unless(Storage::disk('public')->exists($pdfFile->file_path), 404);
+        abort_unless(Storage::disk('local')->exists($pdfFile->file_path), 404);
 
-        return Storage::disk('public')->response(
+        return Storage::disk('local')->response(
             $pdfFile->file_path,
             $pdfFile->file_name,
             [
@@ -204,7 +204,7 @@ class VerifikatorSuratController extends Controller
         $pdfFile = $this->resolvePdfFileForDokumen($dokumen);
         $previewPdfUrl = null;
 
-        if ($pdfFile && Storage::disk('public')->exists($pdfFile->file_path)) {
+        if ($pdfFile && Storage::disk('local')->exists($pdfFile->file_path)) {
             $previewPdfUrl = route('verifikator.surat.preview-pdf', $dokumen);
         }
 
@@ -521,7 +521,7 @@ class VerifikatorSuratController extends Controller
             }
         }
 
-        if (! $sourcePdf || ! Storage::disk('public')->exists($sourcePdf->file_path)) {
+        if (! $sourcePdf || ! Storage::disk('local')->exists($sourcePdf->file_path)) {
             return;
         }
 

@@ -120,6 +120,7 @@ class DashboardController extends Controller
             'PEMOHON' => 'Pemohon',
             'ADMIN_SURAT' => 'Admin Surat',
             'VERIFIKATOR' => 'Verifikator',
+            'PENANDATANGAN' => 'Penandatangan',
             'SUPER_ADMIN' => 'Super Admin',
         ])->map(function (string $label, string $role) use ($userCounts) {
             $total = (int) ($userCounts[$role] ?? 0);

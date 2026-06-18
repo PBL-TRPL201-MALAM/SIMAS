@@ -13,7 +13,7 @@ class UserReferenceOptions
     public static function roles(): array
     {
         // Daftar role ini dipakai oleh validasi user dan pembagian akses route.
-        return ['SUPER_ADMIN', 'ADMIN_SURAT', 'PEMOHON', 'VERIFIKATOR'];
+        return ['SUPER_ADMIN', 'ADMIN_SURAT', 'PEMOHON', 'VERIFIKATOR', 'PENANDATANGAN'];
     }
 
     /**

@@ -54,6 +54,7 @@ class UserController extends Controller
         return view('super-admin.tambah-user', [
             'roles' => $this->roles(),
             'jabatans' => $this->jabatans(),
+            'signerJabatans' => UserReferenceOptions::signerJabatans(),
             'unitKerjas' => $this->unitKerjas(),
         ]);
     }
@@ -91,6 +92,7 @@ class UserController extends Controller
             'user' => $user,
             'roles' => $this->roles(),
             'jabatans' => $this->jabatans(),
+            'signerJabatans' => UserReferenceOptions::signerJabatans(),
             'unitKerjas' => $this->unitKerjas(),
         ]);
     }
@@ -167,6 +169,11 @@ class UserController extends Controller
     {
         $userId = $user?->user_id;
 
+        $role = request()->input('role');
+        $validJabatans = $role === 'PENANDATANGAN' 
+            ? UserReferenceOptions::signerJabatans() 
+            : $this->jabatans();
+
         // Semua validasi pilihan mengacu ke helper referensi agar UI, validasi, dan database selalu sinkron.
         $rules = [
             'nama' => ['required', 'string', 'max:150'],
@@ -185,7 +192,7 @@ class UserController extends Controller
             'role' => ['required', Rule::in($this->roles())],
             'unit_kerja' => ['nullable', Rule::in($this->unitKerjas())],
             'nip_nik' => ['nullable', 'string', 'max:50'],
-            'jabatan' => ['nullable', Rule::in($this->jabatans())],
+            'jabatan' => ['nullable', Rule::in($validJabatans)],
             'is_active' => ['nullable', 'boolean'],
         ];
 

@@ -56,10 +56,10 @@ class AdminSkController extends Controller
         abort_unless($dokumen->jenis_dokumen === 'SURAT_KEPUTUSAN', 404);
 
         $file = $this->resolveFinalPdf($dokumen);
-        abort_unless($file && Storage::disk('public')->exists($file->file_path), 404);
+        abort_unless($file && Storage::disk('local')->exists($file->file_path), 404);
 
         return response()->file(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'inline; filename="' . addslashes($file->file_name) . '"',
@@ -73,10 +73,10 @@ class AdminSkController extends Controller
         abort_unless($dokumen->jenis_dokumen === 'SURAT_KEPUTUSAN', 404);
 
         $file = $this->resolveFinalPdf($dokumen);
-        abort_unless($file && Storage::disk('public')->exists($file->file_path), 404);
+        abort_unless($file && Storage::disk('local')->exists($file->file_path), 404);
 
         return response()->download(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             $file->file_name
         );
     }
@@ -108,7 +108,7 @@ class AdminSkController extends Controller
         $finalFileName = $this->buildFinalFileName($dokumen);
         $finalFilePath = 'dokumen/final/' . $dokumen->dokumen_id . '/' . $finalFileName;
 
-        Storage::disk('public')->makeDirectory(dirname($finalFilePath));
+        Storage::disk('local')->makeDirectory(dirname($finalFilePath));
 
         try {
             // Generator SK merender PDF dari Blade dan data database, bukan dari PDF upload pemohon.
@@ -166,7 +166,7 @@ class AdminSkController extends Controller
 
         // Calon penandatangan SK mengikuti daftar jabatan penandatangan resmi yang juga dipakai pada Surat Biasa.
         $penandatangans = User::query()
-            ->where('role', 'VERIFIKATOR')
+            ->where('role', 'PENANDATANGAN')
             ->where('is_active', true)
             ->whereIn('jabatan', UserReferenceOptions::signerJabatans())
             ->orderBy('jabatan')
@@ -446,7 +446,7 @@ class AdminSkController extends Controller
     private function metadataRules(): array
     {
         $activePenandatanganRule = fn () => Rule::exists('users', 'user_id')->where(fn ($query) => $query
-            ->where('role', 'VERIFIKATOR')
+            ->where('role', 'PENANDATANGAN')
             ->where('is_active', true)
             ->whereIn('jabatan', UserReferenceOptions::signerJabatans()));
 
@@ -466,7 +466,7 @@ class AdminSkController extends Controller
             ->where('is_active', true));
 
         $activePenandatanganRule = fn () => Rule::exists('users', 'user_id')->where(fn ($query) => $query
-            ->where('role', 'VERIFIKATOR')
+            ->where('role', 'PENANDATANGAN')
             ->where('is_active', true)
             ->whereIn('jabatan', UserReferenceOptions::signerJabatans()));
 

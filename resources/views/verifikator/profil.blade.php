@@ -9,7 +9,7 @@
         </button>
         <div>
           <h1 class="text-sm font-bold text-slate-900">Profil Saya</h1>
-          <p class="text-[11px] text-slate-400 font-light">Informasi akun verifikator.</p>
+          <p class="text-[11px] text-slate-400 font-light">Informasi akun {{ auth()->user()->role === 'PENANDATANGAN' ? 'penandatangan' : 'verifikator' }}.</p>
         </div>
         <a href="{{ route('verifikator.profil') }}" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 border border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">

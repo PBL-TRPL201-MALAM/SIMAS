@@ -69,7 +69,7 @@ class AdminProsesSuratController extends Controller
 
         // File preview dicari dari koleksi file dokumen yang sudah diload; prioritasnya DRAFT_PDF dari Pemohon.
         $previewFile = $this->resolveProcessSourcePdf($dokumen);
-        $previewFileExists = $previewFile && Storage::disk('public')->exists($previewFile->file_path);
+        $previewFileExists = $previewFile && Storage::disk('local')->exists($previewFile->file_path);
 
         // Jumlah halaman PDF dikirim ke Blade agar UI Admin Surat bisa memilih halaman 1, 2, dan seterusnya saat mengatur posisi.
         $previewPdfPageCount = $this->countPdfPages($previewFile);
@@ -90,7 +90,7 @@ class AdminProsesSuratController extends Controller
 
         // Query ini mengambil calon penandatangan final dari user aktif dengan jabatan yang berwenang menandatangani surat.
         $penandatangans = User::query()
-            ->where('role', 'VERIFIKATOR')
+            ->where('role', 'PENANDATANGAN')
             ->where('is_active', true)
             ->whereIn('jabatan', UserReferenceOptions::signerJabatans())
             ->orderBy('jabatan')
@@ -148,11 +148,11 @@ class AdminProsesSuratController extends Controller
     // Nilai ini hanya untuk navigasi preview Admin Surat; jika struktur PDF tidak terbaca, default 1 menjaga PDF lama tetap bisa diproses.
     private function countPdfPages(?DokumenFile $previewFile): int
     {
-        if (! $previewFile || ! Storage::disk('public')->exists($previewFile->file_path)) {
+        if (! $previewFile || ! Storage::disk('local')->exists($previewFile->file_path)) {
             return 1;
         }
 
-        $pdfContent = Storage::disk('public')->get($previewFile->file_path);
+        $pdfContent = Storage::disk('local')->get($previewFile->file_path);
 
         preg_match_all('/\/Type\s*\/Page\b/', $pdfContent, $matches);
 
@@ -203,7 +203,7 @@ class AdminProsesSuratController extends Controller
 
         $sourcePdf = $this->resolveProcessSourcePdf($dokumen);
 
-        if (! $sourcePdf || ! Storage::disk('public')->exists($sourcePdf->file_path)) {
+        if (! $sourcePdf || ! Storage::disk('local')->exists($sourcePdf->file_path)) {
             // PDF pemohon wajib ada karena Admin Surat tidak lagi mengunggah ulang PDF pada alur surat biasa baru.
             return redirect()
                 ->route('admin.proses-surat', [
@@ -218,7 +218,7 @@ class AdminProsesSuratController extends Controller
             'penanda_tangan' => [
                 'required',
                 Rule::exists('users', 'user_id')->where(fn ($query) => $query
-                    ->where('role', 'VERIFIKATOR')
+                    ->where('role', 'PENANDATANGAN')
                     ->where('is_active', true)
                     ->whereIn('jabatan', UserReferenceOptions::signerJabatans())),
             ],
@@ -236,7 +236,7 @@ class AdminProsesSuratController extends Controller
         // Penandatangan divalidasi lagi lewat query agar user yang dipakai benar-benar aktif dan berjabatan penandatangan.
         $penandatangan = User::query()
             ->where('user_id', $validated['penanda_tangan'])
-            ->where('role', 'VERIFIKATOR')
+            ->where('role', 'PENANDATANGAN')
             ->where('is_active', true)
             ->whereIn('jabatan', UserReferenceOptions::signerJabatans())
             ->firstOrFail();
@@ -335,10 +335,10 @@ class AdminProsesSuratController extends Controller
 
         // Preview PDF yang dilihat Admin Surat memakai DRAFT_PDF Pemohon.
         $previewFile = $this->resolveProcessSourcePdf($dokumen);
-        abort_unless($previewFile && Storage::disk('public')->exists($previewFile->file_path), 404);
+        abort_unless($previewFile && Storage::disk('local')->exists($previewFile->file_path), 404);
 
         return response()->file(
-            Storage::disk('public')->path($previewFile->file_path),
+            Storage::disk('local')->path($previewFile->file_path),
             [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'inline; filename="' . $previewFile->file_name . '"',
@@ -444,7 +444,7 @@ class AdminProsesSuratController extends Controller
             'penandatangan_final' => [
                 'required',
                 Rule::exists('users', 'user_id')->where(fn ($query) => $query
-                    ->where('role', 'VERIFIKATOR')
+                    ->where('role', 'PENANDATANGAN')
                     ->where('is_active', true)
                     ->whereIn('jabatan', UserReferenceOptions::signerJabatans())),
             ],
@@ -498,7 +498,7 @@ class AdminProsesSuratController extends Controller
         // PDF sumber berasal dari DRAFT_PDF Pemohon agar Admin Surat tidak perlu upload ulang sebelum verifikasi.
         $sourcePdf = $this->resolveProcessSourcePdf($dokumen);
 
-        if (! $sourcePdf || ! Storage::disk('public')->exists($sourcePdf->file_path)) {
+        if (! $sourcePdf || ! Storage::disk('local')->exists($sourcePdf->file_path)) {
             // Redirect ke step verifikasi dengan pesan error karena flow approval belum bisa dibuat tanpa PDF sumber.
             return redirect()
                 ->route('admin.proses-surat', [

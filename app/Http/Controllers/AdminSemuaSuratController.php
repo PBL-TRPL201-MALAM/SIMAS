@@ -59,11 +59,11 @@ class AdminSemuaSuratController extends Controller
 
         // File previewable dipilih dari prioritas final, preview verifikasi, lalu PDF sumber proses.
         $file = $this->resolvePreviewablePdf($dokumen);
-        abort_unless($file && Storage::disk('public')->exists($file->file_path), 404);
+        abort_unless($file && Storage::disk('local')->exists($file->file_path), 404);
 
         // response()->file menampilkan PDF inline, berbeda dengan download yang memaksa unduhan.
         return response()->file(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'inline; filename="' . $file->file_name . '"',
@@ -78,10 +78,10 @@ class AdminSemuaSuratController extends Controller
 
         // Query file tetap melalui helper agar aturan fallback sama dengan preview.
         $file = $this->resolvePreviewablePdf($dokumen);
-        abort_unless($file && Storage::disk('public')->exists($file->file_path), 404);
+        abort_unless($file && Storage::disk('local')->exists($file->file_path), 404);
 
         return response()->download(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             SuratPdfDownloadName::forDokumen($dokumen)
         );
     }
@@ -96,10 +96,10 @@ class AdminSemuaSuratController extends Controller
             404
         );
 
-        abort_unless(Storage::disk('public')->exists($file->file_path), 404);
+        abort_unless(Storage::disk('local')->exists($file->file_path), 404);
 
         return response()->download(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             $file->file_name
         );
     }
@@ -116,10 +116,10 @@ class AdminSemuaSuratController extends Controller
             404
         );
 
-        abort_unless(Storage::disk('public')->exists($file->file_path), 404);
+        abort_unless(Storage::disk('local')->exists($file->file_path), 404);
 
         return response()->file(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             [
                 'Content-Type' => $file->lampiranPreviewContentType() ?? 'application/octet-stream',
                 'Content-Disposition' => 'inline; filename="' . addslashes($file->file_name) . '"',
@@ -141,7 +141,7 @@ class AdminSemuaSuratController extends Controller
         $finalPdfPayload = null;
         $verificationToken = $this->resolveVerificationToken($dokumen);
 
-        if (! $sourcePdf || ! Storage::disk('public')->exists($sourcePdf->file_path)) {
+        if (! $sourcePdf || ! Storage::disk('local')->exists($sourcePdf->file_path)) {
             return redirect()
                 ->route('admin.semua-surat')
                 ->with('error', 'File PDF sumber belum tersedia untuk dipublish.');
@@ -153,7 +153,7 @@ class AdminSemuaSuratController extends Controller
         $finalFileName = pathinfo($sourcePdf->file_name, PATHINFO_FILENAME) . '-final.' . $extension;
         $finalFilePath = 'dokumen/final/' . $dokumen->dokumen_id . '/' . $finalFileName;
 
-        Storage::disk('public')->makeDirectory(dirname($finalFilePath));
+        Storage::disk('local')->makeDirectory(dirname($finalFilePath));
 
         try {
             // FINAL_PDF digenerate ulang dari PDF sumber pemohon/proses agar QR dummy preview diganti QR validasi asli.

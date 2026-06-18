@@ -177,11 +177,12 @@
               <p class="mb-2 font-semibold text-slate-700">Akun Demo</p>
 
               <div class="space-y-1">                  
-                  <p><span class="font-semibold text-slate-600">Pemohon</span> : pemohon / 12345678</p>
-                  <p><span class="font-semibold text-slate-600">Admin Surat</span> : adminsurat / 12345678</p>
-                  <p><span class="font-semibold text-slate-600">Verifikator</span> : verifikator / 12345678</p>
-                  <p><span class="font-semibold text-slate-600">Verifikator</span> : direktur / 12345678</p>
                   <p><span class="font-semibold text-slate-600">Super Admin</span> : superadmin / 12345678</p>
+                  <p><span class="font-semibold text-slate-600">Admin Surat</span> : adminsurat / 12345678</p>
+                  <p><span class="font-semibold text-slate-600">Pemohon</span> : pemohon / 12345678</p>
+                  <p><span class="font-semibold text-slate-600">Verifikator</span> : verifikator / 12345678</p>
+                  <p><span class="font-semibold text-slate-600">Penandatangan</span> : direktur / 12345678</p>
+                  <p><span class="font-semibold text-slate-600">Penandatangan</span> : wadir1 / 12345678</p>
               </div>
           </div>
 

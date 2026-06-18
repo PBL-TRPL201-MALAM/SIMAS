@@ -50,10 +50,10 @@ class AdminSuratMasukController extends Controller
             ->latest('file_id')
             ->firstOrFail();
 
-        abort_unless(Storage::disk('public')->exists($draftFile->file_path), 404);
+        abort_unless(Storage::disk('local')->exists($draftFile->file_path), 404);
 
         return response()->file(
-            Storage::disk('public')->path($draftFile->file_path),
+            Storage::disk('local')->path($draftFile->file_path),
             [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'inline; filename="' . $draftFile->file_name . '"',

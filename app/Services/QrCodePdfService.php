@@ -7,13 +7,23 @@ use RuntimeException;
 // Service ini khusus menangani pembuatan command QR di PDF, baik QR dummy preview maupun QR validasi final.
 class QrCodePdfService
 {
-    // Parameter QR level L versi 1-5 cukup untuk URL validasi SIMAS berisi APP_URL + token 40 karakter.
+    // Parameter QR level L versi 1-15 cukup untuk URL validasi SIMAS berisi APP_URL + token 40 karakter atau URL yang panjang.
     private const QR_LOW_ECC_PARAMS = [
-        1 => ['data_codewords' => 19, 'ecc_codewords' => 7, 'remainder_bits' => 0, 'alignment' => []],
-        2 => ['data_codewords' => 34, 'ecc_codewords' => 10, 'remainder_bits' => 7, 'alignment' => [6, 18]],
-        3 => ['data_codewords' => 55, 'ecc_codewords' => 15, 'remainder_bits' => 7, 'alignment' => [6, 22]],
-        4 => ['data_codewords' => 80, 'ecc_codewords' => 20, 'remainder_bits' => 7, 'alignment' => [6, 26]],
-        5 => ['data_codewords' => 108, 'ecc_codewords' => 26, 'remainder_bits' => 7, 'alignment' => [6, 30]],
+        1  => ['data_codewords' => 19, 'ecc_codewords' => 7, 'remainder_bits' => 0, 'alignment' => []],
+        2  => ['data_codewords' => 34, 'ecc_codewords' => 10, 'remainder_bits' => 7, 'alignment' => [6, 18]],
+        3  => ['data_codewords' => 55, 'ecc_codewords' => 15, 'remainder_bits' => 7, 'alignment' => [6, 22]],
+        4  => ['data_codewords' => 80, 'ecc_codewords' => 20, 'remainder_bits' => 7, 'alignment' => [6, 26]],
+        5  => ['data_codewords' => 108, 'ecc_codewords' => 26, 'remainder_bits' => 7, 'alignment' => [6, 30]],
+        6  => ['data_codewords' => 136, 'ecc_codewords' => 36, 'remainder_bits' => 7, 'alignment' => [6, 34]],
+        7  => ['data_codewords' => 156, 'ecc_codewords' => 40, 'remainder_bits' => 0, 'alignment' => [6, 22, 38]],
+        8  => ['data_codewords' => 194, 'ecc_codewords' => 48, 'remainder_bits' => 0, 'alignment' => [6, 24, 42]],
+        9  => ['data_codewords' => 232, 'ecc_codewords' => 60, 'remainder_bits' => 0, 'alignment' => [6, 26, 46]],
+        10 => ['data_codewords' => 274, 'ecc_codewords' => 72, 'remainder_bits' => 3, 'alignment' => [6, 28, 50]],
+        11 => ['data_codewords' => 324, 'ecc_codewords' => 80, 'remainder_bits' => 4, 'alignment' => [6, 30, 54]],
+        12 => ['data_codewords' => 370, 'ecc_codewords' => 96, 'remainder_bits' => 0, 'alignment' => [6, 32, 58]],
+        13 => ['data_codewords' => 428, 'ecc_codewords' => 104, 'remainder_bits' => 0, 'alignment' => [6, 34, 62]],
+        14 => ['data_codewords' => 461, 'ecc_codewords' => 120, 'remainder_bits' => 0, 'alignment' => [6, 26, 46, 66]],
+        15 => ['data_codewords' => 523, 'ecc_codewords' => 132, 'remainder_bits' => 3, 'alignment' => [6, 26, 48, 70]],
     ];
 
     // Method ini membuat placeholder QR/TTE merah untuk PREVIEW_VERIFIKASI_PDF.

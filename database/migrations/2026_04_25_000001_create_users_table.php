@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            $table->enum('role', ['SUPER_ADMIN', 'ADMIN_SURAT', 'PEMOHON', 'VERIFIKATOR']);
+            $table->enum('role', ['SUPER_ADMIN', 'ADMIN_SURAT', 'PEMOHON', 'VERIFIKATOR', 'PENANDATANGAN']);
             $table->enum('unit_kerja', [
                 'Direktorat',
                 'Akademik',

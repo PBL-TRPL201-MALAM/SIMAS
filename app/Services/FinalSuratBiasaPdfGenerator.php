@@ -27,7 +27,7 @@ class FinalSuratBiasaPdfGenerator
             'verifikasi.verifikator',
         ]);
 
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
 
         if (! $disk->exists($sourceRelativePath)) {
             throw new RuntimeException('File PDF sumber tidak ditemukan.');

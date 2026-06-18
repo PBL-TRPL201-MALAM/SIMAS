@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
             'ADMIN_SURAT' => 'admin.dashboard',
             'PEMOHON' => 'pemohon.dashboard',
             'VERIFIKATOR' => 'verifikator.dashboard',
+            'PENANDATANGAN' => 'verifikator.dashboard',
             default => 'home',
         });
     })->name('dashboard');
@@ -135,7 +136,7 @@ Route::middleware(['auth', 'role:PEMOHON'])->prefix('pemohon')->name('pemohon.')
 
 // Area Verifikator untuk memeriksa dokumen, memberi keputusan, dan melihat PDF preview hasil proses Admin Surat.
 // Middleware role:VERIFIKATOR membatasi halaman pemeriksaan hanya untuk user yang ditugaskan sebagai verifikator.
-Route::middleware(['auth', 'role:VERIFIKATOR'])->prefix('verifikator')->name('verifikator.')->group(function () {
+Route::middleware(['auth', 'role:VERIFIKATOR,PENANDATANGAN'])->prefix('verifikator')->name('verifikator.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'verifikator'])->name('dashboard');
 
     // Route surat biasa: status verifikasi kini difilter dari halaman Perlu Verifikasi, bukan menu sidebar terpisah.

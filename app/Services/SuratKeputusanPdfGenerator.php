@@ -52,7 +52,7 @@ class SuratKeputusanPdfGenerator
             'memutuskanItems' => $this->memutuskanItems($sk->skMemutuskan),
         ])->setPaper('a4', 'portrait');
 
-        Storage::disk('public')->put($outputPath, $pdf->output());
+        Storage::disk('local')->put($outputPath, $pdf->output());
 
         return $outputPath;
     }

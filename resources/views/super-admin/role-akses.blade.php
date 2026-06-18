@@ -46,6 +46,11 @@
                     <td class="px-5 py-4 text-slate-500">Validasi alur persetujuan</td>
                   </tr>
                   <tr>
+                    <td class="px-5 py-4 font-semibold text-slate-800">PENANDATANGAN</td>
+                    <td class="px-5 py-4 text-slate-600">Verifikasi final, tanda tangan dokumen</td>
+                    <td class="px-5 py-4 text-slate-500">Otorisasi akhir & pengesahan</td>
+                  </tr>
+                  <tr>
                     <td class="px-5 py-4 font-semibold text-slate-800">PEMOHON</td>
                     <td class="px-5 py-4 text-slate-600">Buat surat, buat SK, pantau status</td>
                     <td class="px-5 py-4 text-slate-500">Pengguna pengajuan</td>
@@ -61,15 +66,23 @@
               <div class="mt-4 space-y-3">
                 <div class="rounded-xl border border-slate-100 p-4">
                   <p class="text-xs font-semibold text-slate-700">SUPER_ADMIN</p>
-                  <p class="text-xs text-slate-500 font-light mt-1">Tambah user, edit user, aktif/nonaktif akun, ubah role, monitoring semua dokumen, dan lihat log aktivitas.</p>
+                  <p class="text-xs text-slate-500 font-light mt-1">Memiliki kontrol penuh atas sistem. Bertanggung jawab menambah, mengedit, dan mengelola status akun seluruh user. Dapat memantau seluruh dokumen dan aktivitas di dalam sistem.</p>
                 </div>
                 <div class="rounded-xl border border-slate-100 p-4">
                   <p class="text-xs font-semibold text-slate-700">ADMIN_SURAT</p>
-                  <p class="text-xs text-slate-500 font-light mt-1">Memproses dokumen sebelum dikirim ke verifikator dan mengelola dasar hukum.</p>
+                  <p class="text-xs text-slate-500 font-light mt-1">Bertugas memproses pengajuan surat dan SK dari pemohon. Melengkapi metadata resmi dokumen, mengatur posisi elemen pada PDF, memilih jalur verifikasi, dan melakukan publish dokumen final.</p>
+                </div>
+                <div class="rounded-xl border border-slate-100 p-4">
+                  <p class="text-xs font-semibold text-slate-700">PEMOHON</p>
+                  <p class="text-xs text-slate-500 font-light mt-1">Membuat pengajuan surat biasa dan surat keputusan melalui form pengajuan. Dapat memantau status dokumen, melakukan revisi jika diminta, serta mengunduh dokumen yang sudah dipublish.</p>
                 </div>
                 <div class="rounded-xl border border-slate-100 p-4">
                   <p class="text-xs font-semibold text-slate-700">VERIFIKATOR</p>
-                  <p class="text-xs text-slate-500 font-light mt-1">Menyetujui atau menolak dokumen berdasarkan tingkat verifikasi.</p>
+                  <p class="text-xs text-slate-500 font-light mt-1">Memeriksa dan memvalidasi dokumen pada tahap verifikasi bertingkat. Dapat menyetujui atau menolak dokumen disertai catatan, sesuai level verifikasi yang ditugaskan oleh Admin Surat.</p>
+                </div>
+                <div class="rounded-xl border border-slate-100 p-4">
+                  <p class="text-xs font-semibold text-slate-700">PENANDATANGAN</p>
+                  <p class="text-xs text-slate-500 font-light mt-1">Pejabat berwenang yang melakukan pengesahan akhir dokumen. Bertindak sebagai level verifikasi terakhir dalam alur persetujuan. Hanya user dengan jabatan pejabat tertentu (Direktur, Wakil Direktur, Kepala Jurusan) yang dapat memegang role ini.</p>
                 </div>
               </div>
             </div>

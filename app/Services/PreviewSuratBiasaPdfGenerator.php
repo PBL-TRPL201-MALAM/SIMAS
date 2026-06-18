@@ -29,7 +29,7 @@ class PreviewSuratBiasaPdfGenerator
         ]);
 
         // Generator ini tidak merender HTML; ia menempelkan konten tambahan langsung ke PDF sumber yang sudah ada.
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
 
         if (! $disk->exists($sourceRelativePath)) {
             throw new RuntimeException('File PDF sumber tidak ditemukan.');

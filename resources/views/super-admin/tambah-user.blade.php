@@ -119,6 +119,7 @@
                 <li><strong class="text-slate-700">ADMIN_SURAT</strong> untuk proses dan publikasi dokumen.</li>
                 <li><strong class="text-slate-700">PEMOHON</strong> untuk membuat dan memantau pengajuan.</li>
                 <li><strong class="text-slate-700">VERIFIKATOR</strong> untuk validasi dan keputusan dokumen.</li>
+                <li><strong class="text-slate-700">PENANDATANGAN</strong> untuk validasi dan penandatanganan final dokumen.</li>
                 <li><strong class="text-slate-700">SUPER_ADMIN</strong> untuk kontrol penuh user dan monitoring.</li>
               </ul>
             </div>
@@ -148,6 +149,36 @@
         </div>
       </main>
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.querySelector('select[name="role"]');
+    const jabatanSelect = document.querySelector('select[name="jabatan"]');
+    const signerJabatans = @json($signerJabatans);
+    
+    function updateJabatanOptions() {
+        const isSigner = roleSelect.value === 'PENANDATANGAN';
+        const selectedValue = jabatanSelect.value;
+        
+        Array.from(jabatanSelect.options).forEach(option => {
+            if (option.value === "") return;
+            const isAllowed = !isSigner || signerJabatans.includes(option.value);
+            option.disabled = !isAllowed;
+            option.style.display = isAllowed ? 'block' : 'none';
+        });
+        
+        // Reset selection if the current one becomes invalid
+        if (selectedValue && isSigner && !signerJabatans.includes(selectedValue)) {
+            jabatanSelect.value = "";
+        }
+    }
+    
+    if (roleSelect && jabatanSelect) {
+        roleSelect.addEventListener('change', updateJabatanOptions);
+        updateJabatanOptions();
+    }
+});
+</script>
 
 @include('template.layouts.footer')
 

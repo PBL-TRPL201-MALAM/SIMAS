@@ -58,7 +58,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('template.sidebar.verifikator', function ($view): void {
             $user = Auth::user();
 
-            if (! $user || $user->role !== 'VERIFIKATOR') {
+            if (! $user || ! in_array($user->role, ['VERIFIKATOR', 'PENANDATANGAN'], true)) {
                 $view->with('sidebarStats', ['surat_menunggu_count' => 0, 'sk_menunggu_count' => 0]);
                 return;
             }

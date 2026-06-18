@@ -80,7 +80,7 @@ class PemohonSuratController extends Controller
         $file = $validated['draft_surat'];
         $lampiranPendukung = $validated['lampiran_pendukung'] ?? [];
         // PDF dari Pemohon menjadi sumber utama proses Admin Surat, sehingga tidak ada upload ulang PDF di alur surat biasa baru.
-        $storedPath = $file->store('dokumen/draft', 'public');
+        $storedPath = $file->store('dokumen/draft', 'local');
 
         // Transaction dipakai karena 3 tabel harus berhasil bersama: dokumen, detail surat, dan file draft.
         // Jika salah satu gagal, Laravel akan rollback agar data pengajuan tidak setengah tersimpan.
@@ -111,7 +111,7 @@ class PemohonSuratController extends Controller
 
             // Lampiran pendukung bersifat opsional dan disimpan sebagai file tambahan, bukan sumber preview/verifikasi/publish.
             foreach ($lampiranPendukung as $lampiran) {
-                $lampiranPath = $lampiran->store('dokumen/lampiran', 'public');
+                $lampiranPath = $lampiran->store('dokumen/lampiran', 'local');
 
                 DokumenFile::create([
                     'dokumen_id' => $dokumen->dokumen_id,
@@ -151,7 +151,7 @@ class PemohonSuratController extends Controller
         $user = $request->user();
         $file = $validated['draft_surat'];
         $lampiranPendukung = $validated['lampiran_pendukung'] ?? [];
-        $storedPath = $file->store('dokumen/draft', 'public');
+        $storedPath = $file->store('dokumen/draft', 'local');
         $statusLama = $dokumen->status_dokumen;
 
         DB::transaction(function () use ($dokumen, $validated, $user, $file, $storedPath, $lampiranPendukung, $statusLama): void {
@@ -179,7 +179,7 @@ class PemohonSuratController extends Controller
 
             // Lampiran baru ditambahkan ke dokumen yang sama agar riwayat pendukung tetap lengkap.
             foreach ($lampiranPendukung as $lampiran) {
-                $lampiranPath = $lampiran->store('dokumen/lampiran', 'public');
+                $lampiranPath = $lampiran->store('dokumen/lampiran', 'local');
 
                 DokumenFile::query()->create([
                     'dokumen_id' => $dokumen->dokumen_id,
@@ -197,8 +197,8 @@ class PemohonSuratController extends Controller
                 ->values();
 
             foreach ($obsoleteFiles as $obsoleteFile) {
-                if ($obsoleteFile->file_path && Storage::disk('public')->exists($obsoleteFile->file_path)) {
-                    Storage::disk('public')->delete($obsoleteFile->file_path);
+                if ($obsoleteFile->file_path && Storage::disk('local')->exists($obsoleteFile->file_path)) {
+                    Storage::disk('local')->delete($obsoleteFile->file_path);
                 }
 
                 $obsoleteFile->delete();
@@ -266,14 +266,14 @@ class PemohonSuratController extends Controller
 
         $file = $this->resolvePublishedFile($dokumen);
 
-        if (! $file || ! Storage::disk('public')->exists($file->file_path)) {
+        if (! $file || ! Storage::disk('local')->exists($file->file_path)) {
             return redirect()
                 ->route('pemohon.surat-saya')
                 ->with('error', 'File dokumen belum tersedia untuk dilihat.');
         }
 
         return response()->file(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'inline; filename="' . addslashes($this->buildPublishedDownloadFileName($dokumen)) . '"',
@@ -302,7 +302,7 @@ class PemohonSuratController extends Controller
                 ->with('error', 'File dokumen belum tersedia untuk diunduh.');
         }
 
-        if (! Storage::disk('public')->exists($file->file_path)) {
+        if (! Storage::disk('local')->exists($file->file_path)) {
             // File record ada di database, tetapi file fisik hilang di storage; user dikembalikan dengan pesan aman.
             return redirect()
                 ->route('pemohon.surat-saya')
@@ -311,7 +311,7 @@ class PemohonSuratController extends Controller
 
         // response()->download membuat browser mengunduh file dengan nama rapi dari helper SuratPdfDownloadName.
         return response()->download(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             $this->buildPublishedDownloadFileName($dokumen)
         );
     }
@@ -330,10 +330,10 @@ class PemohonSuratController extends Controller
             404
         );
 
-        abort_unless(Storage::disk('public')->exists($file->file_path), 404);
+        abort_unless(Storage::disk('local')->exists($file->file_path), 404);
 
         return response()->download(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             $file->file_name
         );
     }
@@ -353,10 +353,10 @@ class PemohonSuratController extends Controller
             404
         );
 
-        abort_unless(Storage::disk('public')->exists($file->file_path), 404);
+        abort_unless(Storage::disk('local')->exists($file->file_path), 404);
 
         return response()->file(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             [
                 'Content-Type' => $file->lampiranPreviewContentType() ?? 'application/octet-stream',
                 'Content-Disposition' => 'inline; filename="' . addslashes($file->file_name) . '"',

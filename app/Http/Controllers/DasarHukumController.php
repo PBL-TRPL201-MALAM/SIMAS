@@ -59,8 +59,15 @@ class DasarHukumController extends Controller
 
         $dasarHukum->update($validated);
 
+        $redirectTo = $request->input('redirect_to', url()->previous());
+
+        // Validasi agar terhindar dari Open Redirect (hanya izinkan path relatif atau domain lokal)
+        if (! \Illuminate\Support\Str::startsWith($redirectTo, '/') && ! \Illuminate\Support\Str::startsWith($redirectTo, config('app.url'))) {
+            $redirectTo = route('admin.master-dasar-hukum');
+        }
+
         return redirect()
-            ->to($request->input('redirect_to', url()->previous()))
+            ->to($redirectTo)
             ->with('status', 'Dasar hukum berhasil diperbarui.');
     }
 

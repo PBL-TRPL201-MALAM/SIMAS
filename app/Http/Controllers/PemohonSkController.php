@@ -172,14 +172,14 @@ class PemohonSkController extends Controller
 
         $file = $this->resolvePublishedFile($dokumen);
 
-        if (! $file || ! Storage::disk('public')->exists($file->file_path)) {
+        if (! $file || ! Storage::disk('local')->exists($file->file_path)) {
             return redirect()
                 ->route('pemohon.sk-saya')
                 ->with('error', 'File final SK belum tersedia untuk dilihat.');
         }
 
         return response()->file(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'inline; filename="' . addslashes($this->buildPublishedDownloadFileName($dokumen)) . '"',
@@ -198,14 +198,14 @@ class PemohonSkController extends Controller
 
         $file = $this->resolvePublishedFile($dokumen);
 
-        if (! $file || ! Storage::disk('public')->exists($file->file_path)) {
+        if (! $file || ! Storage::disk('local')->exists($file->file_path)) {
             return redirect()
                 ->route('pemohon.sk-saya')
                 ->with('error', 'File final SK belum tersedia untuk diunduh.');
         }
 
         return response()->download(
-            Storage::disk('public')->path($file->file_path),
+            Storage::disk('local')->path($file->file_path),
             $this->buildPublishedDownloadFileName($dokumen)
         );
     }

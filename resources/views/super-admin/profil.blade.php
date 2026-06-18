@@ -184,5 +184,35 @@
       </main>
     </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.querySelector('select[name="role"]');
+    const jabatanSelect = document.querySelector('select[name="jabatan"]');
+    const signerJabatans = @json($signerJabatans);
+    
+    function updateJabatanOptions() {
+        const isSigner = roleSelect.value === 'PENANDATANGAN';
+        const selectedValue = jabatanSelect.value;
+        
+        Array.from(jabatanSelect.options).forEach(option => {
+            if (option.value === "") return;
+            const isAllowed = !isSigner || signerJabatans.includes(option.value);
+            option.disabled = !isAllowed;
+            option.style.display = isAllowed ? 'block' : 'none';
+        });
+        
+        // Reset selection if the current one becomes invalid
+        if (selectedValue && isSigner && !signerJabatans.includes(selectedValue)) {
+            jabatanSelect.value = "";
+        }
+    }
+    
+    if (roleSelect && jabatanSelect) {
+        roleSelect.addEventListener('change', updateJabatanOptions);
+        updateJabatanOptions();
+    }
+});
+</script>
+
 @include('template.layouts.footer')
 

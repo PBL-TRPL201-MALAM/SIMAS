@@ -573,3 +573,4 @@
     </div>
 
 @include('template.layouts.footer')
+@include('template.layouts.footer')

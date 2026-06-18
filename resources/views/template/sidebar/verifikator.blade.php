@@ -6,7 +6,7 @@
     <img src="{{ asset('images/logo.png') }}" alt="Logo SIMAS" class="h-7 w-auto object-contain" />
     <div>
       <span class="text-sm font-bold tracking-tight text-slate-900 block">SIMAS</span>
-      <span class="text-[10px] font-medium text-blue-500">Verifikator</span>
+      <span class="text-[10px] font-medium text-blue-500">{{ auth()->user()->role === 'PENANDATANGAN' ? 'Penandatangan' : 'Verifikator' }}</span>
     </div>
   </div>
 
