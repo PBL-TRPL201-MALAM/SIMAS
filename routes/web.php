@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminSemuaSuratController;
 use App\Http\Controllers\AdminSuratMasukController;
 use App\Http\Controllers\PemohonSkController;
 use App\Http\Controllers\PemohonSuratController;
+use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\PublicDokumenVerificationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifikatorSuratController;
@@ -98,9 +99,10 @@ Route::middleware(['auth', 'role:ADMIN_SURAT'])->prefix('admin')->name('admin.')
     Route::post('/proses-sk/{dokumen}/kirim-verifikasi', [AdminSkController::class, 'sendToVerification'])->name('proses-sk.kirim-verifikasi');
     Route::post('/proses-sk/{dokumen}/revisi', [AdminSkController::class, 'returnForRevision'])->name('proses-sk.revisi');
 
-    Route::get('/profil', function () {
-        return view('admin.profil');
-    })->name('profil');
+    // Profil Saya Admin Surat: lihat/edit data diri dan ganti password lewat ProfilController.
+    Route::get('/profil', [ProfilController::class, 'edit'])->name('profil');
+    Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+    Route::put('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
 });
 
 // Area Pemohon untuk membuat pengajuan dan memantau status dokumen miliknya sendiri.
@@ -129,9 +131,10 @@ Route::middleware(['auth', 'role:PEMOHON'])->prefix('pemohon')->name('pemohon.')
     Route::get('/sk/{dokumen}/lihat', [PemohonSkController::class, 'previewPublished'])->name('sk.preview');
     Route::get('/sk/{dokumen}/download', [PemohonSkController::class, 'download'])->name('sk.download');
 
-    Route::get('/profil', function () {
-        return view('pemohon.profil');
-    })->name('profil');
+    // Profil Saya Pemohon: lihat/edit data diri dan ganti password lewat ProfilController.
+    Route::get('/profil', [ProfilController::class, 'edit'])->name('profil');
+    Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+    Route::put('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
 });
 
 // Area Verifikator untuk memeriksa dokumen, memberi keputusan, dan melihat PDF preview hasil proses Admin Surat.
@@ -168,9 +171,10 @@ Route::middleware(['auth', 'role:VERIFIKATOR,PENANDATANGAN'])->prefix('verifikat
 
     Route::get('/sk-semua', [VerifikatorSuratController::class, 'skSemua'])->name('sk-semua');
 
-    Route::get('/profil', function () {
-        return view('verifikator.profil');
-    })->name('profil');
+    // Profil Saya Verifikator/Penandatangan: lihat/edit data diri dan ganti password lewat ProfilController.
+    Route::get('/profil', [ProfilController::class, 'edit'])->name('profil');
+    Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+    Route::put('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
 });
 
 // Area Super Admin difokuskan untuk pengelolaan user dan monitoring ringkasan sistem.
@@ -218,7 +222,10 @@ Route::middleware(['auth', 'role:SUPER_ADMIN'])->prefix('super-admin')->name('su
         return view('super-admin.log-aktivitas');
     })->name('log-aktivitas');
 
+    // Profil Saya Super Admin: edit data diri tetap pakai UserController::edit/update (route super-admin.users.update),
+    // di sini hanya ditambahkan route khusus untuk ganti password lewat ProfilController.
     Route::get('/profil', function (UserController $controller) {
         return $controller->edit(auth()->user());
     })->name('profil');
+    Route::put('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
 });

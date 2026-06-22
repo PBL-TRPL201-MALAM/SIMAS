@@ -31,8 +31,8 @@
               </div>
             @endif
 
-            <!-- Error validasi atau error bisnis seperti self-deactivation ditampilkan di sini. -->
-            @if ($errors->any())
+            <!-- Error validasi atau error bisnis seperti self-deactivation ditampilkan di sini. Error password ditampilkan terpisah di card Ganti Password. -->
+            @if ($errors->any() && ! $errors->has('current_password') && ! $errors->has('password'))
               <div class="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
                 {{ $errors->first() }}
               </div>
@@ -136,6 +136,48 @@
                 </button>
               @endif
             </form>
+
+            <!-- ====== GANTI PASSWORD (BARU) ====== -->
+            <!-- Form ini khusus untuk akun yang sedang login (diri sendiri); diproses oleh ProfilController::updatePassword. -->
+            <div class="mt-6 rounded-2xl border border-slate-100 bg-slate-50/40 p-6">
+              <h3 class="text-sm font-semibold text-slate-800 mb-1">Ganti Password</h3>
+              <p class="text-[11px] text-slate-400 font-light mb-5">Pastikan password baru minimal 8 karakter. Form ini hanya berlaku untuk akun yang sedang Anda gunakan.</p>
+
+              @if ($errors->has('current_password'))
+                <div class="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
+                  {{ $errors->first('current_password') }}
+                </div>
+              @endif
+              @if ($errors->has('password'))
+                <div class="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
+                  {{ $errors->first('password') }}
+                </div>
+              @endif
+
+              <form action="{{ route('super-admin.profil.password') }}" method="POST" class="space-y-4">
+                @csrf
+                @method('PUT')
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-2">Password Saat Ini</label>
+                  <input type="password" name="current_password" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-2">Password Baru</label>
+                    <input type="password" name="password" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-2">Konfirmasi Password Baru</label>
+                    <input type="password" name="password_confirmation" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none" />
+                  </div>
+                </div>
+                <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-all duration-200">
+                  Ganti Password
+                </button>
+              </form>
+            </div>
+            <!-- ====== END GANTI PASSWORD ====== -->
+
           </div>
 
           <div class="space-y-6">
@@ -189,24 +231,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const roleSelect = document.querySelector('select[name="role"]');
     const jabatanSelect = document.querySelector('select[name="jabatan"]');
     const signerJabatans = @json($signerJabatans);
-    
+
     function updateJabatanOptions() {
         const isSigner = roleSelect.value === 'PENANDATANGAN';
         const selectedValue = jabatanSelect.value;
-        
+
         Array.from(jabatanSelect.options).forEach(option => {
             if (option.value === "") return;
             const isAllowed = !isSigner || signerJabatans.includes(option.value);
             option.disabled = !isAllowed;
             option.style.display = isAllowed ? 'block' : 'none';
         });
-        
+
         // Reset selection if the current one becomes invalid
         if (selectedValue && isSigner && !signerJabatans.includes(selectedValue)) {
             jabatanSelect.value = "";
         }
     }
-    
+
     if (roleSelect && jabatanSelect) {
         roleSelect.addEventListener('change', updateJabatanOptions);
         updateJabatanOptions();
@@ -215,4 +257,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 @include('template.layouts.footer')
-
