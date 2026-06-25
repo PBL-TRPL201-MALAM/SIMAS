@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Verifikasi;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 // Controller ini menyiapkan data ringkasan untuk dashboard tiap role.
@@ -38,6 +39,22 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Data chart: distribusi status dokumen milik pemohon untuk Doughnut Chart.
+        $statusCounts = (clone $baseQuery)
+            ->selectRaw('status_dokumen, COUNT(*) as total')
+            ->groupBy('status_dokumen')
+            ->pluck('total', 'status_dokumen');
+
+        $chartStatusDokumen = [
+            'labels' => ['Diajukan', 'Diproses', 'Revisi / Ditolak', 'Published'],
+            'data' => [
+                (int) ($statusCounts['DIAJUKAN'] ?? 0),
+                (int) (($statusCounts['DIPROSES'] ?? 0) + ($statusCounts['MENUNGGU_VERIFIKASI'] ?? 0) + ($statusCounts['SIAP_PUBLISH'] ?? 0)),
+                (int) (($statusCounts['DITOLAK'] ?? 0) + ($statusCounts['PERLU_REVISI'] ?? 0)),
+                (int) (($statusCounts['PUBLISHED'] ?? 0) + ($statusCounts['DISETUJUI'] ?? 0)),
+            ],
+        ];
+
         return view('pemohon.dashboard', [
             'stats' => [
                 'total_dokumen' => (clone $baseQuery)->count(),
@@ -47,6 +64,7 @@ class DashboardController extends Controller
             ],
             'latestDocuments' => $latestDocuments,
             'recentActivities' => $recentActivities,
+            'chartStatusDokumen' => $chartStatusDokumen,
         ]);
     }
 
@@ -64,6 +82,33 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Data chart: tren pengajuan per bulan dalam tahun berjalan untuk Bar Chart.
+        $currentYear = now()->year;
+        $monthlyTrend = Dokumen::query()
+            ->selectRaw('MONTH(created_at) as bulan, COUNT(*) as total')
+            ->whereYear('created_at', $currentYear)
+            ->groupByRaw('MONTH(created_at)')
+            ->pluck('total', 'bulan');
+
+        $chartTrenBulanan = [
+            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+            'data' => collect(range(1, 12))->map(fn ($m) => (int) ($monthlyTrend[$m] ?? 0))->values()->toArray(),
+        ];
+
+        // Data chart: perbandingan Surat Biasa vs Surat Keputusan untuk Doughnut Chart.
+        $jenisCounts = Dokumen::query()
+            ->selectRaw('jenis_dokumen, COUNT(*) as total')
+            ->groupBy('jenis_dokumen')
+            ->pluck('total', 'jenis_dokumen');
+
+        $chartJenisSurat = [
+            'labels' => ['Surat Biasa', 'Surat Keputusan'],
+            'data' => [
+                (int) ($jenisCounts['SURAT_BIASA'] ?? 0),
+                (int) ($jenisCounts['SURAT_KEPUTUSAN'] ?? 0),
+            ],
+        ];
+
         return view('admin.dashboard', [
             'stats' => [
                 'pengajuan_masuk' => (clone $incomingQuery)->count(),
@@ -72,6 +117,8 @@ class DashboardController extends Controller
                 'total_dokumen' => Dokumen::query()->count(),
             ],
             'latestIncoming' => $latestIncoming,
+            'chartTrenBulanan' => $chartTrenBulanan,
+            'chartJenisSurat' => $chartJenisSurat,
         ]);
     }
 
@@ -96,6 +143,22 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Data chart: distribusi status verifikasi milik verifikator login untuk Doughnut Chart.
+        $verifikasiCounts = Verifikasi::query()
+            ->where('verifikator_id', $userId)
+            ->selectRaw('status_verifikasi, COUNT(*) as total')
+            ->groupBy('status_verifikasi')
+            ->pluck('total', 'status_verifikasi');
+
+        $chartVerifikasi = [
+            'labels' => ['Menunggu', 'Disetujui', 'Ditolak'],
+            'data' => [
+                (int) ($verifikasiCounts['MENUNGGU'] ?? 0),
+                (int) ($verifikasiCounts['DISETUJUI'] ?? 0),
+                (int) ($verifikasiCounts['DITOLAK'] ?? 0),
+            ],
+        ];
+
         return view('verifikator.dashboard', [
             'stats' => [
                 'menunggu' => (clone $pendingQuery)->count(),
@@ -104,6 +167,7 @@ class DashboardController extends Controller
                 'total_diverifikasi' => Verifikasi::query()->where('verifikator_id', $userId)->whereIn('status_verifikasi', ['DISETUJUI', 'DITOLAK'])->count(),
             ],
             'latestPending' => $latestPending,
+            'chartVerifikasi' => $chartVerifikasi,
         ]);
     }
 
@@ -140,6 +204,19 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Data chart: tren dokumen per bulan dalam tahun berjalan untuk Bar Chart Super Admin.
+        $currentYear = now()->year;
+        $monthlyDocs = Dokumen::query()
+            ->selectRaw('MONTH(created_at) as bulan, COUNT(*) as total')
+            ->whereYear('created_at', $currentYear)
+            ->groupByRaw('MONTH(created_at)')
+            ->pluck('total', 'bulan');
+
+        $chartTrenDokumen = [
+            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+            'data' => collect(range(1, 12))->map(fn ($m) => (int) ($monthlyDocs[$m] ?? 0))->values()->toArray(),
+        ];
+
         return view('super-admin.dashboard', [
             'stats' => [
                 'total_user' => User::query()->count(),
@@ -149,6 +226,7 @@ class DashboardController extends Controller
             ],
             'roleDistribution' => $roleDistribution,
             'recentActivities' => $recentActivities,
+            'chartTrenDokumen' => $chartTrenDokumen,
         ]);
     }
 

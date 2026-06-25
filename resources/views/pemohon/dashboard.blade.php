@@ -72,7 +72,23 @@
             </div>
           </div>
 
+          <!-- Chart: Distribusi Status Dokumen -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-800">Distribusi Status Dokumen</h3>
+                  <p class="text-[11px] text-slate-400 font-light mt-0.5">Ringkasan status semua dokumen kamu</p>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                </div>
+              </div>
+              <div class="relative w-full" style="max-height: 260px;">
+                <canvas id="chartStatusDokumen"></canvas>
+              </div>
+            </div>
+
             <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <h3 class="text-sm font-semibold text-slate-800">Dokumen Terbaru</h3>
@@ -159,4 +175,63 @@
         </div>
       </main>
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const chartData = @json($chartStatusDokumen);
+    const ctx = document.getElementById('chartStatusDokumen');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    data: chartData.data,
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',   // Blue 500 — Diajukan
+                        'rgba(245, 158, 11, 0.8)',   // Amber 500 — Diproses
+                        'rgba(244, 63, 94, 0.8)',    // Rose 500 — Revisi/Ditolak
+                        'rgba(16, 185, 129, 0.8)',   // Emerald 500 — Published
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(244, 63, 94, 1)',
+                        'rgba(16, 185, 129, 1)',
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 6,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyleWidth: 8,
+                            font: { family: 'Inter', size: 11, weight: '500' },
+                            color: '#64748b',
+                        },
+                    },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleFont: { family: 'Inter', size: 12 },
+                        bodyFont: { family: 'Inter', size: 11 },
+                        padding: 10,
+                        cornerRadius: 10,
+                        displayColors: true,
+                        boxPadding: 4,
+                    },
+                },
+            },
+        });
+    }
+});
+</script>
+
 @include('template.layouts.footer')

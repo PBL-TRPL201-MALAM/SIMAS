@@ -19,6 +19,8 @@
       ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
       ::-webkit-scrollbar-thumb:hover { background: #bfdbfe; }
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
 
   <body class="bg-slate-50 antialiased overflow-hidden h-screen">

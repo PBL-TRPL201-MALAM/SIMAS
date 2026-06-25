@@ -74,6 +74,38 @@
             </div>
           </div>
 
+          <!-- Charts: Distribusi Role + Tren Dokumen Bulanan -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-800">Distribusi User per Role</h3>
+                  <p class="text-[11px] text-slate-400 font-light mt-0.5">Komposisi pengguna aktif dalam sistem</p>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                </div>
+              </div>
+              <div class="relative w-full flex items-center justify-center" style="min-height: 260px;">
+                <canvas id="chartRoleDistribusi"></canvas>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-800">Tren Dokumen Bulanan</h3>
+                  <p class="text-[11px] text-slate-400 font-light mt-0.5">Jumlah dokumen per bulan ({{ date('Y') }})</p>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                </div>
+              </div>
+              <div class="relative w-full" style="min-height: 260px;">
+                <canvas id="chartTrenDokumen"></canvas>
+              </div>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             <div class="xl:col-span-2 rounded-2xl bg-white border border-slate-100 overflow-hidden">
               <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
@@ -142,5 +174,130 @@
         </div>
       </main>
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Doughnut Chart: Distribusi Role
+    const roleData = @json($roleDistribution);
+    const ctxRole = document.getElementById('chartRoleDistribusi');
+    if (ctxRole) {
+        new Chart(ctxRole, {
+            type: 'doughnut',
+            data: {
+                labels: roleData.map(item => item.label),
+                datasets: [{
+                    data: roleData.map(item => item.total),
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',   // Blue 500 — Pemohon
+                        'rgba(14, 165, 233, 0.8)',   // Sky 500 — Admin Surat
+                        'rgba(245, 158, 11, 0.8)',   // Amber 500 — Verifikator
+                        'rgba(139, 92, 246, 0.8)',   // Violet 500 — Penandatangan
+                        'rgba(100, 116, 139, 0.8)',  // Slate 500 — Super Admin
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(14, 165, 233, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(139, 92, 246, 1)',
+                        'rgba(100, 116, 139, 1)',
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 6,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 14,
+                            usePointStyle: true,
+                            pointStyleWidth: 8,
+                            font: { family: 'Inter', size: 10, weight: '500' },
+                            color: '#64748b',
+                        },
+                    },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleFont: { family: 'Inter', size: 12 },
+                        bodyFont: { family: 'Inter', size: 11 },
+                        padding: 10,
+                        cornerRadius: 10,
+                        displayColors: true,
+                        boxPadding: 4,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = total > 0 ? Math.round((context.parsed / total) * 100) : 0;
+                                return context.label + ': ' + context.parsed + ' user (' + pct + '%)';
+                            }
+                        }
+                    },
+                },
+            },
+        });
+    }
+
+    // Bar Chart: Tren Dokumen Bulanan
+    const trenData = @json($chartTrenDokumen);
+    const ctxTren = document.getElementById('chartTrenDokumen');
+    if (ctxTren) {
+        new Chart(ctxTren, {
+            type: 'bar',
+            data: {
+                labels: trenData.labels,
+                datasets: [{
+                    label: 'Jumlah Dokumen',
+                    data: trenData.data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1.5,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    maxBarThickness: 32,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleFont: { family: 'Inter', size: 12 },
+                        bodyFont: { family: 'Inter', size: 11 },
+                        padding: 10,
+                        cornerRadius: 10,
+                        displayColors: false,
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: { family: 'Inter', size: 10 },
+                            color: '#94a3b8',
+                            stepSize: 1,
+                        },
+                        grid: { color: 'rgba(241, 245, 249, 0.8)' },
+                        border: { display: false },
+                    },
+                    x: {
+                        ticks: {
+                            font: { family: 'Inter', size: 10 },
+                            color: '#94a3b8',
+                        },
+                        grid: { display: false },
+                        border: { display: false },
+                    },
+                },
+            },
+        });
+    }
+});
+</script>
 
 @include('template.layouts.footer')

@@ -63,57 +63,132 @@
             </div>
           </div>
 
-          <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
-            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <h3 class="text-sm font-semibold text-slate-800">Menunggu Verifikasi Saya</h3>
-              <a href="{{ route('verifikator.surat-menunggu') }}" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Lihat semua</a>
+          <!-- Chart + Table: Status Verifikasi + Menunggu -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-800">Status Verifikasi Saya</h3>
+                  <p class="text-[11px] text-slate-400 font-light mt-0.5">Distribusi keputusan verifikasi</p>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                </div>
+              </div>
+              <div class="relative w-full" style="max-height: 260px;">
+                <canvas id="chartVerifikasi"></canvas>
+              </div>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead>
-                  <tr class="bg-slate-50/60">
-                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Perihal / Judul</th>
-                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Pemohon</th>
-                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Jenis</th>
-                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Level</th>
-                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Tanggal</th>
-                    <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50">
-                  <!-- forelse menampilkan dokumen yang levelnya sudah aktif untuk verifikator ini. -->
-                  @forelse ($latestPending as $item)
-                    <!-- Blok php menentukan judul dan route detail berdasarkan jenis dokumen surat biasa atau SK. -->
-                    @php
-                      $isSk = $item->dokumen->jenis_dokumen === 'SURAT_KEPUTUSAN';
-                      $judul = $isSk
-                          ? ($item->dokumen->suratKeputusan?->judul_sk ?: $item->dokumen->suratKeputusan?->tentang ?: '-')
-                          : ($item->dokumen->suratBiasa?->hal ?: '-');
-                      $detailRoute = $isSk
-                          ? route('verifikator.sk.detail', $item->dokumen)
-                          : route('verifikator.surat.detail', $item->dokumen);
-                    @endphp
-                    <tr class="hover:bg-slate-50/40 transition-colors duration-150">
-                      <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[160px]">{{ $judul }}</p></td>
-                      <td class="px-5 py-3.5"><p class="text-xs text-slate-600">{{ $item->dokumen->pemohon?->nama ?? '-' }}</p></td>
-                      <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{{ $isSk ? 'SK' : 'Surat Biasa' }}</span></td>
-                      <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level {{ $item->level }}</span></td>
-                      <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->dokumen->created_at)->format('d M Y') }}</p></td>
-                      <td class="px-5 py-3.5">
-                        <!-- Tombol Verifikasi membawa user ke halaman detail sebelum mengambil keputusan. -->
-                        <a href="{{ $detailRoute }}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Verifikasi</a>
-                      </td>
+
+            <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-100 overflow-hidden">
+              <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <h3 class="text-sm font-semibold text-slate-800">Menunggu Verifikasi Saya</h3>
+                <a href="{{ route('verifikator.surat-menunggu') }}" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Lihat semua</a>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr class="bg-slate-50/60">
+                      <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Perihal / Judul</th>
+                      <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Pemohon</th>
+                      <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Jenis</th>
+                      <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Level</th>
+                      <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Tanggal</th>
+                      <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-5 py-3">Aksi</th>
                     </tr>
-                  @empty
-                    <tr>
-                      <td colspan="6" class="px-5 py-10 text-center text-xs text-slate-400">Belum ada dokumen yang menunggu verifikasi Anda.</td>
-                    </tr>
-                  @endforelse
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody class="divide-y divide-slate-50">
+                    <!-- forelse menampilkan dokumen yang levelnya sudah aktif untuk verifikator ini. -->
+                    @forelse ($latestPending as $item)
+                      <!-- Blok php menentukan judul dan route detail berdasarkan jenis dokumen surat biasa atau SK. -->
+                      @php
+                        $isSk = $item->dokumen->jenis_dokumen === 'SURAT_KEPUTUSAN';
+                        $judul = $isSk
+                            ? ($item->dokumen->suratKeputusan?->judul_sk ?: $item->dokumen->suratKeputusan?->tentang ?: '-')
+                            : ($item->dokumen->suratBiasa?->hal ?: '-');
+                        $detailRoute = $isSk
+                            ? route('verifikator.sk.detail', $item->dokumen)
+                            : route('verifikator.surat.detail', $item->dokumen);
+                      @endphp
+                      <tr class="hover:bg-slate-50/40 transition-colors duration-150">
+                        <td class="px-5 py-3.5"><p class="text-xs font-medium text-slate-800 max-w-[160px]">{{ $judul }}</p></td>
+                        <td class="px-5 py-3.5"><p class="text-xs text-slate-600">{{ $item->dokumen->pemohon?->nama ?? '-' }}</p></td>
+                        <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{{ $isSk ? 'SK' : 'Surat Biasa' }}</span></td>
+                        <td class="px-5 py-3.5"><span class="text-[10px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Level {{ $item->level }}</span></td>
+                        <td class="px-5 py-3.5"><p class="text-[11px] text-slate-400 font-light">{{ optional($item->dokumen->created_at)->format('d M Y') }}</p></td>
+                        <td class="px-5 py-3.5">
+                          <!-- Tombol Verifikasi membawa user ke halaman detail sebelum mengambil keputusan. -->
+                          <a href="{{ $detailRoute }}" class="inline-flex items-center gap-1 text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Verifikasi</a>
+                        </td>
+                      </tr>
+                    @empty
+                      <tr>
+                        <td colspan="6" class="px-5 py-10 text-center text-xs text-slate-400">Belum ada dokumen yang menunggu verifikasi Anda.</td>
+                      </tr>
+                    @endforelse
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
       </main>
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const chartData = @json($chartVerifikasi);
+    const ctx = document.getElementById('chartVerifikasi');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    data: chartData.data,
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',   // Blue 500 — Menunggu
+                        'rgba(16, 185, 129, 0.8)',   // Emerald 500 — Disetujui
+                        'rgba(244, 63, 94, 0.8)',    // Rose 500 — Ditolak
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(244, 63, 94, 1)',
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 6,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyleWidth: 8,
+                            font: { family: 'Inter', size: 11, weight: '500' },
+                            color: '#64748b',
+                        },
+                    },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleFont: { family: 'Inter', size: 12 },
+                        bodyFont: { family: 'Inter', size: 11 },
+                        padding: 10,
+                        cornerRadius: 10,
+                        displayColors: true,
+                        boxPadding: 4,
+                    },
+                },
+            },
+        });
+    }
+});
+</script>
+
 @include('template.layouts.footer')

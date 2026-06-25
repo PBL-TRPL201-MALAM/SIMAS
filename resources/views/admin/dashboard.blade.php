@@ -67,6 +67,38 @@
             </div>
           </div>
 
+          <!-- Charts: Tren Bulanan + Jenis Surat -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-800">Tren Pengajuan Bulanan</h3>
+                  <p class="text-[11px] text-slate-400 font-light mt-0.5">Jumlah pengajuan per bulan ({{ date('Y') }})</p>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                </div>
+              </div>
+              <div class="relative w-full" style="min-height: 240px;">
+                <canvas id="chartTrenBulanan"></canvas>
+              </div>
+            </div>
+            <div class="rounded-2xl bg-white border border-slate-100 p-5 hover:shadow-md hover:shadow-blue-50/60 transition-all duration-300">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-800">Perbandingan Jenis Surat</h3>
+                  <p class="text-[11px] text-slate-400 font-light mt-0.5">Surat Biasa vs Surat Keputusan</p>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                </div>
+              </div>
+              <div class="relative w-full flex items-center justify-center" style="min-height: 240px;">
+                <canvas id="chartJenisSurat"></canvas>
+              </div>
+            </div>
+          </div>
+
           <div class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <h3 class="text-sm font-semibold text-slate-800">Pengajuan Masuk Terbaru</h3>
@@ -127,5 +159,117 @@
         </div>
       </main>
     </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Bar Chart: Tren Pengajuan Bulanan
+    const trenData = @json($chartTrenBulanan);
+    const ctxTren = document.getElementById('chartTrenBulanan');
+    if (ctxTren) {
+        new Chart(ctxTren, {
+            type: 'bar',
+            data: {
+                labels: trenData.labels,
+                datasets: [{
+                    label: 'Jumlah Pengajuan',
+                    data: trenData.data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1.5,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    maxBarThickness: 32,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleFont: { family: 'Inter', size: 12 },
+                        bodyFont: { family: 'Inter', size: 11 },
+                        padding: 10,
+                        cornerRadius: 10,
+                        displayColors: false,
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: { family: 'Inter', size: 10 },
+                            color: '#94a3b8',
+                            stepSize: 1,
+                        },
+                        grid: { color: 'rgba(241, 245, 249, 0.8)' },
+                        border: { display: false },
+                    },
+                    x: {
+                        ticks: {
+                            font: { family: 'Inter', size: 10 },
+                            color: '#94a3b8',
+                        },
+                        grid: { display: false },
+                        border: { display: false },
+                    },
+                },
+            },
+        });
+    }
+
+    // Doughnut Chart: Jenis Surat
+    const jenisData = @json($chartJenisSurat);
+    const ctxJenis = document.getElementById('chartJenisSurat');
+    if (ctxJenis) {
+        new Chart(ctxJenis, {
+            type: 'doughnut',
+            data: {
+                labels: jenisData.labels,
+                datasets: [{
+                    data: jenisData.data,
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',   // Blue 500 — Surat Biasa
+                        'rgba(139, 92, 246, 0.8)',   // Violet 500 — SK
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(139, 92, 246, 1)',
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 6,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyleWidth: 8,
+                            font: { family: 'Inter', size: 11, weight: '500' },
+                            color: '#64748b',
+                        },
+                    },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleFont: { family: 'Inter', size: 12 },
+                        bodyFont: { family: 'Inter', size: 11 },
+                        padding: 10,
+                        cornerRadius: 10,
+                        displayColors: true,
+                        boxPadding: 4,
+                    },
+                },
+            },
+        });
+    }
+});
+</script>
 
 @include('template.layouts.footer')
