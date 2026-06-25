@@ -79,7 +79,7 @@
                   <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                 </div>
               </div>
-              <div class="relative w-full" style="min-height: 240px;">
+              <div class="relative h-72 w-full flex items-center justify-center">
                 <canvas id="chartTrenBulanan"></canvas>
               </div>
             </div>
@@ -93,7 +93,7 @@
                   <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
                 </div>
               </div>
-              <div class="relative w-full flex items-center justify-center" style="min-height: 240px;">
+              <div class="relative h-72 w-full flex items-center justify-center">
                 <canvas id="chartJenisSurat"></canvas>
               </div>
             </div>
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 cutout: '60%',
                 plugins: {
                     legend: {
