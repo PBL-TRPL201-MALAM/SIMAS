@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'dashboard'  : { title: 'Dashboard',         subtitle: 'Selamat datang di SIMAS' },
     'buat-surat' : { title: 'Buat Surat Baru',   subtitle: 'Ajukan surat biasa — Langkah 1 dari 2' },
     'surat-saya' : { title: 'Surat Saya',         subtitle: 'Daftar semua surat yang diajukan' },
-    'buat-sk'    : { title: 'Buat Pengajuan SK',  subtitle: 'Ajukan Surat Keputusan — Langkah 1 dari 3' },
+    'buat-sk'    : { title: 'Buat Pengajuan SK',  subtitle: 'Ajukan Surat Keputusan — Langkah 1 dari 2' },
     'sk-saya'    : { title: 'SK Saya',            subtitle: 'Daftar semua SK yang diajukan' },
     'profil'     : { title: 'Profil Saya',        subtitle: 'Kelola data akun kamu' },
   };
@@ -280,103 +280,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // ================================================================
-  // WIZARD: BUAT PENGAJUAN SK (3 step)
+  // WIZARD: BUAT PENGAJUAN SK (2 step)
   // ================================================================
-  const skStep1  = document.getElementById('sk-step-1');
-  const skStep2  = document.getElementById('sk-step-2');
-  const skStep3  = document.getElementById('sk-step-3');
-  const skNext1  = document.getElementById('sk-next-1');
-  const skNext2  = document.getElementById('sk-next-2');
-  const skBack1  = document.getElementById('sk-back-1');
-  const skBack2  = document.getElementById('sk-back-2');
-  const skSubmit = document.getElementById('sk-submit-btn');
-  const skCircle1 = document.getElementById('sk-circle-1');
-  const skCircle2 = document.getElementById('sk-circle-2');
-  const skCircle3 = document.getElementById('sk-circle-3');
-  const skLabel1  = document.getElementById('sk-label-1');
-  const skLabel2  = document.getElementById('sk-label-2');
-  const skLabel3  = document.getElementById('sk-label-3');
-
-  const setSkStep = (step) => {
-    [[skCircle1, skLabel1], [skCircle2, skLabel2], [skCircle3, skLabel3]].forEach(([c, l], i) => {
-      if (!c || !l) return;
-      if (i < step) {
-        c.className = 'w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0';
-        c.querySelector('span').className = 'text-[11px] font-bold text-white';
-        l.className = 'text-xs font-semibold text-blue-600';
-      } else {
-        c.className = 'w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center shrink-0';
-        c.querySelector('span').className = 'text-[11px] font-bold text-slate-400';
-        l.className = 'text-xs font-medium text-slate-400';
-      }
-    });
-  };
-
   const resetSkWizard = () => {
-    skStep1?.classList.remove('hidden');
-    skStep2?.classList.add('hidden');
-    skStep3?.classList.add('hidden');
-    setSkStep(1);
-    if (pageSub) pageSub.textContent = 'Ajukan Surat Keputusan — Langkah 1 dari 3';
+    const s1 = document.getElementById('sk-step-1');
+    const s2 = document.getElementById('sk-step-2');
+    s1?.classList.remove('hidden');
+    s2?.classList.add('hidden');
   };
-
-  skNext1?.addEventListener('click', () => {
-    setSkStep(2);
-    if (pageSub) pageSub.textContent = 'Ajukan Surat Keputusan — Langkah 2 dari 3';
-    skStep1?.classList.add('hidden');
-    skStep2?.classList.remove('hidden');
-  });
-
-  skBack1?.addEventListener('click', () => {
-    setSkStep(1);
-    if (pageSub) pageSub.textContent = 'Ajukan Surat Keputusan — Langkah 1 dari 3';
-    skStep2?.classList.add('hidden');
-    skStep1?.classList.remove('hidden');
-  });
-
-  skNext2?.addEventListener('click', () => {
-    // Isi review
-    const judul      = document.getElementById('sk-judul')?.value || '—';
-    const tentang    = document.getElementById('sk-tentang')?.value || '—';
-    const menimbang  = document.getElementById('sk-menimbang')?.value || '—';
-    const memutuskan = document.getElementById('sk-memutuskan')?.value || '—';
-    const checked    = document.querySelectorAll('#sk-dasar-list input:checked');
-    const mengingat  = Array.from(checked).map(cb => {
-      const lbl = cb.closest('label');
-      return `${lbl?.querySelector('p:first-of-type')?.textContent || ''} ${lbl?.querySelector('p:last-of-type')?.textContent || ''}`;
-    });
-
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    set('review-judul', judul);
-    set('review-tentang', tentang);
-    set('review-menimbang', menimbang);
-    set('review-memutuskan', memutuskan);
-
-    const listEl = document.getElementById('review-mengingat');
-    if (listEl) {
-      listEl.innerHTML = mengingat.length
-        ? mengingat.map(m => `<li class="text-xs text-slate-600 font-light flex items-start gap-1.5"><span class="w-1 h-1 rounded-full bg-slate-400 mt-1.5 shrink-0"></span>${m}</li>`).join('')
-        : '<li class="text-xs text-slate-400 font-light">Tidak ada dasar hukum dipilih.</li>';
-    }
-
-    setSkStep(3);
-    if (pageSub) pageSub.textContent = 'Ajukan Surat Keputusan — Langkah 3 dari 3';
-    skStep2?.classList.add('hidden');
-    skStep3?.classList.remove('hidden');
-  });
-
-  skBack2?.addEventListener('click', () => {
-    setSkStep(2);
-    if (pageSub) pageSub.textContent = 'Ajukan Surat Keputusan — Langkah 2 dari 3';
-    skStep3?.classList.add('hidden');
-    skStep2?.classList.remove('hidden');
-  });
-
-  skSubmit?.addEventListener('click', () => {
-    if (skSubmit?.type === 'submit') return;
-    showToast('Pengajuan SK berhasil diajukan!', 'success');
-    setTimeout(() => switchPage('sk-saya'), 800);
-  });
 
 
   // ================================================================
@@ -390,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ================================================================
-  // FORM SK DINAMIS
+  // FORM SK DINAMIS (2-step wizard: Isi Data SK → Review & Kirim)
   // ================================================================
   (() => {
     const form = document.getElementById('sk-form');
@@ -398,16 +309,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const step1 = document.getElementById('sk-step-1');
     const step2 = document.getElementById('sk-step-2');
-    const step3 = document.getElementById('sk-step-3');
     const circles = [
       document.getElementById('sk-circle-1'),
       document.getElementById('sk-circle-2'),
-      document.getElementById('sk-circle-3'),
     ];
     const labels = [
       document.getElementById('sk-label-1'),
       document.getElementById('sk-label-2'),
-      document.getElementById('sk-label-3'),
     ];
     const diktumLabels = ['KESATU', 'KEDUA', 'KETIGA', 'KEEMPAT', 'KELIMA', 'KEENAM', 'KETUJUH', 'KEDELAPAN', 'KESEMBILAN', 'KESEPULUH'];
     const dasarHukumModal = document.getElementById('sk-dasar-hukum-modal');
@@ -418,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mengingatList = document.getElementById('sk-mengingat-list');
     const mengingatEmpty = document.getElementById('sk-mengingat-empty');
     const mengingatHiddenInputs = document.getElementById('sk-mengingat-hidden-inputs');
+    const mengingatError = document.getElementById('sk-mengingat-error');
     let selectedDasarHukum = [];
 
     const alphaLabel = (index) => {
@@ -434,8 +343,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const diktumLabel = (index) => diktumLabels[index] || `KE-${index + 1}`;
 
+    // Stepper now only has 2 steps
     const setSkFormStep = (step) => {
-      [step1, step2, step3].forEach((panel, index) => panel?.classList.toggle('hidden', index !== step - 1));
+      [step1, step2].forEach((panel, index) => panel?.classList.toggle('hidden', index !== step - 1));
       circles.forEach((circle, index) => {
         const span = circle?.querySelector('span');
         const active = index < step;
@@ -574,6 +484,11 @@ document.addEventListener('DOMContentLoaded', () => {
       mengingatHiddenInputs.innerHTML = '';
       mengingatEmpty?.classList.toggle('hidden', selectedDasarHukum.length > 0);
 
+      // Sembunyikan error validasi saat user sudah menambahkan dasar hukum
+      if (selectedDasarHukum.length > 0) {
+        mengingatError?.classList.add('hidden');
+      }
+
       selectedDasarHukum.forEach((item, index) => {
         const row = document.createElement('div');
         row.className = 'sk-mengingat-row flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3';
@@ -687,15 +602,18 @@ document.addEventListener('DOMContentLoaded', () => {
       addDasarHukum(row?.dataset.dasarId, row?.dataset.dasarLabel);
     });
 
+    // Tombol "Lanjut Review" — validasi dasar hukum lalu populate review
     document.getElementById('sk-proto-next-1')?.addEventListener('click', () => {
-      setSkFormStep(2);
-    });
+      // Validasi: minimal 1 dasar hukum harus dipilih
+      if (selectedDasarHukum.length === 0) {
+        mengingatError?.classList.remove('hidden');
+        // Scroll ke bagian error agar user menyadarinya
+        mengingatError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      mengingatError?.classList.add('hidden');
 
-    document.getElementById('sk-proto-back-1')?.addEventListener('click', () => {
-      setSkFormStep(1);
-    });
-
-    document.getElementById('sk-proto-next-2')?.addEventListener('click', () => {
+      // Populate review fields
       const set = (id, value) => {
         const el = document.getElementById(id);
         if (el) el.textContent = value || '-';
@@ -707,11 +625,12 @@ document.addEventListener('DOMContentLoaded', () => {
       renderReviewList('review-menimbang', collectTextRows('.sk-menimbang-input'), alphaLabel, 'Belum ada butir menimbang.');
       renderReviewList('review-mengingat', collectSelectedMengingatRows(), (index) => `${index + 1}.`, 'Belum ada dasar hukum dipilih.');
       renderReviewList('review-memutuskan', collectTextRows('.sk-diktum-input'), diktumLabel, 'Belum ada diktum keputusan.');
-      setSkFormStep(3);
+      setSkFormStep(2);
     });
 
-    document.getElementById('sk-proto-back-2')?.addEventListener('click', () => {
-      setSkFormStep(2);
+    // Tombol "Kembali" dari Review ke form
+    document.getElementById('sk-proto-back-1')?.addEventListener('click', () => {
+      setSkFormStep(1);
     });
 
     form.addEventListener('submit', () => {

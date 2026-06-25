@@ -12,27 +12,52 @@ use Illuminate\View\View;
 // Controller ini menangani halaman "Profil Saya" untuk Admin Surat, Pemohon, dan Verifikator/Penandatangan.
 // Super Admin TIDAK memakai edit()/update() di sini, karena edit profil Super Admin tetap memakai UserController
 // (route super-admin.profil & super-admin.users.update). Controller ini hanya menyediakan ganti password untuk Super Admin.
+//
+// Semua role (kecuali Super Admin) menggunakan satu view tunggal 'profile.index'.
+// Perbedaan sidebar, label, dan route prefix ditentukan oleh konfigurasi per-role di bawah.
 class ProfilController extends Controller
 {
-    // Mapping role ke nama view profil masing-masing.
-    private const VIEW_MAP = [
-        'ADMIN_SURAT' => 'admin.profil',
-        'PEMOHON' => 'pemohon.profil',
-        'VERIFIKATOR' => 'verifikator.profil',
-        'PENANDATANGAN' => 'verifikator.profil',
+    // Konfigurasi per-role: sidebar view, label tampilan, route prefix, dan subtitle halaman.
+    private const ROLE_CONFIG = [
+        'ADMIN_SURAT' => [
+            'sidebarView'  => 'template.sidebar.admin',
+            'roleLabel'    => 'Admin Surat',
+            'routePrefix'  => 'admin',
+            'pageSubtitle' => 'Informasi akun Admin Surat',
+        ],
+        'PEMOHON' => [
+            'sidebarView'  => 'template.sidebar.pemohon',
+            'roleLabel'    => 'Pemohon',
+            'routePrefix'  => 'pemohon',
+            'pageSubtitle' => 'Informasi akun pemohon.',
+        ],
+        'VERIFIKATOR' => [
+            'sidebarView'  => 'template.sidebar.verifikator',
+            'roleLabel'    => 'Verifikator',
+            'routePrefix'  => 'verifikator',
+            'pageSubtitle' => 'Informasi akun verifikator.',
+        ],
+        'PENANDATANGAN' => [
+            'sidebarView'  => 'template.sidebar.verifikator',
+            'roleLabel'    => 'Penandatangan',
+            'routePrefix'  => 'verifikator',
+            'pageSubtitle' => 'Informasi akun penandatangan.',
+        ],
     ];
 
-    // Method ini menampilkan halaman profil sesuai role user yang sedang login.
+    // Method ini menampilkan halaman profil menggunakan view tunggal 'profile.index'.
+    // Data konfigurasi per-role (sidebar, label, dll.) dikirim sebagai variabel view.
     public function edit(Request $request): View
     {
         $user = $request->user();
+        $config = $this->resolveConfig($user->role);
 
-        return view($this->resolveView($user->role), [
+        return view('profile.index', array_merge($config, [
             'user' => $user,
             'jabatans' => UserReferenceOptions::jabatans(),
             'signerJabatans' => UserReferenceOptions::signerJabatans(),
             'unitKerjas' => UserReferenceOptions::unitKerjas(),
-        ]);
+        ]));
     }
 
     // Method ini menyimpan perubahan data diri (nama, username, email, unit kerja, NIP/NIK, jabatan).
@@ -104,9 +129,14 @@ class ProfilController extends Controller
             ->with('status', 'Password berhasil diperbarui.');
     }
 
-    private function resolveView(string $role): string
+    /**
+     * Ambil konfigurasi view per-role; fallback ke PEMOHON jika role tidak dikenali.
+     *
+     * @return array{sidebarView: string, roleLabel: string, routePrefix: string, pageSubtitle: string}
+     */
+    private function resolveConfig(string $role): array
     {
-        return self::VIEW_MAP[$role] ?? 'pemohon.profil';
+        return self::ROLE_CONFIG[$role] ?? self::ROLE_CONFIG['PEMOHON'];
     }
 
     private function resolveRoute(string $role): string

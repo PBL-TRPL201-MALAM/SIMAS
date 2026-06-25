@@ -77,7 +77,7 @@
                       })->implode("\n") ?: '-';
                       $memutuskanText = $sk?->skMemutuskan?->sortBy('urutan')->pluck('isi_memutuskan')->implode("\n") ?: '-';
                       $finalPdf = $dokumen->dokumenFiles->firstWhere('file_type', 'FINAL_PDF');
-                      $canOpenProcess = in_array($status, ['DIAJUKAN', 'DIPROSES', 'MENUNGGU_VERIFIKASI'], true);
+                      $canOpenProcess = in_array($status, ['DIAJUKAN', 'DIPROSES'], true);
                       $badgeClasses = match ($status) {
                           'DIAJUKAN' => 'text-blue-600 bg-blue-50',
                           'DIPROSES' => 'text-amber-600 bg-amber-50',
@@ -119,6 +119,9 @@
                           {{-- Aksi tabel mengikuti status dokumen agar SK siap publish/published tidak kembali ke proses review. --}}
                           @if($canOpenProcess)
                             <a href="{{ route('admin.proses-sk', ['dokumen' => $dokumen->dokumen_id]) }}" class="inline-flex items-center text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-all duration-200">Lihat Proses</a>
+                          @elseif($status === 'MENUNGGU_VERIFIKASI')
+                            {{-- Dokumen sedang di verifikator/penandatangan, Admin hanya bisa melihat detail. --}}
+                            <span class="inline-flex items-center text-[11px] font-medium text-violet-600 bg-violet-50 px-2.5 py-1 rounded-lg">Menunggu Verifikasi</span>
                           @elseif($status === 'SIAP_PUBLISH')
                             {{-- Publish SK membuat PDF final dari template Blade dan menyimpan record FINAL_PDF. --}}
                             <form action="{{ route('admin.sk.publish', $dokumen) }}" method="POST" class="inline-flex">
@@ -128,6 +131,8 @@
                           @elseif($status === 'PUBLISHED' && $finalPdf)
                             <a href="{{ route('admin.semua-sk.preview-final', $dokumen) }}" target="_blank" rel="noopener" class="inline-flex items-center text-[11px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-all duration-200">Lihat Dokumen</a>
                             <a href="{{ route('admin.semua-sk.download-final', $dokumen) }}" class="inline-flex items-center text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-all duration-200">Unduh Dokumen</a>
+                          @elseif(in_array($status, ['PERLU_REVISI', 'DITOLAK'], true))
+                            <span class="inline-flex items-center text-[11px] font-medium text-red-600 bg-red-50 px-2.5 py-1 rounded-lg">Menunggu Revisi Pemohon</span>
                           @endif
                         </div>
                       </td>

@@ -160,7 +160,9 @@
                           @elseif ($status === 'DIPROSES')
                             <a href="{{ route('admin.proses-surat', ['dokumen' => $dokumen->dokumen_id, 'step' => $processStep]) }}" class="inline-flex items-center text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-all duration-200">Lihat Proses</a>
                           @elseif ($status === 'MENUNGGU_VERIFIKASI')
-                            <a href="{{ route('admin.proses-surat', ['dokumen' => $dokumen->dokumen_id, 'step' => 3]) }}" class="inline-flex items-center text-[11px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-all duration-200">Lihat Proses</a>
+                            <button type="button"
+                              class="btn-detail inline-flex items-center text-[11px] font-semibold text-violet-600 bg-violet-50 hover:bg-violet-100 px-2.5 py-1 rounded-lg transition-all duration-200"
+                              data-preview-url="{{ $previewUrl }}">Detail</button>
                           @elseif ($status === 'SIAP_PUBLISH')
                             <!-- Tombol Publish hanya muncul saat status SIAP_PUBLISH setelah semua level verifikasi menyetujui. -->
                             <form action="{{ route('admin.surat.publish', $dokumen) }}" method="POST" class="inline-flex">

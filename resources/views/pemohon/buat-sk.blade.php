@@ -29,9 +29,9 @@
         </a>
       </header>
 
-      <main class="flex-1 overflow-y-auto p-6">
+      <main class="flex-1 overflow-y-auto p-6 bg-slate-100">
         <div id="page-buat-sk" class="page-content">
-          <div class="max-w-2xl mx-auto">
+          <div class="max-w-5xl mx-auto">
             @if ($errors->any())
               <div class="mb-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3">
                 <p class="text-xs font-semibold text-red-700">Pengajuan SK belum bisa dikirim:</p>
@@ -46,34 +46,37 @@
             <form id="sk-form" method="POST" action="{{ route('pemohon.sk.store') }}">
               @csrf
               {{-- Form ini tersambung ke database; JavaScript hanya membantu penyusunan baris dan review sebelum submit. --}}
+
+              {{-- Stepper: 2 langkah (Isi Data SK → Review & Kirim) --}}
               <div class="flex items-center mb-6">
                 <div class="flex items-center gap-2">
                   <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shrink-0" id="sk-circle-1"><span class="text-[11px] font-bold text-white">1</span></div>
-                  <span class="text-xs font-semibold text-blue-600" id="sk-label-1">Data SK</span>
+                  <span class="text-xs font-semibold text-blue-600" id="sk-label-1">Isi Data SK</span>
                 </div>
                 <div class="flex-1 h-px bg-slate-200 mx-3"></div>
                 <div class="flex items-center gap-2">
                   <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center shrink-0" id="sk-circle-2"><span class="text-[11px] font-bold text-slate-400">2</span></div>
-                  <span class="text-xs font-medium text-slate-400" id="sk-label-2">Dasar Hukum</span>
-                </div>
-                <div class="flex-1 h-px bg-slate-200 mx-3"></div>
-                <div class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center shrink-0" id="sk-circle-3"><span class="text-[11px] font-bold text-slate-400">3</span></div>
-                  <span class="text-xs font-medium text-slate-400" id="sk-label-3">Review</span>
+                  <span class="text-xs font-medium text-slate-400" id="sk-label-2">Review & Kirim</span>
                 </div>
               </div>
 
-              <div id="sk-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
+              {{-- ============================================================ --}}
+              {{-- STEP 1: Isi Data SK (gabungan Data SK + Dasar Hukum) --}}
+              {{-- ============================================================ --}}
+              <div id="sk-step-1" class="rounded-2xl bg-white border border-slate-200/80 shadow-lg shadow-slate-200/50 overflow-hidden">
                 <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-                  <h2 class="text-sm font-bold text-slate-900">Langkah 1 Data Surat Keputusan</h2>
-                  <p class="text-xs text-slate-400 font-light mt-0.5">Isi informasi utama dan butir keputusan.</p>
+                  <h2 class="text-sm font-bold text-slate-900">Langkah 1 — Isi Data Surat Keputusan</h2>
+                  <p class="text-xs text-slate-400 font-light mt-0.5">Lengkapi informasi utama, dasar hukum, dan butir keputusan.</p>
                 </div>
                 <div class="px-6 py-6 space-y-5">
+                  {{-- Judul SK --}}
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Judul SK <span class="text-blue-400">*</span></label>
                     <input id="sk-judul" name="judul_sk" type="text" value="{{ old('judul_sk') }}" placeholder="Contoh: SK Pembentukan Panitia Seminar Nasional 2025"
                       class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
                   </div>
+
+                  {{-- Tentang --}}
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Tentang <span class="text-blue-400">*</span></label>
                     <input id="sk-tentang" name="tentang" type="text" value="{{ old('tentang') }}" placeholder="Contoh: Pembentukan Panitia Seminar Nasional Tahun 2025"
@@ -81,6 +84,7 @@
                     <p class="text-[10px] text-slate-400 font-light">Deskripsi singkat isi SK yang akan diterbitkan.</p>
                   </div>
 
+                  {{-- Menimbang --}}
                   <div class="space-y-2">
                     <div class="flex items-center justify-between gap-3">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Menimbang <span class="text-blue-400">*</span></label>
@@ -96,6 +100,26 @@
                     </div>
                   </div>
 
+                  {{-- ========================================== --}}
+                  {{-- Dasar Hukum / Mengingat (pindahan dari Step 2 lama) --}}
+                  {{-- ========================================== --}}
+                  <div class="space-y-2 rounded-2xl border border-blue-100/80 bg-blue-50/20 p-4">
+                    <div class="flex items-center justify-between gap-3">
+                      <label class="block text-xs font-semibold text-slate-700 tracking-wide">Mengingat (Dasar Hukum) <span class="text-blue-400">*</span></label>
+                      <button id="sk-add-mengingat" type="button" class="inline-flex items-center rounded-lg bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-600 hover:bg-blue-100 transition-all duration-200">+ Tambah Dasar Hukum</button>
+                    </div>
+                    <div id="sk-mengingat-list" class="space-y-2">
+                      <div id="sk-mengingat-empty" class="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-4 text-center">
+                        <p class="text-xs font-medium text-slate-500">Belum ada dasar hukum dipilih.</p>
+                        <p class="mt-1 text-[10px] text-slate-400 font-light">Klik tombol Tambah Dasar Hukum untuk memilih dari master aktif.</p>
+                      </div>
+                    </div>
+                    {{-- Hidden input ini disusun ulang oleh JavaScript agar urutan dasar_hukum_id[] mengikuti list Mengingat. --}}
+                    <div id="sk-mengingat-hidden-inputs"></div>
+                    <p class="text-[10px] text-slate-400 font-light">Nomor Mengingat dibuat otomatis mengikuti urutan baris.</p>
+                  </div>
+
+                  {{-- Menetapkan & Diktum --}}
                   <div class="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/40 p-4">
                     <div class="space-y-1.5">
                       <label class="block text-xs font-semibold text-slate-700 tracking-wide">Menetapkan <span class="text-blue-400">*</span></label>
@@ -119,53 +143,28 @@
                     </div>
                   </div>
 
+                  {{-- Pesan validasi Dasar Hukum (ditampilkan oleh JS jika kosong) --}}
+                  <div id="sk-mengingat-error" class="hidden rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
+                    Pilih minimal 1 dasar hukum (Mengingat) sebelum melanjutkan ke Review.
+                  </div>
+
+                  {{-- Tombol Lanjut ke Review --}}
                   <div class="flex justify-end pt-2">
                     <button id="sk-proto-next-1" type="button"
                       class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-                      Lanjut Pilih Dasar Hukum
+                      Lanjut Review
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div id="sk-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
+              {{-- ============================================================ --}}
+              {{-- STEP 2: Review & Kirim (sebelumnya Step 3) --}}
+              {{-- ============================================================ --}}
+              <div id="sk-step-2" class="hidden rounded-2xl bg-white border border-slate-200/80 shadow-lg shadow-slate-200/50 overflow-hidden">
                 <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-                  <h2 class="text-sm font-bold text-slate-900">Langkah 2 Dasar Hukum (Mengingat)</h2>
-                  <p class="text-xs text-slate-400 font-light mt-0.5">Tambahkan dasar hukum per baris sesuai urutan Mengingat.</p>
-                </div>
-                <div class="px-6 py-6 space-y-4">
-                  <div class="space-y-2">
-                    <div class="flex items-center justify-between gap-3">
-                      <p class="text-xs font-semibold text-slate-700 tracking-wide">Daftar Mengingat</p>
-                      <button id="sk-add-mengingat" type="button" class="inline-flex items-center rounded-lg bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-600 hover:bg-blue-100 transition-all duration-200">+ Tambah Dasar Hukum</button>
-                    </div>
-                    <div id="sk-mengingat-list" class="space-y-2">
-                      <div id="sk-mengingat-empty" class="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-4 text-center">
-                        <p class="text-xs font-medium text-slate-500">Belum ada dasar hukum dipilih.</p>
-                        <p class="mt-1 text-[10px] text-slate-400 font-light">Klik tombol Tambah Dasar Hukum untuk memilih dari master aktif.</p>
-                      </div>
-                    </div>
-                    {{-- Hidden input ini disusun ulang oleh JavaScript agar urutan dasar_hukum_id[] mengikuti list Mengingat. --}}
-                    <div id="sk-mengingat-hidden-inputs"></div>
-                  </div>
-
-                  <p class="text-[10px] text-slate-400 font-light">Nomor Mengingat dibuat otomatis mengikuti urutan baris.</p>
-
-                  <div class="flex items-center justify-between pt-2">
-                    <button id="sk-proto-back-1" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700 transition-all duration-200">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" /></svg>Kembali
-                    </button>
-                    <button id="sk-proto-next-2" type="button" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-                      Lanjut Review<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div id="sk-step-3" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
-                <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
-                  <h2 class="text-sm font-bold text-slate-900">Langkah 3 Review & Submit</h2>
+                  <h2 class="text-sm font-bold text-slate-900">Langkah 2 — Review & Kirim</h2>
                   <p class="text-xs text-slate-400 font-light mt-0.5">Periksa susunan SK sebelum dikirim ke Admin Surat.</p>
                 </div>
                 <div class="px-6 py-6 space-y-4">
@@ -188,7 +187,7 @@
                     <p class="text-[11px] text-blue-600 font-light">Setelah dikirim, status SK menjadi Diajukan dan menunggu review Admin Surat.</p>
                   </div>
                   <div class="flex items-center justify-between pt-2">
-                    <button id="sk-proto-back-2" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700 transition-all duration-200">
+                    <button id="sk-proto-back-1" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700 transition-all duration-200">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" /></svg>Kembali
                     </button>
                     <button id="sk-proto-submit-btn" type="submit" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">

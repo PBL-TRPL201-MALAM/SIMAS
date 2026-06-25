@@ -67,6 +67,13 @@ class AdminProsesSuratController extends Controller
                 ->with('error', 'Dokumen sedang menunggu perbaikan dari pemohon dan tidak bisa diproses ulang.');
         }
 
+        // Dokumen yang sudah berada di jalur verifikasi, siap publish, atau sudah dipublish tidak boleh dibuka ulang di wizard proses.
+        if (in_array($dokumen->status_dokumen, ['MENUNGGU_VERIFIKASI', 'SIAP_PUBLISH', 'PUBLISHED'], true)) {
+            return redirect()
+                ->route('admin.semua-surat')
+                ->with('error', 'Dokumen ini masih dalam tahap verifikasi/penandatanganan dan belum bisa diproses.');
+        }
+
         // File preview dicari dari koleksi file dokumen yang sudah diload; prioritasnya DRAFT_PDF dari Pemohon.
         $previewFile = $this->resolveProcessSourcePdf($dokumen);
         $previewFileExists = $previewFile && Storage::disk('local')->exists($previewFile->file_path);

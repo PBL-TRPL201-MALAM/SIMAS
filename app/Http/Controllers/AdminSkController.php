@@ -164,6 +164,20 @@ class AdminSkController extends Controller
             ->with(['verifikasi.verifikator'])
             ->findOrFail($dokumenId);
 
+        // Dokumen yang sudah dikembalikan ke pemohon tidak boleh dibuka di wizard proses Admin.
+        if (in_array($dokumen->status_dokumen, ['PERLU_REVISI', 'DITOLAK'], true)) {
+            return redirect()
+                ->route('admin.semua-sk')
+                ->with('error', 'Dokumen sedang menunggu perbaikan dari pemohon dan tidak bisa diproses ulang.');
+        }
+
+        // Dokumen yang sudah berada di jalur verifikasi, siap publish, atau sudah dipublish tidak boleh dibuka ulang di wizard proses.
+        if (in_array($dokumen->status_dokumen, ['MENUNGGU_VERIFIKASI', 'SIAP_PUBLISH', 'PUBLISHED'], true)) {
+            return redirect()
+                ->route('admin.semua-sk')
+                ->with('error', 'Dokumen ini masih dalam tahap verifikasi/penandatanganan dan belum bisa diproses.');
+        }
+
         // Calon penandatangan SK mengikuti daftar jabatan penandatangan resmi yang juga dipakai pada Surat Biasa.
         $penandatangans = User::query()
             ->where('role', 'PENANDATANGAN')

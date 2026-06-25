@@ -22,9 +22,9 @@
           </svg>
         </a>
       </header>
-      <main class="flex-1 overflow-y-auto p-6">
+      <main class="flex-1 overflow-y-auto p-6 bg-slate-100">
         <div id="page-buat-surat" class="page-content">
-          <div class="max-w-2xl mx-auto">
+          <div class="max-w-5xl mx-auto">
 
             <div class="flex items-center mb-6">
               <div class="flex items-center gap-2">
@@ -42,7 +42,7 @@
               </div>
             </div>
 
-            <div id="surat-step-1" class="rounded-2xl bg-white border border-slate-100 overflow-hidden">
+            <div id="surat-step-1" class="rounded-2xl bg-white border border-slate-200/80 shadow-lg shadow-slate-200/50 overflow-hidden">
               <!-- Step 1 hanya memilih file PDF; file ini tetap dikirim bersama form di step 2 melalui atribut form="surat-biasa-form". -->
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 1 - Upload PDF Surat</h2>
@@ -108,7 +108,7 @@
               </div>
             </div>
 
-            <div id="surat-step-2" class="hidden rounded-2xl bg-white border border-slate-100 overflow-hidden">
+            <div id="surat-step-2" class="hidden rounded-2xl bg-white border border-slate-200/80 shadow-lg shadow-slate-200/50 overflow-hidden">
               <!-- Step 2 berisi form utama; action route pemohon.surat.store diproses oleh PemohonSuratController::store. -->
               <div class="px-6 py-5 border-b border-slate-100 bg-blue-50/30">
                 <h2 class="text-sm font-bold text-slate-900">Langkah 2 - Data Surat</h2>

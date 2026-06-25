@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DasarHukumController;
 use App\Http\Controllers\AdminProsesSuratController;
@@ -34,6 +35,16 @@ Route::middleware('guest')->group(function () {
     // GET menampilkan form login, sedangkan POST memproses kredensial dari form tersebut.
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
+
+    // Route Lupa Kata Sandi (Forgot Password).
+    // GET menampilkan form input email, POST memproses pengiriman link reset via email.
+    Route::get('/forgot-password', [PasswordResetController::class, 'showForgotForm'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+
+    // Route Reset Kata Sandi.
+    // GET menampilkan form input password baru (dengan token dari email), POST memproses pembaruan password.
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.update');
 });
 
 // Route auth umum dipakai bersama oleh semua role setelah login berhasil.

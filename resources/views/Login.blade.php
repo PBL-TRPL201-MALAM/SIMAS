@@ -124,7 +124,7 @@
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label for="password" class="block text-xs font-semibold text-slate-700 tracking-wide">Kata Sandi</label>
-                <a href="#" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Lupa kata sandi?</a>
+                <a href="{{ route('password.request') }}" class="text-[11px] font-medium text-blue-500 hover:text-blue-700 transition-colors duration-200">Lupa kata sandi?</a>
               </div>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
