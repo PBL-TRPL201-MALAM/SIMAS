@@ -49,7 +49,7 @@ Route::middleware('guest')->group(function () {
 
 // Route auth umum dipakai bersama oleh semua role setelah login berhasil.
 // Middleware auth memastikan request memiliki session login sebelum boleh masuk ke route di dalam group ini.
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'prevent.back.history'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/dashboard', function () {
@@ -71,7 +71,7 @@ Route::middleware('auth')->group(function () {
 // Area Admin Surat untuk memproses pengajuan, mengatur verifikasi, dan melakukan publish dokumen.
 // prefix('admin') membuat semua URL diawali /admin, name('admin.') membuat nama route diawali admin.
 // Middleware role:ADMIN_SURAT membatasi seluruh route di group ini hanya untuk user role Admin Surat.
-Route::middleware(['auth', 'role:ADMIN_SURAT'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'prevent.back.history', 'role:ADMIN_SURAT'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
 
     // Route pengajuan masuk dipakai Admin Surat untuk mengambil dokumen yang baru dikirim pemohon.
@@ -118,7 +118,7 @@ Route::middleware(['auth', 'role:ADMIN_SURAT'])->prefix('admin')->name('admin.')
 
 // Area Pemohon untuk membuat pengajuan dan memantau status dokumen miliknya sendiri.
 // Middleware role:PEMOHON menjaga agar pemohon hanya melihat fitur pengajuan dan dokumen miliknya.
-Route::middleware(['auth', 'role:PEMOHON'])->prefix('pemohon')->name('pemohon.')->group(function () {
+Route::middleware(['auth', 'prevent.back.history', 'role:PEMOHON'])->prefix('pemohon')->name('pemohon.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'pemohon'])->name('dashboard');
 
     // Route buat-surat memisahkan tampilan form (GET) dan proses penyimpanan pengajuan (POST).
@@ -150,7 +150,7 @@ Route::middleware(['auth', 'role:PEMOHON'])->prefix('pemohon')->name('pemohon.')
 
 // Area Verifikator untuk memeriksa dokumen, memberi keputusan, dan melihat PDF preview hasil proses Admin Surat.
 // Middleware role:VERIFIKATOR membatasi halaman pemeriksaan hanya untuk user yang ditugaskan sebagai verifikator.
-Route::middleware(['auth', 'role:VERIFIKATOR,PENANDATANGAN'])->prefix('verifikator')->name('verifikator.')->group(function () {
+Route::middleware(['auth', 'prevent.back.history', 'role:VERIFIKATOR,PENANDATANGAN'])->prefix('verifikator')->name('verifikator.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'verifikator'])->name('dashboard');
 
     // Route surat biasa: status verifikasi kini difilter dari halaman Perlu Verifikasi, bukan menu sidebar terpisah.
@@ -190,7 +190,7 @@ Route::middleware(['auth', 'role:VERIFIKATOR,PENANDATANGAN'])->prefix('verifikat
 
 // Area Super Admin difokuskan untuk pengelolaan user dan monitoring ringkasan sistem.
 // Middleware role:SUPER_ADMIN memisahkan fitur administrasi user dari role operasional lain.
-Route::middleware(['auth', 'role:SUPER_ADMIN'])->prefix('super-admin')->name('super-admin.')->group(function () {
+Route::middleware(['auth', 'prevent.back.history', 'role:SUPER_ADMIN'])->prefix('super-admin')->name('super-admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'superAdmin'])->name('dashboard');
 
     // controller(UserController::class) membuat route di dalam group ini otomatis memanggil method UserController.
