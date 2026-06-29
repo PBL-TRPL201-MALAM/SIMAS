@@ -149,15 +149,9 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <!-- Trust badge (poin 7) -->
-          <span class="hidden lg:flex items-center gap-1.5 text-[11px] font-medium text-slate-400 border border-slate-200 rounded-full px-3 py-1.5">
-            <svg class="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            Secured via SSO Polibatam
-          </span>
+
           <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
-            Masuk dengan Akun Polibatam
+            Masuk
           </a>
           <button id="menu-toggle" type="button" aria-label="Buka menu navigasi" class="lg:hidden -m-1 p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-all duration-200">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -176,7 +170,7 @@
           <a href="#tentang" class="text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg px-3 py-2.5 transition-all duration-200">Tentang</a>
           <hr class="border-slate-100 my-1" />
           <a href="{{ route('login') }}" class="mt-1 inline-flex justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-all duration-200">
-            Masuk dengan Akun Polibatam
+            Masuk
           </a>
         </div>
       </div>
@@ -197,12 +191,6 @@
         <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 text-center lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.85fr)] lg:px-10 lg:text-left">
           <div>
 
-          <!-- Status badge -->
-          <div class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-1.5 mb-8">
-            <span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-            <span class="text-xs font-semibold text-blue-700">Terintegrasi dengan SSO Polibatam</span>
-          </div>
-
           <h1 class="text-5xl sm:text-6xl lg:text-[76px] font-extrabold tracking-tight text-slate-900 leading-[1.06] text-balance">
             Administrasi Surat<br />
             <span class="gradient-text">Tanpa Kerumitan.</span>
@@ -219,7 +207,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
               </svg>
-              Masuk dengan Akun Polibatam
+              Masuk
             </a>
             <a href="#fitur"
                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-8 py-4 text-sm font-semibold text-slate-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
@@ -232,12 +220,6 @@
 
           <!-- Trust badges (poin 7) -->
           <div class="mt-10 flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-400 font-medium lg:justify-start">
-            <span class="flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-              Login via SSO resmi Polibatam
-            </span>
             <span class="w-px h-3 bg-slate-200 hidden sm:block"></span>
             <span class="flex items-center gap-1.5">
               <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -251,13 +233,6 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
               TTE terintegrasi QR Code resmi
-            </span>
-            <span class="w-px h-3 bg-slate-200 hidden sm:block"></span>
-            <span class="flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Untuk seluruh civitas Polibatam
             </span>
           </div>
 
@@ -290,9 +265,9 @@
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             @foreach ([
               ['value' => '6', 'suffix' => 'Role', 'label' => 'Pengguna terintegrasi', 'color' => 'text-blue-600'],
-              ['value' => '13', 'suffix' => 'Jenis', 'label' => 'Template surat tersedia', 'color' => 'text-violet-600'],
-              ['value' => '3', 'suffix' => 'Level', 'label' => 'Verifikasi bertingkat', 'color' => 'text-emerald-600'],
-              ['value' => '100%', 'suffix' => '', 'label' => 'Terdigitalisasi, tanpa kertas', 'color' => 'text-amber-600'],
+              ['value' => '13', 'suffix' => 'Jenis', 'label' => 'Template surat tersedia', 'color' => 'text-blue-600'],
+              ['value' => '3', 'suffix' => 'Level', 'label' => 'Verifikasi bertingkat', 'color' => 'text-blue-600'],
+              ['value' => '100%', 'suffix' => '', 'label' => 'Terdigitalisasi, tanpa kertas', 'color' => 'text-blue-600'],
             ] as $stat)
             <div class="stat-card">
               <p class="text-3xl sm:text-4xl font-extrabold {{ $stat['color'] }}">{{ $stat['value'] }}<span class="text-xl ml-0.5">{{ $stat['suffix'] }}</span></p>
