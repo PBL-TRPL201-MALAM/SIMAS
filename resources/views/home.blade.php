@@ -273,9 +273,9 @@
           </div>
 
           <div class="pointer-events-none relative mx-auto w-full max-w-[520px] lg:mx-0">
-            <img src="{{ asset('images/hero.png') }}"
+            <img src="{{ asset('images/hand2.png') }}"
                  alt="Ilustrasi layanan digital SIMAS"
-                 class="hero-float h-auto w-full object-contain drop-shadow-2xl"
+                 class="hero-float h-auto w-full object-contain"
                  loading="eager" />
           </div>
         </div>
