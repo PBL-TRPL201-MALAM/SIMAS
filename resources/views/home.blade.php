@@ -193,7 +193,7 @@
 
           <h1 class="text-5xl sm:text-6xl lg:text-[76px] font-extrabold tracking-tight text-slate-900 leading-[1.06] text-balance">
             Administrasi Surat<br />
-            <span class="gradient-text">Tanpa Kerumitan.</span>
+            <span>Tanpa Kerumitan.</span>
           </h1>
 
           <p class="mt-6 max-w-2xl mx-auto text-base sm:text-lg text-slate-500 font-light leading-relaxed lg:mx-0">
@@ -264,10 +264,10 @@
         <div class="mx-auto max-w-5xl px-6 lg:px-10">
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             @foreach ([
-              ['value' => '6', 'suffix' => 'Role', 'label' => 'Pengguna terintegrasi', 'color' => 'text-blue-600'],
-              ['value' => '13', 'suffix' => 'Jenis', 'label' => 'Template surat tersedia', 'color' => 'text-blue-600'],
-              ['value' => '3', 'suffix' => 'Level', 'label' => 'Verifikasi bertingkat', 'color' => 'text-blue-600'],
-              ['value' => '100%', 'suffix' => '', 'label' => 'Terdigitalisasi, tanpa kertas', 'color' => 'text-blue-600'],
+              ['value' => '6', 'suffix' => 'Role', 'label' => 'Pengguna terintegrasi', 'color' => 'text-black-600'],
+              ['value' => '13', 'suffix' => 'Jenis', 'label' => 'Template surat tersedia', 'color' => 'text-black-600'],
+              ['value' => '3', 'suffix' => 'Level', 'label' => 'Verifikasi bertingkat', 'color' => 'text-black-600'],
+              ['value' => '100%', 'suffix' => '', 'label' => 'Terdigitalisasi, tanpa kertas', 'color' => 'text-black-600'],
             ] as $stat)
             <div class="stat-card">
               <p class="text-3xl sm:text-4xl font-extrabold {{ $stat['color'] }}">{{ $stat['value'] }}<span class="text-xl ml-0.5">{{ $stat['suffix'] }}</span></p>
@@ -627,22 +627,18 @@
             <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
             <div class="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-blue-900/20 blur-2xl pointer-events-none"></div>
             <div class="relative">
-              <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 mb-6">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
-                <span class="text-xs font-semibold text-white/90">Secured via Polibatam SSO</span>
-              </div>
               <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight text-balance leading-tight">
                 Siap Digitalisasi Administrasi<br />Polibatam?
               </h2>
               <p class="mt-4 max-w-md mx-auto text-sm text-white/70 font-light leading-relaxed">
-                Login menggunakan akun kampus Polibatam yang sudah Anda miliki. Tidak perlu daftar, tidak perlu password baru.
+                Login menggunakan akun yang sudah Anda miliki. Tidak perlu daftar, tidak perlu password baru.
               </p>
               <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <a href="{{ route('login') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-7 py-3.5 text-sm font-bold text-blue-700 shadow-lg hover:bg-blue-50 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                   </svg>
-                  Masuk dengan Akun Polibatam
+                  Masuk
                 </a>
                 <a href="#faq" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border border-white/30 bg-white/10 backdrop-blur-sm px-7 py-3.5 text-sm font-medium text-white hover:bg-white/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
                   Lihat Pertanyaan Umum
@@ -769,14 +765,7 @@
 
         <div class="mt-12 pt-6 border-t border-slate-100/80 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p class="text-[11px] text-slate-300 font-light">&copy; 2026 SIMAS · Politeknik Negeri Batam. Dikembangkan oleh Tim PBL-TRPL201-MALAM.</p>
-          <div class="flex items-center gap-4 text-[11px] text-slate-300 font-light">
-            <span>Laravel · Tailwind CSS · MySQL</span>
-            <span class="w-px h-3 bg-slate-200"></span>
-            <span class="flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
-              Sistem Normal
-            </span>
-          </div>
+          
         </div>
       </div>
     </footer>

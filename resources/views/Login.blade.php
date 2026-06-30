@@ -177,7 +177,7 @@
           <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-[11px] text-slate-500 leading-relaxed">
               <p class="mb-2 font-semibold text-slate-700">Akun Demo</p>
 
-              <div class="space-y-1">                  
+              <div class="space-y-1">
                   <p><span class="font-semibold text-slate-600">Super Admin</span> : superadmin / 12345678</p>
                   <p><span class="font-semibold text-slate-600">Admin Surat</span> : adminsurat / 12345678</p>
                   <p><span class="font-semibold text-slate-600">Pemohon</span> : pemohon / 12345678</p>
@@ -302,12 +302,6 @@
             </div>
           </div>
 
-          <!-- Quote bawah -->
-          <div class="border-t border-white/10 pt-6">
-            <p class="text-xs text-white/40 font-light leading-relaxed">
-              Sistem ini dikembangkan sebagai bagian dari program Project-Based Learning Politeknik Negeri Batam untuk meningkatkan tata kelola administrasi institusi.
-            </p>
-          </div>
 
         </div>
       </div>
