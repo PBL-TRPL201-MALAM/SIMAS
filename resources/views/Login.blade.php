@@ -302,6 +302,11 @@
             </div>
           </div>
 
+            <!-- Quote bawah -->
+          <div class="border-t border-white/10 pt-6">
+            
+          </div>
+
 
         </div>
       </div>
