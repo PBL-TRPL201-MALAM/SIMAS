@@ -58,7 +58,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('template.sidebar.verifikator', function ($view): void {
             $user = Auth::user();
 
-            if (! $user || ! in_array($user->role, ['VERIFIKATOR', 'PENANDATANGAN'], true)) {
+            if (! $user || $user->role !== 'VERIFIKATOR') {
                 $view->with('sidebarStats', ['surat_menunggu_count' => 0, 'sk_menunggu_count' => 0]);
                 return;
             }
@@ -75,6 +75,38 @@ class AppServiceProvider extends ServiceProvider
                 });
 
             // Badge verifikator hanya menghitung level yang sudah terbuka untuk diproses, bukan semua record verifikasi.
+            $view->with('sidebarStats', [
+                'surat_menunggu_count' => (clone $baseQuery)->whereHas('dokumen', fn (Builder $query) => $query
+                    ->where('jenis_dokumen', 'SURAT_BIASA')
+                    ->where('status_dokumen', 'MENUNGGU_VERIFIKASI'))->count(),
+                'sk_menunggu_count' => (clone $baseQuery)->whereHas('dokumen', fn (Builder $query) => $query
+                    ->where('jenis_dokumen', 'SURAT_KEPUTUSAN')
+                    ->where('status_dokumen', 'MENUNGGU_VERIFIKASI'))->count(),
+            ]);
+        });
+
+        // View composer untuk sidebar Penandatangan: logika query identik dengan verifikator,
+        // tetapi terpisah agar sidebar penandatangan mendapat datanya sendiri secara independen.
+        View::composer('template.sidebar.penandatangan', function ($view): void {
+            $user = Auth::user();
+
+            if (! $user || $user->role !== 'PENANDATANGAN') {
+                $view->with('sidebarStats', ['surat_menunggu_count' => 0, 'sk_menunggu_count' => 0]);
+                return;
+            }
+
+            $baseQuery = Verifikasi::query()
+                ->where('verifikator_id', $user->user_id)
+                ->where('status_verifikasi', 'MENUNGGU')
+                ->whereNotExists(function ($query) {
+                    $query->selectRaw('1')
+                        ->from('verifikasi as previous_levels')
+                        ->whereColumn('previous_levels.dokumen_id', 'verifikasi.dokumen_id')
+                        ->whereColumn('previous_levels.level', '<', 'verifikasi.level')
+                        ->where('previous_levels.status_verifikasi', '!=', 'DISETUJUI');
+                });
+
+            // Badge penandatangan menghitung dokumen yang sudah boleh ditandatangani oleh user login.
             $view->with('sidebarStats', [
                 'surat_menunggu_count' => (clone $baseQuery)->whereHas('dokumen', fn (Builder $query) => $query
                     ->where('jenis_dokumen', 'SURAT_BIASA')

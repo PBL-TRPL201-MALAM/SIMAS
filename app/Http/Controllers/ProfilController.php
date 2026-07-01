@@ -38,9 +38,9 @@ class ProfilController extends Controller
             'pageSubtitle' => 'Informasi akun verifikator.',
         ],
         'PENANDATANGAN' => [
-            'sidebarView'  => 'template.sidebar.verifikator',
+            'sidebarView'  => 'template.sidebar.penandatangan',
             'roleLabel'    => 'Penandatangan',
-            'routePrefix'  => 'verifikator',
+            'routePrefix'  => 'penandatangan',
             'pageSubtitle' => 'Informasi akun penandatangan.',
         ],
     ];
@@ -144,7 +144,8 @@ class ProfilController extends Controller
         return match ($role) {
             'ADMIN_SURAT' => 'admin.profil',
             'PEMOHON' => 'pemohon.profil',
-            'VERIFIKATOR', 'PENANDATANGAN' => 'verifikator.profil',
+            'VERIFIKATOR' => 'verifikator.profil',
+            'PENANDATANGAN' => 'penandatangan.profil',
             'SUPER_ADMIN' => 'super-admin.profil',
             default => 'home',
         };

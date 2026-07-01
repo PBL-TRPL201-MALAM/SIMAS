@@ -242,6 +242,7 @@ Route::middleware(['auth', 'prevent.back.history', 'role:SUPER_ADMIN'])->prefix(
         Route::get('/{user}/edit', 'edit')->name('edit');
         Route::put('/{user}', 'update')->name('update');
         Route::patch('/{user}/toggle-status', 'toggleStatus')->name('toggle-status');
+        Route::put('/{user}/reset-password', 'resetPassword')->name('reset-password');
     });
 
     // Route lama/alias diarahkan ke route resource-like agar link menu tetap kompatibel.

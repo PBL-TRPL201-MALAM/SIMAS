@@ -162,6 +162,26 @@ class UserController extends Controller
             ->with('status', 'Status user berhasil diperbarui.');
     }
 
+    // Method ini memungkinkan Super Admin mengganti password user lain tanpa perlu memasukkan password lama.
+    // Password baru cukup dimasukkan sekali, divalidasi minimal 8 karakter.
+    public function resetPassword(Request $request, User $user): RedirectResponse
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ], [
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password baru minimal 8 karakter.',
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return redirect()
+            ->route('super-admin.users.edit', $user)
+            ->with('status', 'Password user berhasil diperbarui.');
+    }
+
     /**
      * @return array<string, mixed>
      */
