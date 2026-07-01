@@ -54,7 +54,7 @@ class RoleMiddleware
             'ADMIN_SURAT' => 'admin.dashboard',
             'PEMOHON' => 'pemohon.dashboard',
             'VERIFIKATOR' => 'verifikator.dashboard',
-            'PENANDATANGAN' => 'verifikator.dashboard',
+            'PENANDATANGAN' => 'penandatangan.dashboard',
             default => 'home',
         };
     }

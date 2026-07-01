@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminSemuaSuratController;
 use App\Http\Controllers\AdminSuratMasukController;
 use App\Http\Controllers\PemohonSkController;
 use App\Http\Controllers\PemohonSuratController;
+use App\Http\Controllers\PenandatanganSuratController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\PublicDokumenVerificationController;
 use App\Http\Controllers\UserController;
@@ -62,7 +63,7 @@ Route::middleware(['auth', 'prevent.back.history'])->group(function () {
             'ADMIN_SURAT' => 'admin.dashboard',
             'PEMOHON' => 'pemohon.dashboard',
             'VERIFIKATOR' => 'verifikator.dashboard',
-            'PENANDATANGAN' => 'verifikator.dashboard',
+            'PENANDATANGAN' => 'penandatangan.dashboard',
             default => 'home',
         });
     })->name('dashboard');
@@ -150,7 +151,7 @@ Route::middleware(['auth', 'prevent.back.history', 'role:PEMOHON'])->prefix('pem
 
 // Area Verifikator untuk memeriksa dokumen, memberi keputusan, dan melihat PDF preview hasil proses Admin Surat.
 // Middleware role:VERIFIKATOR membatasi halaman pemeriksaan hanya untuk user yang ditugaskan sebagai verifikator.
-Route::middleware(['auth', 'prevent.back.history', 'role:VERIFIKATOR,PENANDATANGAN'])->prefix('verifikator')->name('verifikator.')->group(function () {
+Route::middleware(['auth', 'prevent.back.history', 'role:VERIFIKATOR'])->prefix('verifikator')->name('verifikator.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'verifikator'])->name('dashboard');
 
     // Route surat biasa: status verifikasi kini difilter dari halaman Perlu Verifikasi, bukan menu sidebar terpisah.
@@ -182,7 +183,47 @@ Route::middleware(['auth', 'prevent.back.history', 'role:VERIFIKATOR,PENANDATANG
 
     Route::get('/sk-semua', [VerifikatorSuratController::class, 'skSemua'])->name('sk-semua');
 
-    // Profil Saya Verifikator/Penandatangan: lihat/edit data diri dan ganti password lewat ProfilController.
+    // Profil Saya Verifikator: lihat/edit data diri dan ganti password lewat ProfilController.
+    Route::get('/profil', [ProfilController::class, 'edit'])->name('profil');
+    Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
+    Route::put('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
+});
+
+// Area Penandatangan terpisah dari Verifikator untuk kepatuhan prinsip Separation of Concerns (SoC) dan RBAC.
+// Middleware role:PENANDATANGAN menjaga agar halaman persetujuan akhir hanya bisa diakses oleh user role Penandatangan.
+Route::middleware(['auth', 'prevent.back.history', 'role:PENANDATANGAN'])->prefix('penandatangan')->name('penandatangan.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'penandatangan'])->name('dashboard');
+
+    // Route surat biasa Penandatangan: struktur sama seperti verifikator tetapi UI disesuaikan untuk level pimpinan.
+    Route::get('/surat-menunggu', [PenandatanganSuratController::class, 'menunggu'])->name('surat-menunggu');
+    Route::get('/surat/{dokumen}/detail', [PenandatanganSuratController::class, 'detailSurat'])->name('surat.detail');
+    Route::get('/surat-disetujui', [PenandatanganSuratController::class, 'disetujui'])->name('surat-disetujui');
+    Route::get('/surat-ditolak', [PenandatanganSuratController::class, 'ditolak'])->name('surat-ditolak');
+    Route::get('/surat/{dokumen}/preview-pdf', [PenandatanganSuratController::class, 'previewPdf'])->name('surat.preview-pdf');
+    Route::get('/surat/{dokumen}/unduh-pdf', [PenandatanganSuratController::class, 'downloadPdf'])->name('surat.unduh-pdf');
+    Route::get('/lampiran/{file}/lihat', [PenandatanganSuratController::class, 'previewLampiran'])->name('lampiran.preview');
+    Route::get('/lampiran/{file}/download', [PenandatanganSuratController::class, 'downloadLampiran'])->name('lampiran.download');
+    Route::post('/verifikasi/{verifikasi}/proses', [PenandatanganSuratController::class, 'proses'])->name('verifikasi.proses');
+
+    Route::get('/surat-semua', [PenandatanganSuratController::class, 'semua'])->name('surat-semua');
+
+    // Route SK Penandatangan.
+    Route::get('/sk-menunggu', [PenandatanganSuratController::class, 'skMenunggu'])->name('sk-menunggu');
+    Route::get('/sk-detail/{dokumen}', [PenandatanganSuratController::class, 'detailSk'])->name('sk.detail');
+    Route::get('/sk/{dokumen}/preview-pdf', [PenandatanganSuratController::class, 'previewPdf'])->name('sk.preview-pdf');
+    Route::get('/sk/{dokumen}/unduh-pdf', [PenandatanganSuratController::class, 'downloadPdf'])->name('sk.unduh-pdf');
+
+    Route::get('/sk-disetujui', function () {
+        return redirect()->route('penandatangan.sk-menunggu', ['status' => 'disetujui']);
+    })->name('sk-disetujui');
+
+    Route::get('/sk-ditolak', function () {
+        return redirect()->route('penandatangan.sk-menunggu', ['status' => 'ditolak']);
+    })->name('sk-ditolak');
+
+    Route::get('/sk-semua', [PenandatanganSuratController::class, 'skSemua'])->name('sk-semua');
+
+    // Profil Saya Penandatangan: lihat/edit data diri dan ganti password lewat ProfilController.
     Route::get('/profil', [ProfilController::class, 'edit'])->name('profil');
     Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
     Route::put('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');

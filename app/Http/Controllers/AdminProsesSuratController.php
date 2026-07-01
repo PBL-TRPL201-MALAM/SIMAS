@@ -236,6 +236,16 @@ class AdminProsesSuratController extends Controller
             'isi_ringkasan' => ['required', 'string'],
             'catatan_tambahan' => ['nullable', 'string'],
         ], [
+            'penanda_tangan.required' => 'Mohon pilih penandatangan surat.',
+            'penanda_tangan.exists' => 'Penandatangan yang dipilih tidak valid atau sudah tidak aktif.',
+            'jenis_surat.required' => 'Jenis surat wajib dipilih.',
+            'jenis_surat.in' => 'Jenis surat yang dipilih tidak tersedia dalam daftar.',
+            'sifat_surat.required' => 'Sifat surat tidak boleh kosong.',
+            'sifat_surat.max' => 'Sifat surat tidak boleh lebih dari 100 karakter.',
+            'nomor_surat.required' => 'Nomor surat wajib diisi.',
+            'nomor_surat.max' => 'Nomor surat tidak boleh lebih dari 100 karakter.',
+            'tanggal_surat.required' => 'Tanggal surat wajib diisi.',
+            'tanggal_surat.date' => 'Format tanggal surat tidak valid.',
             'isi_ringkasan.required' => 'Isi/Ringkasan surat wajib diisi.',
         ]);
 

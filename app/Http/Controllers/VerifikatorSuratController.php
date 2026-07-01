@@ -26,6 +26,13 @@ class VerifikatorSuratController extends Controller
     ) {
     }
 
+    // Helper ini menentukan prefix route name berdasarkan role user aktif.
+    // PenandatanganSuratController meng-override method ini dengan 'penandatangan'.
+    protected function routePrefix(): string
+    {
+        return 'verifikator';
+    }
+
     // Method ini menampilkan surat biasa yang sedang menunggu keputusan verifikator login.
     public function menunggu(Request $request): View
     {
@@ -334,10 +341,12 @@ class VerifikatorSuratController extends Controller
         }
 
         // Setelah keputusan disimpan, user kembali ke daftar menunggu sesuai jenis dokumennya.
+        $prefix = $this->routePrefix();
+
         return redirect()
             ->route($verifikasi->dokumen->jenis_dokumen === 'SURAT_KEPUTUSAN'
-                ? 'verifikator.sk-menunggu'
-                : 'verifikator.surat-menunggu')
+                ? "{$prefix}.sk-menunggu"
+                : "{$prefix}.surat-menunggu")
             ->with('status', $validated['keputusan'] === 'setuju'
                 ? 'Dokumen berhasil disetujui.'
                 : 'Dokumen berhasil dikembalikan untuk revisi.');

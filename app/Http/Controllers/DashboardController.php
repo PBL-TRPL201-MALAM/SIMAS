@@ -171,6 +171,53 @@ class DashboardController extends Controller
         ]);
     }
 
+    // Method ini menampilkan dashboard Penandatangan dengan data yang sama seperti Verifikator tetapi view yang berbeda.
+    public function penandatangan(Request $request): View
+    {
+        $userId = $request->user()->user_id;
+
+        // Query reuse dari Verifikator: hanya level yang sudah aktif untuk user login.
+        $pendingQuery = $this->processableVerificationQuery($userId)
+            ->where('status_verifikasi', 'MENUNGGU')
+            ->whereHas('dokumen', fn (Builder $query) => $query->where('status_dokumen', 'MENUNGGU_VERIFIKASI'));
+
+        $latestPending = (clone $pendingQuery)
+            ->with([
+                'dokumen.pemohon',
+                'dokumen.suratBiasa',
+                'dokumen.suratKeputusan',
+            ])
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+
+        $verifikasiCounts = Verifikasi::query()
+            ->where('verifikator_id', $userId)
+            ->selectRaw('status_verifikasi, COUNT(*) as total')
+            ->groupBy('status_verifikasi')
+            ->pluck('total', 'status_verifikasi');
+
+        $chartVerifikasi = [
+            'labels' => ['Menunggu', 'Disetujui', 'Ditolak'],
+            'data' => [
+                (int) ($verifikasiCounts['MENUNGGU'] ?? 0),
+                (int) ($verifikasiCounts['DISETUJUI'] ?? 0),
+                (int) ($verifikasiCounts['DITOLAK'] ?? 0),
+            ],
+        ];
+
+        return view('penandatangan.dashboard', [
+            'stats' => [
+                'menunggu' => (clone $pendingQuery)->count(),
+                'disetujui' => Verifikasi::query()->where('verifikator_id', $userId)->where('status_verifikasi', 'DISETUJUI')->count(),
+                'ditolak' => Verifikasi::query()->where('verifikator_id', $userId)->where('status_verifikasi', 'DITOLAK')->count(),
+                'total_diverifikasi' => Verifikasi::query()->where('verifikator_id', $userId)->whereIn('status_verifikasi', ['DISETUJUI', 'DITOLAK'])->count(),
+            ],
+            'latestPending' => $latestPending,
+            'chartVerifikasi' => $chartVerifikasi,
+        ]);
+    }
+
     // Method ini menampilkan dashboard Super Admin untuk melihat statistik global user dan dokumen.
     public function superAdmin(): View
     {

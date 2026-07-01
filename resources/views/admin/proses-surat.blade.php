@@ -37,15 +37,11 @@
             $pemohon = $dokumen->pemohon;
           @endphp
 
-          <!-- Error validasi dari step metadata atau step verifikasi ditampilkan di bagian atas wizard. -->
+          <!-- Inline error ditampilkan di bawah masing-masing field, bukan di satu blok atas. -->
           @if ($errors->any())
-            <div class="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3">
-              <p class="text-[11px] font-semibold text-red-700 mb-1">Data proses surat belum bisa disimpan:</p>
-              <ul class="space-y-1 text-[11px] text-red-600 font-light">
-                @foreach ($errors->all() as $error)
-                  <li>{{ $error }}</li>
-                @endforeach
-              </ul>
+            <div class="mb-4 rounded-xl border border-red-100 bg-red-50/60 px-4 py-3 flex items-start gap-3">
+              <svg class="w-4 h-4 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+              <p class="text-[11px] font-semibold text-red-700">Beberapa field masih perlu dilengkapi. Silakan periksa form di bawah.</p>
             </div>
           @endif
 
@@ -184,7 +180,7 @@
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Penandatangan <span class="text-blue-400">*</span></label>
                     <!-- $penandatangans berisi user role VERIFIKATOR yang jabatannya boleh menjadi penandatangan final. -->
-                    <select name="penanda_tangan" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                    <select name="penanda_tangan" class="w-full rounded-xl border {{ $errors->has('penanda_tangan') ? 'border-red-400 bg-red-50/30' : 'border-slate-200 bg-slate-50/50' }} px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
                       <option value="" disabled {{ $selectedPenandatanganId ? '' : 'selected' }}>Pilih penanda tangan</option>
                       @foreach ($penandatangans as $penandatangan)
                         <option value="{{ $penandatangan->user_id }}" @selected((string) $selectedPenandatanganId === (string) $penandatangan->user_id)>
@@ -192,6 +188,9 @@
                         </option>
                       @endforeach
                     </select>
+                    @error('penanda_tangan')
+                      <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                    @enderror
                   </div>
 
                   <div class="space-y-1.5">
@@ -200,7 +199,7 @@
                     </label>
 
                     <select name="jenis_surat"
-                        class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                        class="w-full rounded-xl border {{ $errors->has('jenis_surat') ? 'border-red-400 bg-red-50/30' : 'border-slate-200 bg-slate-50/50' }} px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
 
                         <!-- $jenisSuratOptions berasal dari helper UserReferenceOptions agar pilihan UI sama dengan validasi controller. -->
                         <option value="" disabled {{ old('jenis_surat', $dokumen->suratBiasa?->jenis_surat) ? '' : 'selected' }}>
@@ -214,28 +213,40 @@
                         @endforeach
 
                     </select>
+                    @error('jenis_surat')
+                      <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Sifat Surat <span class="text-blue-400">*</span></label>
-                    <select name="sifat_surat" class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                    <select name="sifat_surat" class="w-full rounded-xl border {{ $errors->has('sifat_surat') ? 'border-red-400 bg-red-50/30' : 'border-slate-200 bg-slate-50/50' }} px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100">
                       <option value="" disabled {{ old('sifat_surat', $dokumen->suratBiasa?->sifat_surat) ? '' : 'selected' }}>Pilih sifat surat</option>
                       @foreach (['Biasa', 'Penting', 'Segera', 'Sangat Segera', 'Rahasia'] as $sifatSurat)
                         <option value="{{ $sifatSurat }}" @selected(old('sifat_surat', $dokumen->suratBiasa?->sifat_surat) === $sifatSurat)>{{ $sifatSurat }}</option>
                       @endforeach
                     </select>
+                    @error('sifat_surat')
+                      <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                    @enderror
                   </div>
 
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Nomor Surat <span class="text-blue-400">*</span></label>
                     <input type="text" name="nomor_surat" placeholder="Contoh: B/123/TU/2026" value="{{ old('nomor_surat', $dokumen->suratBiasa?->nomor_surat) }}"
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
+                      class="w-full rounded-xl border {{ $errors->has('nomor_surat') ? 'border-red-400 bg-red-50/30' : 'border-slate-200 bg-slate-50/50' }} px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
+                    @error('nomor_surat')
+                      <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                    @enderror
                   </div>
 
                   <div class="space-y-1.5">
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Tanggal Surat <span class="text-blue-400">*</span></label>
                     <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat', optional($dokumen->suratBiasa?->tanggal_surat)->format('Y-m-d')) }}"
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
+                      class="w-full rounded-xl border {{ $errors->has('tanggal_surat') ? 'border-red-400 bg-red-50/30' : 'border-slate-200 bg-slate-50/50' }} px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100" />
+                    @error('tanggal_surat')
+                      <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                    @enderror
                   </div>
                 </div>
 
@@ -244,7 +255,10 @@
                     <label class="block text-xs font-semibold text-slate-700 tracking-wide">Isi / Ringkasan</label>
                     <!-- Ringkasan dapat direvisi Admin Surat sebagai hasil pengecekan sebelum metadata disimpan. -->
                     <textarea name="isi_ringkasan" rows="4"
-                      class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('isi_ringkasan', $ringkasanSurat) }}</textarea>
+                      class="w-full rounded-xl border {{ $errors->has('isi_ringkasan') ? 'border-red-400 bg-red-50/30' : 'border-slate-200 bg-slate-50/50' }} px-4 py-2.5 text-sm text-slate-900 font-light outline-none transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 resize-none">{{ old('isi_ringkasan', $ringkasanSurat) }}</textarea>
+                    @error('isi_ringkasan')
+                      <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                    @enderror
                   </div>
 
                   <div class="space-y-1.5">
@@ -264,7 +278,10 @@
                   <label class="block text-xs font-semibold text-amber-700 tracking-wide">Catatan Revisi</label>
                   <!-- Catatan ini wajib saat Admin Surat mengembalikan dokumen ke Pemohon dari step 1. -->
                   <textarea name="catatan_revisi" rows="3" placeholder="Tuliskan bagian yang perlu diperbaiki oleh Pemohon..."
-                    class="w-full rounded-xl border border-amber-200 bg-white/80 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-100 resize-none">{{ old('catatan_revisi') }}</textarea>
+                    class="w-full rounded-xl border {{ $errors->has('catatan_revisi') ? 'border-red-400 bg-red-50/30' : 'border-amber-200 bg-white/80' }} px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 font-light outline-none transition-all duration-200 focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-100 resize-none">{{ old('catatan_revisi') }}</textarea>
+                  @error('catatan_revisi')
+                    <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                  @enderror
                 </div>
               </div>
 

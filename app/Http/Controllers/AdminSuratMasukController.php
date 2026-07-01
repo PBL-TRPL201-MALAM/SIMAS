@@ -27,7 +27,7 @@ class AdminSuratMasukController extends Controller
             ])
             ->where('jenis_dokumen', 'SURAT_BIASA')
             ->where('status_dokumen', 'DIAJUKAN')
-            ->latest('created_at')
+            ->oldest('created_at')
             ->get();
 
         return view('admin.pengajuan-masuk', [
